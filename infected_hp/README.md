@@ -11,6 +11,6 @@ the cookies:
 
 healthbars updates occur from 2 types of sources: primary and secondary.
 Primary sources are from you dealing damage or killing something. They occur instantly.
-Secondary sources are from any change to the bar that isn't directly caused by your personal damage. So other damage from teammates, or the next frame from one of the animated effects.
+Secondary sources are from any change to the bar that isn't directly caused by your personal damage. So other damage from teammates, or the next frame from one of the animated effects. These updates get queued, waiting for the next plugin managed frame.
 
 Lastly, as some of the cookies listed above already hinted at, 2 healthbars can display alongside eachother: one reserved for the last boss infected you dealt damage to, and one for the last non-boss infected you dealt damage to. Their healthbars will persist on your screen until you either deal damage to a new target, or you don't attack anything for a duration (infectedhp_target_remove_time convar, which by default is 2.5 seconds)
