@@ -43,7 +43,7 @@ ConVar
 	g_hJockeyVoiceInterval = null;
 
 Handle
-	g_hJockeySoundTimer[MAXPLAYERS + 1] = {null, ...};
+	g_hJockeySoundTimer[MAXPLAYERS + 1];
 
 stock const char g_sJockeySound[][] =
 {
@@ -70,7 +70,7 @@ public Plugin myinfo =
 	name = "Unsilent Jockey",
 	author = "Tabun, robex, Sir, A1m`",
 	description = "Makes jockeys emit sound constantly.",
-	version = "0.9",
+	version = "0.9.1",
 	url = "https://github.com/SirPlease/L4D2-Competitive-Rework"
 };
 
@@ -92,6 +92,10 @@ public void OnMapStart()
 	// Precache
 	for (int i = 0; i < sizeof(g_sJockeySound); i++) {
 		PrecacheSound(g_sJockeySound[i], true);
+	}
+	// avoid invalid timer handle exceptions after map transitions
+	for (int i = 1; i <= MaxClients; i++) {
+		g_hJockeySoundTimer[i] = null;
 	}
 }
 
@@ -190,8 +194,7 @@ Action delayedJockeySound(Handle timer, any client)
 void ChangeJockeyTimerStatus(int client, bool bEnable)
 {
 	if (g_hJockeySoundTimer[client] != null) {
-		KillTimer(g_hJockeySoundTimer[client], false);
-		g_hJockeySoundTimer[client] = null;
+		delete g_hJockeySoundTimer[client];
 	}
 
 	if (bEnable) {
