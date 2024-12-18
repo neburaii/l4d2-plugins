@@ -22,43 +22,43 @@
 #define MAXENTITES					2048
 
 
-stock bool nsIsClientValid(int client)
+stock bool nsIsClientValid(int iClient)
 {
-	if(client < 1 || client > MaxClients) return false;
-	if(!IsClientInGame(client)) return false;
+	if(iClient < 1 || iClient > MAXPLAYERS_L4D2) return false;
+	if(!IsClientInGame(iClient)) return false;
 	return true;
 }
 
-stock bool nsIsEntityValid(int entity)
+stock bool nsIsEntityValid(int iEntity)
 {
-	if(entity <= MaxClients) return false;
+	if(iEntity <= MAXPLAYERS_L4D2) return false;
 
-	if(IsValidEdict(entity)) return true;
-	if(IsValidEntity(entity)) return true;
+	if(IsValidEdict(iEntity)) return true;
+	if(IsValidEntity(iEntity)) return true;
 
 	return false;
 }
 
-stock int nsGetInfectedClass(int client)
+stock int nsGetInfectedClass(int iClient)
 {
-	return GetEntProp(client, Prop_Send, "m_zombieClass", 4);
+	return GetEntProp(iClient, Prop_Send, "m_zombieClass", 4);
 }
 
-stock bool nsIsInfected(int client, int class = -1)
+stock bool nsIsInfected(int iClient, int iClass = -1)
 {
-	if(!nsIsClientValid(client)) return false;
-	if(GetClientTeam(client) != TEAM_INFECTED) return false;
+	if(!nsIsClientValid(iClient)) return false;
+	if(GetClientTeam(iClient) != TEAM_INFECTED) return false;
 
-	if(class < 0 || class > ZCLASS_TANK) return true;
-	if(nsGetInfectedClass(client) == class) return true;
+	if(iClass < 0 || iClass > ZCLASS_TRUEMAX) return true;
+	if(nsGetInfectedClass(iClient) == iClass) return true;
 
 	return false;
 }
 
-stock bool nsIsSurvivor(int client)
+stock bool nsIsSurvivor(int iClient)
 {
-	if(!nsIsClientValid(client)) return false;
-	if(GetClientTeam(client) != TEAM_SURVIVOR) return false;
+	if(!nsIsClientValid(iClient)) return false;
+	if(GetClientTeam(iClient) != TEAM_SURVIVOR) return false;
 	return true;
 }
 

@@ -1,0 +1,1 @@
+pushes a forward whenever the server is completely emptied (i've had issues with the on hibernate forward from left4dhooks. Sometimes my servers failed to hibernate somehow, and i'm too lazy to figure out why)
