@@ -2,8 +2,8 @@
 #include <left4dhooks>
 #include <neb_stocks>
 
-ConVar g_cSpeedHPVeryLow, g_cSpeedHPLow, g_cSpeedAdren, g_cSpeedRunning, g_cSpeedCrouching, g_cSpeedWalking, g_cHPThresholdLow, g_cHPThresholdVeryLow, g_cSpeedWater;
-float g_fSpeedHPVeryLow, g_fSpeedHPLow, g_fSpeedAdren, g_fSpeedRunning, g_fSpeedCrouching, g_fSpeedWalking, g_fHPThresholdLow, g_fHPThresholdVeryLow, g_fSpeedWater;
+ConVar g_cSpeedHPVeryLow, g_cSpeedHPLow, g_cSpeedAdren, g_cSpeedRunning, g_cSpeedCrouching, g_cSpeedWalking, g_cHPThresholdLow, g_cHPThresholdVeryLow, g_cSpeedWater, g_cSpeedScoped;
+float g_fSpeedHPVeryLow, g_fSpeedHPLow, g_fSpeedAdren, g_fSpeedRunning, g_fSpeedCrouching, g_fSpeedWalking, g_fHPThresholdLow, g_fHPThresholdVeryLow, g_fSpeedWater, g_fSpeedScoped;
 
 public Plugin myinfo = 
 {
@@ -25,6 +25,7 @@ public void OnPluginStart()
 	g_cHPThresholdLow =		CreateConVar("sspeed_hp_threshold_low",			"40.0",		"survivor will have low hp speed when their hp is < this", FCVAR_NOTIFY);
 	g_cHPThresholdVeryLow =	CreateConVar("sspeed_hp_threshold_very_low",	"1.0",		"survivor will have very low hp speed when their hp is <= this", FCVAR_NOTIFY);
 	g_cSpeedWater =			CreateConVar("sspeed_water",					"115.0",	"survivor max speed from water slowdown", FCVAR_NOTIFY);
+	g_cSpeedScoped =		CreateConVar("sspeed_scoped",					"85.0",		"survivor max speed when scoped in with a sniper", FCVAR_NOTIFY);
 	convarSet();
 	
 	g_cSpeedRunning.AddChangeHook(convarHook);
@@ -36,6 +37,7 @@ public void OnPluginStart()
 	g_cHPThresholdLow.AddChangeHook(convarHook);
 	g_cHPThresholdVeryLow.AddChangeHook(convarHook);
 	g_cSpeedWater.AddChangeHook(convarHook);
+	g_cSpeedScoped.AddChangeHook(convarHook);
 
 	AutoExecConfig(true, "neb_survivor_speed");
 }
@@ -56,6 +58,7 @@ void convarSet()
 	g_fHPThresholdLow = g_cHPThresholdLow.FloatValue;
 	g_fHPThresholdVeryLow = g_cHPThresholdVeryLow.FloatValue;
 	g_fSpeedWater = g_cSpeedWater.FloatValue;
+	g_fSpeedScoped = g_cSpeedScoped.FloatValue;
 }
 
 public Action L4D_OnGetCrouchTopSpeed(int iTarget, float &fRetVal)
@@ -68,6 +71,10 @@ public Action L4D_OnGetCrouchTopSpeed(int iTarget, float &fRetVal)
 		if(GetEntProp(iTarget, Prop_Send, "m_bAdrenalineActive"))
 		{
 			fRetVal = g_fSpeedAdren;
+			if(g_fSpeedScoped < fRetVal)
+			{
+				if(GetEntProp(iTarget,  Prop_Send, "m_iFOV")) fRetVal = g_fSpeedScoped;
+			}
 			return Plugin_Handled;
 		}
 	}
@@ -87,6 +94,10 @@ public Action L4D_OnGetWalkTopSpeed(int iTarget, float &fRetVal)
 		if(GetEntProp(iTarget, Prop_Send, "m_bAdrenalineActive"))
 		{
 			fRetVal = g_fSpeedAdren;
+			if(g_fSpeedScoped < fRetVal)
+			{
+				if(GetEntProp(iTarget,  Prop_Send, "m_iFOV")) fRetVal = g_fSpeedScoped;
+			}
 			return Plugin_Handled;
 		}
 	}
@@ -104,6 +115,10 @@ public Action L4D_OnGetRunTopSpeed(int iTarget, float &fRetVal)
 	if(GetEntProp(iTarget, Prop_Send, "m_bAdrenalineActive"))
 	{
 		fRetVal = g_fSpeedAdren;
+		if(g_fSpeedScoped < fRetVal)
+		{
+			if(GetEntProp(iTarget,  Prop_Send, "m_iFOV")) fRetVal = g_fSpeedScoped;
+		}
 		return Plugin_Handled;
 	}
 	
@@ -114,6 +129,12 @@ public Action L4D_OnGetRunTopSpeed(int iTarget, float &fRetVal)
 
 float getFinalSpeed(float fRetVal, int iTarget)
 {
+	// scoped
+	if(g_fSpeedScoped < fRetVal)
+	{
+		if(GetEntProp(iTarget,  Prop_Send, "m_iFOV")) fRetVal = g_fSpeedScoped;
+	}
+
 	// water
 	if(GetEntityFlags(iTarget) & FL_INWATER)
 	{
