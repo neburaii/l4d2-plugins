@@ -73,7 +73,7 @@ public Action L4D_OnGetCrouchTopSpeed(int iTarget, float &fRetVal)
 			fRetVal = g_fSpeedAdren;
 			if(g_fSpeedScoped < fRetVal)
 			{
-				if(GetEntProp(iTarget,  Prop_Send, "m_iFOV")) fRetVal = g_fSpeedScoped;
+				if(isScoped(iTarget)) fRetVal = g_fSpeedScoped;
 			}
 			return Plugin_Handled;
 		}
@@ -96,7 +96,7 @@ public Action L4D_OnGetWalkTopSpeed(int iTarget, float &fRetVal)
 			fRetVal = g_fSpeedAdren;
 			if(g_fSpeedScoped < fRetVal)
 			{
-				if(GetEntProp(iTarget,  Prop_Send, "m_iFOV")) fRetVal = g_fSpeedScoped;
+				if(isScoped(iTarget)) fRetVal = g_fSpeedScoped;
 			}
 			return Plugin_Handled;
 		}
@@ -117,7 +117,7 @@ public Action L4D_OnGetRunTopSpeed(int iTarget, float &fRetVal)
 		fRetVal = g_fSpeedAdren;
 		if(g_fSpeedScoped < fRetVal)
 		{
-			if(GetEntProp(iTarget,  Prop_Send, "m_iFOV")) fRetVal = g_fSpeedScoped;
+			if(isScoped(iTarget)) fRetVal = g_fSpeedScoped;
 		}
 		return Plugin_Handled;
 	}
@@ -132,7 +132,7 @@ float getFinalSpeed(float fRetVal, int iTarget)
 	// scoped
 	if(g_fSpeedScoped < fRetVal)
 	{
-		if(GetEntProp(iTarget,  Prop_Send, "m_iFOV")) fRetVal = g_fSpeedScoped;
+		if(isScoped(iTarget)) fRetVal = g_fSpeedScoped;
 	}
 
 	// water
@@ -153,4 +153,10 @@ float getFinalSpeed(float fRetVal, int iTarget)
 	}
 
 	return fRetVal;
+}
+
+bool isScoped(int iClient)
+{
+	int iFOV = GetEntProp(iClient,  Prop_Send, "m_iFOV");
+	return iFOV && iFOV <= 55; // sg552 zoom is 55 and is highest of all zoomable weapons
 }
