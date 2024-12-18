@@ -5,7 +5,6 @@
 
 ConVar g_cSpeedHPVeryLow, g_cSpeedHPLow, g_cSpeedAdren, g_cSpeedRunning, g_cSpeedCrouching, g_cSpeedWalking, g_cHPThresholdLow, g_cHPThresholdVeryLow, g_cSpeedWater;
 float g_fSpeedHPVeryLow, g_fSpeedHPLow, g_fSpeedAdren, g_fSpeedRunning, g_fSpeedCrouching, g_fSpeedWalking, g_fHPThresholdLow, g_fHPThresholdVeryLow, g_fSpeedWater;
-float g_fClientCrouchSpeed[MAXPLAYERS_L4D2+1], g_fClientWalkSpeed[MAXPLAYERS_L4D2+1], g_fClientRunSpeed[MAXPLAYERS_L4D2+1];
 
 public Plugin myinfo = 
 {
@@ -70,13 +69,11 @@ public Action L4D_OnGetCrouchTopSpeed(int iTarget, float &fRetVal)
 		if(GetEntProp(iTarget, Prop_Send, "m_bAdrenalineActive"))
 		{
 			fRetVal = g_fSpeedAdren;
-			g_fClientCrouchSpeed[iTarget] = fRetVal;
 			return Plugin_Handled;
 		}
 	}
 
 	fRetVal = getFinalSpeed(g_fSpeedCrouching, iTarget);
-	g_fClientCrouchSpeed[iTarget] = fRetVal;
 
 	return Plugin_Handled;
 }
@@ -91,13 +88,11 @@ public Action L4D_OnGetWalkTopSpeed(int iTarget, float &fRetVal)
 		if(GetEntProp(iTarget, Prop_Send, "m_bAdrenalineActive"))
 		{
 			fRetVal = g_fSpeedAdren;
-			g_fClientWalkSpeed[iTarget] = fRetVal;
 			return Plugin_Handled;
 		}
 	}
 
 	fRetVal = getFinalSpeed(g_fSpeedWalking, iTarget);
-	g_fClientWalkSpeed[iTarget] = fRetVal;
 
 	return Plugin_Handled;
 }
@@ -110,12 +105,10 @@ public Action L4D_OnGetRunTopSpeed(int iTarget, float &fRetVal)
 	if(GetEntProp(iTarget, Prop_Send, "m_bAdrenalineActive"))
 	{
 		fRetVal = g_fSpeedAdren;
-		g_fClientRunSpeed[iTarget] = fRetVal;
 		return Plugin_Handled;
 	}
 	
 	fRetVal = getFinalSpeed(g_fSpeedRunning, iTarget);
-	g_fClientRunSpeed[iTarget] = fRetVal;
 
 	return Plugin_Handled;
 }
