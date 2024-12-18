@@ -1,6 +1,5 @@
 #include <sourcemod>
 #include <left4dhooks>
-#include <sdkhooks>
 #include <neb_stocks>
 
 ConVar g_cSpeedHPVeryLow, g_cSpeedHPLow, g_cSpeedAdren, g_cSpeedRunning, g_cSpeedCrouching, g_cSpeedWalking, g_cHPThresholdLow, g_cHPThresholdVeryLow, g_cSpeedWater;
