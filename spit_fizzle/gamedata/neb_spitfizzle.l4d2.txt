@@ -33,6 +33,32 @@
 					}
 				}
 			}
+			"neb::CInferno::StartBurning"
+			{
+				"signature"		"CInferno::StartBurning"
+				"callconv"		"thiscall"
+				"return"		"int"
+				"this"			"entity"
+				"arguments"
+				{
+					"a1"
+					{
+						"type"	"vectorptr"
+					}
+					"a2"
+					{
+						"type"	"vectorptr"
+					}
+					"a3"
+					{
+						"type"	"vectorptr"
+					}
+					"a4"
+					{
+						"type"	"int"
+					}
+				}
+			}
         }
 
         "Signatures"
@@ -47,6 +73,13 @@
 				"linux"		"@_ZN18CSpitterProjectile6CreateERK6VectorRK6QAngleS2_S2_P20CBaseCombatCharacter"
 				"windows"	"\x55\x8B\x2A\x8B\x2A\x2A\x8B\x2A\x2A\x53\x8B\x2A\x2A\x56\x57\x50\x51\x53\x68\x2A\x2A\x2A\x2A\xE8\x2A\x2A\x2A\x2A\x8B\x2A\x2A\x2A\x2A\x2A\x83\x2A\x2A\x2A\x2A\x2A\x2A\x8B\x2A\x2A\x2A\x2A\x2A\x2A\x2A\x2A\x2A\x2A\x2A\x2A\x2A\x2A\x2A\x2A\x2A\x2A\x2A\x2A\x2A\x2A\x2A\x2A\x2A\x2A\x2A\x2A\x2A\x2A\x2A\x2A\x2A\x68\x2A\x2A\x2A\x2A\xE8\x2A\x2A\x2A\x2A\xD9\x2A\x2A\x2A\x2A\x2A\x83\x2A\x2A\x8B\x2A\xD9\x2A\x2A\xE8\x2A\x2A\x2A\x2A\x57\x8B\x2A\xE8\x2A\x2A\x2A\x2A\x57\x8B\x2A\xE8\x2A\x2A\x2A\x2A\x2A\x2A\x2A\x57"
 				/* 55 8B ? 8B ? ? 8B ? ? 53 8B ? ? 56 57 50 51 53 68 ? ? ? ? E8 ? ? ? ? 8B ? ? ? ? ? 83 ? ? ? ? ? ? 8B ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? 68 ? ? ? ? E8 ? ? ? ? D9 ? ? ? ? ? 83 ? ? 8B ? D9 ? ? E8 ? ? ? ? 57 8B ? E8 ? ? ? ? 57 8B ? E8 ? ? ? ? ? ? ? 57 */
+			}
+			"CInferno::StartBurning"
+			{
+				"library"	"server"
+				"linux"		"@_ZN8CInferno12StartBurningERK6VectorS2_S2_i"
+				"windows"	"\x55\x8B\x2A\x83\x2A\x2A\x53\x56\x8B\x2A\x83\x2A\x2A\x2A\x2A\x2A\x2A\x57\x75\x2A\x8B"
+				/* 55 8B ? 83 ? ? 53 56 8B ? 83 ? ? ? ? ? ? 57 75 ? 8B */
 			}
         }
     }

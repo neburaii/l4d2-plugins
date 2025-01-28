@@ -1,5 +1,7 @@
-#include <clients>
-#include <entity>
+#if defined _nebstocks_included_
+	#endinput
+#endif
+#define _nebstocks_included_
 
 // SI classes
 #define ZCLASS_SMOKER				1
@@ -21,7 +23,40 @@
 #define MAXPLAYERS_L4D2				32
 #define MAXENTITES					2048
 
+stock char g_sZClassNames[][] =
+{
+	"",
+	"smoker",
+	"boomer",
+	"hunter",
+	"spitter",
+	"jockey",
+	"charger"
+};
 
+/**
+ * Is a survivor being dominated by an SI?
+ *
+ * @param iSurvivor client index of survivor
+ * @return 			bool
+ */
+stock bool nsIsDominated(int iSurvivor)
+{
+	if(	GetEntPropEnt(iSurvivor, Prop_Send, "m_tongueOwner") != -1 ||
+		GetEntPropEnt(iSurvivor, Prop_Send, "m_pounceAttacker") != -1 ||
+		GetEntPropEnt(iSurvivor, Prop_Send, "m_jockeyAttacker") != -1 ||
+		GetEntPropEnt(iSurvivor, Prop_Send, "m_carryAttacker") != -1 ||
+		GetEntPropEnt(iSurvivor, Prop_Send, "m_pummelAttacker") != -1) return true;
+
+	return false;
+}
+
+/**
+ * is this an index of a valid client?
+ * 
+ * @param iClient	client index to check
+ * @return			bool
+ */
 stock bool nsIsClientValid(int iClient)
 {
 	if(iClient < 1 || iClient > MAXPLAYERS_L4D2) return false;
@@ -29,6 +64,12 @@ stock bool nsIsClientValid(int iClient)
 	return true;
 }
 
+/**
+ * is this an index of a valid entity?
+ * 
+ * @param iEntity	entity index to check
+ * @return			bool
+ */
 stock bool nsIsEntityValid(int iEntity)
 {
 	if(iEntity <= MAXPLAYERS_L4D2) return false;
@@ -39,11 +80,24 @@ stock bool nsIsEntityValid(int iEntity)
 	return false;
 }
 
+/**
+ * get the SI class of this infected
+ * 
+ * @param iClient	SI client index to get class of
+ * @return			int of class (one of the ZCLASS_* constants)
+ */
 stock int nsGetInfectedClass(int iClient)
 {
 	return GetEntProp(iClient, Prop_Send, "m_zombieClass", 4);
 }
 
+/**
+ * is this client an infected? optionally check if it's of a specified class
+ * 
+ * @param iClient	client index to check
+ * @param iClass	optional. If a valid class is passed, it will only return true if the client also matches this class
+ * @return			bool
+ */
 stock bool nsIsInfected(int iClient, int iClass = -1)
 {
 	if(!nsIsClientValid(iClient)) return false;
@@ -55,6 +109,12 @@ stock bool nsIsInfected(int iClient, int iClass = -1)
 	return false;
 }
 
+/**
+ * is this client a survivor?
+ * 
+ * @param iClient	client index to check
+ * @return			bool
+ */
 stock bool nsIsSurvivor(int iClient)
 {
 	if(!nsIsClientValid(iClient)) return false;
@@ -62,6 +122,12 @@ stock bool nsIsSurvivor(int iClient)
 	return true;
 }
 
+/**
+ * get the absolute value of an integer
+ * 
+ * @param n	input integer
+ * @return	output integer
+ */
 stock int IntAbs(int n)
 {
    return (n ^ (n >> 31)) - (n >> 31);

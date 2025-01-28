@@ -20,6 +20,11 @@ public void OnPluginStart()
 	g_hRequiredChecks.AddChangeHook(ConVarChanged_Cvars);
 }
 
+public void OnPluginEnd()
+{
+	if(g_hChecks != null) delete g_hChecks;
+}
+
 public APLRes AskPluginLoad2(Handle hMyself, bool bLate, char[] sError, int iErr_max)
 {
 	RegPluginLibrary("server_emptied");
