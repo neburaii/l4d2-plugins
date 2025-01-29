@@ -5,7 +5,6 @@
 
 #include <dhooks>
 #include <neb_stocks>
-#include <hardx>
 #include <left4dhooks>
 
 DynamicDetour g_hDetourOnAutomaticIdle;
