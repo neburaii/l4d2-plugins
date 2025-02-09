@@ -233,7 +233,6 @@ Action umTextMsgHook(UserMsg msg_id, BfRead msg, const int[] players, int player
 {
 	static char sBuffer[32];
 	msg.ReadString(sBuffer, sizeof(sBuffer));
-	PrintToServer(sBuffer);
 	if(StrContains(sBuffer, "L4D_idle_spectator", true) != -1)
 	{
 		return Plugin_Handled;
