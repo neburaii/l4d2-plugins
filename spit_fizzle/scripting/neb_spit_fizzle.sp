@@ -10,8 +10,8 @@
 #define INSECT_SWARM_CLASS "insect_swarm"
 #define SPITTER_PROJECTILE_CLASS "spitter_projectile"
 
-// should be >= to 3 to not screw up death puddles
-#define SPIT_MIN_SPREAD 4
+// having this too low can cause invisible spit
+#define SPIT_MIN_SPREAD 6
 
 int g_iInfernoSpreadCount[MAXENTITES+1], g_iSpittersProjectile[MAXPLAYERS_L4D2+1];
 bool g_bInfernoSpreadStaggerCancelled[MAXENTITES+1];
@@ -25,7 +25,7 @@ public Plugin myinfo =
 	name = "Spit Fizzle",
 	author = "Neburai",
 	description = "Killing a spitter causes her spit projectile to fizzle out, preventing it from reaching the ground to create a puddle",
-	version = "2.1",
+	version = "2.1.1",
 	url = "https://steamcommunity.com/groups/l4d2hardx"
 };
 

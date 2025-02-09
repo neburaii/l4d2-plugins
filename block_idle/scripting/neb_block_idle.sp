@@ -11,7 +11,7 @@ DynamicDetour g_hDetourOnAutomaticIdle;
 
 ConVar	g_cIdleMessage;
 Handle	g_hUnblockTimer[MAXPLAYERS_L4D2+1] = {null, ...};
-bool	g_bBlockIdle[MAXPLAYERS_L4D2+1];
+bool	g_bBlockIdle[MAXPLAYERS_L4D2+1], g_bForceTakeOver[MAXPLAYERS_L4D2+1] = {true, ...};
 bool	g_bBypassCheck, g_bDisplayMessage;
 
 public Plugin myinfo = 
@@ -19,7 +19,7 @@ public Plugin myinfo =
 	name = "Block Idle",
 	author = "Neburai",
 	description = "prevents some idle exploits, along with preventing idle when there are too many clients",
-	version = "1.0",
+	version = "1.1",
 	url = "https://steamcommunity.com/groups/l4d2hardx"
 };
 
@@ -40,6 +40,8 @@ public void OnPluginStart()
 
 	HookEvent("charger_carry_end", event_charger_carry_end);
 	HookEvent("charger_pummel_end", event_charger_pummel_end);
+	HookEvent("player_bot_replace", event_player_bot_replace);
+	HookEvent("bot_player_replace", event_bot_player_replace);
 
 	HookUserMessage(GetUserMessageId("TextMsg"), umTextMsgHook, true);
 }
@@ -49,14 +51,39 @@ void ConVarChanged_Hook(ConVar cConvar, const char[] sOldValue, const char[] sNe
 	g_bDisplayMessage = g_cIdleMessage.BoolValue;
 }
 
+public void OnMapStart()
+{
+	// prevent first bot take over after map load from causing bugs
+	for(int i = 1; i <= MAXPLAYERS_L4D2; i++)
+	{
+		g_bForceTakeOver[i] = true;
+	}
+}
+
+// keep track of which survivors already had their first bot takeover
+void event_player_bot_replace(Event hEvent, const char[] sName, bool bDontBroadcast)
+{
+	int iBot = GetClientOfUserId(hEvent.GetInt("bot"));
+	g_bForceTakeOver[iBot] = false;
+}
+
+void event_bot_player_replace(Event hEvent, const char[] sName, bool bDontBroadcast)
+{
+	int iPlayer = GetClientOfUserId(hEvent.GetInt("player"));
+	g_bForceTakeOver[iPlayer] = false;
+}
+
 public void OnClientPutInServer(int iClient)
 {
 	if(g_hUnblockTimer[iClient] != null) delete g_hUnblockTimer[iClient];
 	g_bBlockIdle[iClient] = false;
 }
 
+// go_away_from_keyboard command listener doesn't cover afk from timeouts. This detour covers both
+// Automatic idles going through without checking botClientAvailable can be very bad in modes like hard 28
 MRESReturn DTR_OnAutomaticIdle(int pThis, DHookReturn hReturn, DHookParam hParams)
 {
+	g_bForceTakeOver[pThis] = false;
 	if(!allowIdle(pThis) || !botClientAvailable())
 	{
 		hReturn.Value = 0;
@@ -73,10 +100,13 @@ public Action L4D_OnTakeOverBot(int iClient)
 	{
 		g_bBypassCheck = false;
 		return Plugin_Continue;
-	}
+	}	
+
 	if(!L4D_IsPlayerIdle(iClient)) return Plugin_Continue;
 
 	int iBot = L4D_GetBotOfIdlePlayer(iClient);
+	if(g_bForceTakeOver[iBot]) return Plugin_Continue;
+
 	if(!allowIdle(iBot))
 	{
 		RequestFrame(queueTakeOver, GetClientUserId(iClient));
@@ -201,8 +231,9 @@ Action unblockIdle(Handle hTimer, int iClient)
 
 Action umTextMsgHook(UserMsg msg_id, BfRead msg, const int[] players, int playersNum, bool reliable, bool init)
 {
-	static char sBuffer[1024];
+	static char sBuffer[32];
 	msg.ReadString(sBuffer, sizeof(sBuffer));
+	PrintToServer(sBuffer);
 	if(StrContains(sBuffer, "L4D_idle_spectator", true) != -1)
 	{
 		return Plugin_Handled;

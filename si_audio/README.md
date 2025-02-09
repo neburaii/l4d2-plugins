@@ -1,5 +1,3 @@
-**WORK IN PROGRESS**; more will be added~
-
 plugins that complement eachother quite well, together achieving better SI audio feedback
 
 * [unsilent_jockey](https://github.com/SirPlease/L4D2-Competitive-Rework/blob/master/addons/sourcemod/scripting/l4d2_unsilent_jockey.sp) had a tiny update to fix a tiny bug. All credits go to original

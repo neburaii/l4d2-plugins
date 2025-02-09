@@ -59,7 +59,7 @@ stock bool nsIsDominated(int iSurvivor)
  */
 stock bool nsIsClientValid(int iClient)
 {
-	if(iClient < 1 || iClient > MAXPLAYERS_L4D2) return false;
+	if(iClient < 1 || iClient > MaxClients) return false;
 	if(!IsClientInGame(iClient)) return false;
 	return true;
 }
@@ -72,7 +72,7 @@ stock bool nsIsClientValid(int iClient)
  */
 stock bool nsIsEntityValid(int iEntity)
 {
-	if(iEntity <= MAXPLAYERS_L4D2) return false;
+	if(iEntity <= MaxClients) return false;
 
 	if(IsValidEdict(iEntity)) return true;
 	if(IsValidEntity(iEntity)) return true;
