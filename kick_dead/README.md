@@ -4,6 +4,5 @@ This plugin will immediately disconnect an SI's client right after they die, alo
 
 known issues:
 * if you have a plugin on your server that relies on their clients existing briefly after death for some of its functions, it may not work right
-* the red text telling who killed who can bug out and not show sometimes. Seems ping based. I
 
 windows hasn't been tested
