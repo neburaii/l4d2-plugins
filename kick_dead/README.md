@@ -2,4 +2,8 @@ normally when an SI dies, their client stays connected to the server for a while
 
 This plugin will immediately disconnect an SI's client right after they die, along with making sure their death sound still plays in its entirety
 
-I'm assuming there'd be issues using this in versus but i don't play versus. Spit damage after the spitter died might screw up the score from the given damage (only a guess)
+known issues:
+* if you have a plugin on your server that relies on their clients existing briefly after death for some of its functions, it may not work right
+* the red text telling who killed who can bug out and not show sometimes. Seems ping based. I
+
+windows hasn't been tested
