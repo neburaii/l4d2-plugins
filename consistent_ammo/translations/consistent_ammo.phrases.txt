@@ -1,0 +1,18 @@
+"Phrases"
+{
+	"msg_ammo_check_fail"
+	{
+		/**
+		 * /ammo command output when the command issuer doesn't have reserve ammo to be checked
+		 */
+		"en" "{default}N/A"
+	}
+	"msg_ammo_check_success"
+	{
+		/**
+		 * /ammo command output when the command issuer has reserve ammo to be checked
+		 */
+		"#format" "{1:i},{2:i},{3:i}"
+		"en" "{olive}{1} {green}/ {default}{2} {green}({olive}{3}%%{green})"
+	}
+}

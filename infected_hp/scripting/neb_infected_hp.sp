@@ -1,660 +1,587 @@
-#include <sourcemod>
-#include <neb_stocks>
+/**
+ * - 2025-05-07 | version 2.1
+ * 		- fixed memory leaks
+ * 		- rewrote plugin to separate target data from the infected entity, allowing the
+ * 		  plugin to fully function after the infected is disconnected
+ * 		- code is just generally improved
+ */
+
+#pragma newdecls required
+#pragma semicolon 1
+
 #include <clientprefs>
+#include <sdkhooks>
+#include <neb_stocks>
+
+public Plugin myinfo = 
+{
+	name = "Infected HP Bars",
+	author = "Neburai",
+	description = "Renders health bars of the SI players most recently damaged. Uses the center text hud element",
+	version = "2.1",
+	url = "https://github.com/neburaii/l4d2-plugins/tree/main/infected_hp"
+};
 
 #define CVAR_FLAGS			FCVAR_NOTIFY
 
-// bar dimensions
+// to keep alignment of bars consistent, we need 1 line within the center text
+// message to be the longest, and of a static length. Any line shorter than
+// the longest has their first character aligned with the first character of the
+// longest line. Downside of ensuring this alignment is it takes up a lot of bytes.
+// Adding additional elements to center text or extending the length of these bars
+// may require this invisible line to be scrapped
 #define ANCHORLINE			"                                                                                                   \10"
+// separate bars into different lines with this
 #define LINEBREAK			"\10"
-#define BARLEN_NORMAL		40
-#define BARLEN_BOSS			60
-#define BARMAXLEN_NORMAL	68
-#define BARMAXLEN_BOSS		86
 
-// index labels
+// max length of just the bars themselves
+#define BAR_LEN				40
+#define BOSSBAR_LEN			60
+
+// max length of the bars + other elements within that line
+#define BAR_MAXLEN			68
+#define BOSSBAR_MAXLEN		86
+
 #define BAR_NORMAL			0
 #define BAR_BOSS			1
+#define MAX_BARS			2
 
-// ConVar vars
-ConVar	g_cUpdateInterval, g_cDeathAnimPattern, g_cDecayAnimLength, g_cTargetTimer, g_cTempTimer, g_cWitchHealth;
-int		g_iConVarUpdateInterval, g_iConVarMaxDeathAnimFrames, g_iConVarDecayAnimLength;
-float	g_fConVarTargetTimer, g_fConVarTempTimer;
-char	g_sDeathAnimPattern[16];
+char	g_sInfectedNames[ZCLASS_TRUEMAX+1][] = 
+{
+	"",
+	"Smoker",
+	"Boomer",
+	"Hunter",
+	"Spitter",
+	"Jockey",
+	"Charger",
+	"Witch",
+	"Tank"
+};
 
-// Cookie vars
-Handle	g_hcShowAll, g_hcShowNormal, g_hcShowDeath, g_hcShowTemp, g_hcShowBoss, g_hcPriorityOnly;
-bool	g_baCookieShowAll[MAXPLAYERS_L4D2+1], g_baCookieShowNormal[MAXPLAYERS_L4D2+1], g_baCookieShowTemp[MAXPLAYERS_L4D2+1], g_baCookieShowDeath[MAXPLAYERS_L4D2+1],
-		g_baCookieShowBoss[MAXPLAYERS_L4D2+1], g_baCookiePriorityOnly[MAXPLAYERS_L4D2+1];
 
-// Timers
-Handle	g_htClientTargetRemove[MAXPLAYERS_L4D2+1][2], g_htClientTempDecayStart[MAXPLAYERS_L4D2+1][2];
+bool	g_bRenderedThisFrame[MAXPLAYERS_L4D2+1], g_bSkipPlayerDeath[MAXPLAYERS_L4D2+1], g_bClientDied[MAXPLAYERS_L4D2+1];
 
-// Data vars
-int		g_iDeathAnimFrame;
-int		g_iaClientUpdatePending[4], g_iaClientTarget[MAXPLAYERS_L4D2+1][2], g_iaClientTempAmount[MAXPLAYERS_L4D2+1][2], g_iaVictimKilledBy[MAXENTITES+1],
-		g_iaWitchMAX[MAXENTITES+1], g_iaWitchHP[MAXENTITES+1], g_iaClientTempSubtract[MAXPLAYERS_L4D2+1][2], g_iaPrevHP[MAXPLAYERS_L4D2+1], g_iaPrevMAX[MAXPLAYERS_L4D2+1];
-bool	g_baClientRendered[MAXPLAYERS_L4D2+1], g_baTargetIsWitch[MAXPLAYERS_L4D2+1], g_baTankDying[MAXPLAYERS_L4D2+1], g_baTankFinalShotDistributed[MAXPLAYERS_L4D2+1];
-char	g_saConstructedBarsNormal[MAXPLAYERS_L4D2+1][BARMAXLEN_NORMAL], g_saConstructedBarsBoss[MAXENTITES+1][BARMAXLEN_BOSS];
+		// track infected health
+int		g_iInfectedHP[MAXENTITES+1], g_iInfectedMaxHP[MAXENTITES+1];
+
+		// info of each client's personalized hp bar
+int		g_iTarget[MAXPLAYERS_L4D2+1][MAX_BARS],
+		g_iTargetClass[MAXPLAYERS_L4D2+1][MAX_BARS],
+		g_iRecentDamage[MAXPLAYERS_L4D2+1][MAX_BARS], 
+		g_iTargetDeadMaxHP[MAXPLAYERS_L4D2+1][MAX_BARS];
+
+bool	g_bIsKiller[MAXPLAYERS_L4D2+1][MAX_BARS],
+		g_bDecayRecentDamage[MAXPLAYERS_L4D2+1][MAX_BARS];
+
+		// animation data
+int		g_iDeathAnimFrame, g_iMaxDeathAnimFrames,
+		g_iSubtractRecentDamage[MAXPLAYERS_L4D2+1][MAX_BARS];
+
+		// timers for delayed effects
+Handle	g_hTimerRemoveTarget[MAXPLAYERS_L4D2+1][MAX_BARS],
+		g_hTimerDecayRecentDamage[MAXPLAYERS_L4D2+1][MAX_BARS];
+
+		// ConVars
+ConVar	g_cTargetTime, g_cRecentDamageTime, g_cFramesToSkip, g_cDeathAnimPattern, g_CDecayAnimLength,
+		g_cWitchMaxHealth;
+char	g_sCVDeathAnimPattern[16];
+int		g_iCVFramesToSkip, g_iCVDecayAnimLength, g_iCVWitchMaxHealth;
+float	g_fCVTargetTime, g_fCVRecentDamageTime;
+
+		// Cookies
+Handle	g_hCookieShowBar[MAX_BARS], g_hCookieShowRecentDamage,
+		g_hCookieShowDeath, g_hCookieShowAll, g_hCookieUpdateOnlyMyDamage;
+
+bool	g_bCookieShowBar[MAXPLAYERS_L4D2+1][MAX_BARS],
+		g_bCookieShowRecentDamage[MAXPLAYERS_L4D2+1],
+		g_bCookieShowDeath[MAXPLAYERS_L4D2+1],
+		g_bCookieShowAll[MAXPLAYERS_L4D2+1],
+		g_bCookieUpdateOnlyMyDamage[MAXPLAYERS_L4D2+1];
 
 public void OnPluginStart()
 {
-	g_cWitchHealth = FindConVar("z_witch_health");
-	g_cUpdateInterval = CreateConVar("infectedhp_update_interval", "5", "render non priority updates to pending clients every X server frame. Default will be about 25fps at 100 tickrate", CVAR_FLAGS);
-	g_cDeathAnimPattern = CreateConVar("infectedhp_deathanim_pattern", "...,.,.,", "presented to its killer, an SI's empty healthbar will have its bottom bezel animated with this pattern moving along it", CVAR_FLAGS);
-	g_cDecayAnimLength = CreateConVar("infectedhp_decayanim_length", "7", "when temp health begins its fade away animation, how many frames (based on plugin's internal framerate) should this last?", CVAR_FLAGS);
-	g_cTargetTimer = CreateConVar("infectedhp_target_remove_time", "2.5", "How long in seconds must a client not deal damage to a target for it to be removed as an active target?", CVAR_FLAGS);
-	g_cTempTimer = CreateConVar("infectedhp_temp_decay_start_timer", "0.5", "How long in seconds must a client not deal damage to a target for its accumulated recent damage to start decaying?", CVAR_FLAGS);
-	readConVars();
-
-	g_cUpdateInterval.AddChangeHook(ConVarChanged_Cvars);
-	g_cDeathAnimPattern.AddChangeHook(ConVarChanged_Cvars);
-	g_cDecayAnimLength.AddChangeHook(ConVarChanged_Cvars);
-	g_cTargetTimer.AddChangeHook(ConVarChanged_Cvars);
-	g_cTempTimer.AddChangeHook(ConVarChanged_Cvars);
-
-	g_hcShowAll = RegClientCookie("sihp_show_all", "Show/hide all enemy healthbars [0 to hide, 1 (default) to show]", CookieAccess_Public);
-	g_hcShowNormal = RegClientCookie("sihp_show_normal", "Show/hide non-boss SI hp bars [0 to hide, 1 (default) to show] (hiding will only make boss bars visible! there is no option currently to merge them to share the same bar)", CookieAccess_Public);
-	g_hcShowBoss = RegClientCookie("sihp_show_boss", "Show/hide boss hp bars [0 to hide, 1 (default) to show] (they're coded to be separate, so this won't magically make it merge with the regular hp bar. Witch/tank hp bars will never show period with this off)", CookieAccess_Public);
-	g_hcShowTemp = RegClientCookie("sihp_show_temp", "Show/hide the recently dealt damage (by you) representation in enemy hp bars [0 (default) to hide, 1 to show]", CookieAccess_Public);
-	g_hcShowDeath = RegClientCookie("sihp_show_death", "Show/hide the kill confirmed indicator on dead SI's health bars (empty bars display with a unique notifier if you're the one who got the kill) [0 (default) to hide, 1 to show", CookieAccess_Public);
-	g_hcPriorityOnly = RegClientCookie("sihp_priority_only", "Only update healthbars from \"priority\" update triggers (when you deal damage to your target). All other update triggers (like when others damage your target) won't trigger updates", CookieAccess_Public);
-
+	// events
 	HookEvent("player_spawn", event_player_spawn);
-	HookEvent("player_death", event_player_death);
-	HookEvent("player_incapacitated", event_player_incapacitated);
+	HookEvent("witch_spawn", event_witch_spawn);
+
 	HookEvent("player_hurt", event_player_hurt);
 	HookEvent("infected_hurt", event_infected_hurt);
-	HookEvent("witch_spawn", event_witch_spawn);
+
+	HookEvent("player_death", event_player_death);
+	HookEvent("player_incapacitated", event_player_incapacitated);
 	HookEvent("witch_killed", event_witch_killed);
 
+	// convars
+	g_cWitchMaxHealth = FindConVar("z_witch_health");
+	g_cTargetTime = CreateConVar("infectedhp_target_remove_time", "2.5", "How long in seconds must a client not deal damage to a target for it to be removed as an active target?", CVAR_FLAGS, true, 0.1);
+	g_cRecentDamageTime = CreateConVar("infectedhp_recent_damage_time", "0.64", "How long in seconds must a client not deal damage to a target for the recent damage to start decaying away?", CVAR_FLAGS, true, 0.1);
+	g_cFramesToSkip = CreateConVar("infectedhp_frames_to_skip", "4", "How many server frames to skip between bar updates?", CVAR_FLAGS, true, 0.0);
+	g_cDeathAnimPattern = CreateConVar("infectedhp_death_anim_pattern", "...,.,.,", "The pattern of the 'killed by you' animation", CVAR_FLAGS);
+	g_CDecayAnimLength = CreateConVar("infectedhp_decay_anim_length", "8", "How long in seconds the 'killed by you' animation should last", CVAR_FLAGS, true, 1.0);
 
-	CreateTimer(1.8, refreshBars, _, TIMER_REPEAT);
-	RequestFrame(updateLoop);
+	g_cTargetTime.AddChangeHook(OnConVarChanged);
+	g_cRecentDamageTime.AddChangeHook(OnConVarChanged);
+	g_cFramesToSkip.AddChangeHook(OnConVarChanged);
+	g_cDeathAnimPattern.AddChangeHook(OnConVarChanged);
+	g_CDecayAnimLength.AddChangeHook(OnConVarChanged);
+	g_cWitchMaxHealth.AddChangeHook(OnConVarChanged);
+
+	readConVars();
+
+	// cookies
+	g_hCookieShowAll = RegClientCookie("sihp_show_all", "Show/hide all enemy healthbars [0 to hide, 1 (default) to show]", CookieAccess_Public);
+	g_hCookieShowBar[BAR_NORMAL] = RegClientCookie("sihp_show_normal", "Show/hide non-boss SI hp bars [0 to hide, 1 (default) to show] (hiding will only make boss bars visible! there is no option currently to merge them to share the same bar)", CookieAccess_Public);
+	g_hCookieShowBar[BAR_BOSS] = RegClientCookie("sihp_show_boss", "Show/hide boss hp bars [0 to hide, 1 (default) to show] (they're coded to be separate, so this won't magically make it merge with the regular hp bar. Witch/tank hp bars will never show period with this off)", CookieAccess_Public);
+	g_hCookieShowRecentDamage = RegClientCookie("sihp_show_temp", "Show/hide the recently dealt damage (by you) representation in enemy hp bars [0 (default) to hide, 1 to show]", CookieAccess_Public);
+	g_hCookieShowDeath = RegClientCookie("sihp_show_death", "Show/hide the kill confirmed indicator on dead SI's health bars (empty bars display with a unique notifier if you're the one who got the kill) [0 (default) to hide, 1 to show", CookieAccess_Public);
+	g_hCookieUpdateOnlyMyDamage = RegClientCookie("sihp_priority_only", "Update HP bar only when you deal damage [0 (default) to update whenever your target takes damage from any source, 1 to update only when you deal damage (behaviour of most center text based hp scripts)]", CookieAccess_Public);
+
+	// init timers as null
+	nullifyTimers();	
+
+	// load cookies if clients are in game already (plugin restart)
+	for(int i = 1; i <= MaxClients; i++)
+	{
+		if(!nsIsClientValid(i)) continue;
+		loadCookies(i);
+	}
+}
+
+public void OnMapEnd()
+{
+	nullifyTimers();
+}
+
+void nullifyTimers()
+{
+	for(int client = 1; client <= MaxClients; client++)
+	{
+		for(int bar = 0; bar < MAX_BARS; bar++)
+		{
+			g_hTimerRemoveTarget[client][bar] = null;
+			g_hTimerDecayRecentDamage[client][bar] = null;
+		}
+	}
 }
 
 /**********
- * ConVars
- **********/
+ * CONVARS
+ *********/
 
-public void OnConfigsExecuted()
-{
-	readConVars();
-}
-
-void ConVarChanged_Cvars(ConVar convar, const char[] oldValue, const char[] newValue)
+void OnConVarChanged(ConVar cConvar, const char[] sOldValue, const char[] sNewValue)
 {
 	readConVars();
 }
 
 void readConVars()
 {
-	g_fConVarTargetTimer = g_cTargetTimer.FloatValue;
-	g_fConVarTempTimer = g_cTempTimer.FloatValue;
-	g_iConVarUpdateInterval = g_cUpdateInterval.IntValue;
-	g_cDeathAnimPattern.GetString(g_sDeathAnimPattern, sizeof(g_sDeathAnimPattern));
-	g_iConVarMaxDeathAnimFrames = strlen(g_sDeathAnimPattern);
-	g_iConVarDecayAnimLength = g_cDecayAnimLength.IntValue;
+	g_fCVTargetTime = g_cTargetTime.FloatValue;
+	g_fCVRecentDamageTime = g_cRecentDamageTime.FloatValue;
+	g_iCVFramesToSkip = g_cFramesToSkip.IntValue;
+	g_cDeathAnimPattern.GetString(g_sCVDeathAnimPattern, sizeof(g_sCVDeathAnimPattern));
+	g_iMaxDeathAnimFrames = strlen(g_sCVDeathAnimPattern);
+	g_iCVDecayAnimLength = g_CDecayAnimLength.IntValue;
+	g_iCVWitchMaxHealth = g_cWitchMaxHealth.IntValue;
 }
 
-/************
- * Cookies
- ************/
+/**********
+ * COOKIES
+ *********/
 
 public void OnClientCookiesCached(int iClient)
 {
-	char sCookie[8];
-
-	// enforce defaults
-	g_baCookieShowAll[iClient] = true;
-	g_baCookieShowNormal[iClient] = true;
-	g_baCookieShowBoss[iClient] = true;
-	g_baCookieShowDeath[iClient] = false;
-	g_baCookieShowTemp[iClient] = false;
-	g_baCookiePriorityOnly[iClient] = false;
-
-	// read cookies, overriding defaults
-	GetClientCookie(iClient, g_hcShowAll, sCookie, sizeof(sCookie));
-	if(sCookie[0] == '0') g_baCookieShowAll[iClient] = false;
-	GetClientCookie(iClient, g_hcShowNormal, sCookie, sizeof(sCookie));
-	if(sCookie[0] == '0') g_baCookieShowNormal[iClient] = false;
-	GetClientCookie(iClient, g_hcShowBoss, sCookie, sizeof(sCookie));
-	if(sCookie[0] == '0') g_baCookieShowBoss[iClient] = false;
-	GetClientCookie(iClient, g_hcShowDeath, sCookie, sizeof(sCookie));
-	if(sCookie[0] == '1') g_baCookieShowDeath[iClient] = true;
-	GetClientCookie(iClient, g_hcShowTemp, sCookie, sizeof(sCookie));
-	if(sCookie[0] == '1') g_baCookieShowTemp[iClient] = true;
-	GetClientCookie(iClient, g_hcPriorityOnly, sCookie, sizeof(sCookie));
-	if(sCookie[0] == '1') g_baCookiePriorityOnly[iClient] = true;
+	loadCookies(iClient);
 }
 
-/*****************
- * Data handling
- *****************/
+void loadCookies(int iClient)
+{
+	static char sCookie[8];
+
+	// enforce defaults
+	g_bCookieShowAll[iClient] = true;
+	g_bCookieShowBar[iClient][BAR_NORMAL] = true;
+	g_bCookieShowBar[iClient][BAR_BOSS] = true;
+	g_bCookieShowRecentDamage[iClient] = false;
+	g_bCookieShowDeath[iClient] = false;
+	g_bCookieUpdateOnlyMyDamage[iClient] = false;
+
+	// read cookies, overriding defaults
+	GetClientCookie(iClient, g_hCookieShowAll, sCookie, sizeof(sCookie));
+	if(sCookie[0] == '0') g_bCookieShowAll[iClient] = false;
+	for(int i = 0; i < MAX_BARS; i++)
+	{
+		GetClientCookie(iClient, g_hCookieShowBar[i], sCookie, sizeof(sCookie));
+		if(sCookie[0] == '0') g_bCookieShowBar[iClient][i] = false;
+	}
+	GetClientCookie(iClient, g_hCookieShowRecentDamage, sCookie, sizeof(sCookie));
+	if(sCookie[0] == '1') g_bCookieShowRecentDamage[iClient] = true;
+	GetClientCookie(iClient, g_hCookieShowDeath, sCookie, sizeof(sCookie));
+	if(sCookie[0] == '1') g_bCookieShowDeath[iClient] = true;
+	GetClientCookie(iClient, g_hCookieUpdateOnlyMyDamage, sCookie, sizeof(sCookie));
+	if(sCookie[0] == '1') g_bCookieUpdateOnlyMyDamage[iClient] = true;
+}
+
+/*****************************
+ * RESET CLIENT'S TARGET DATA
+ ****************************/
 
 public void OnClientPutInServer(int iClient)
 {
-	for(int i = 0; i < 2; i++)
+	for(int bar = 0; bar < MAX_BARS; bar++)
 	{
-		g_iaClientTarget[iClient][i] = 0;
-		g_iaClientTempAmount[iClient][i] = 0;
-		g_iaClientTempSubtract[iClient][i] = 0;
+		if(g_hTimerRemoveTarget[iClient][bar] != null) delete g_hTimerRemoveTarget[iClient][bar];
+		if(g_hTimerDecayRecentDamage[iClient][bar] != null) delete g_hTimerDecayRecentDamage[iClient][bar];
+		g_bDecayRecentDamage[iClient][bar] = false;
+		g_iTargetDeadMaxHP[iClient][bar] = -1;
+		g_iRecentDamage[iClient][bar] = 0;
+		g_iTarget[iClient][bar] = -1;
 	}
-	g_baTargetIsWitch[iClient] = false;
-	g_saConstructedBarsNormal[iClient][0] = 0;
-	g_saConstructedBarsBoss[iClient][0] = 0;
-	g_baTankDying[iClient] = false;
-	g_baTankFinalShotDistributed[iClient] = false;
-	g_iaPrevMAX[iClient] = -1;
-	g_iaPrevHP[iClient] = -1;
-	g_iaVictimKilledBy[iClient] = 0;
-	g_baClientRendered[iClient] = false;
+
+	g_bSkipPlayerDeath[iClient] = false;
+	g_bClientDied[iClient] = false;
 }
 
-// initialize data for newly spawned SI
-void event_player_spawn(Event hEvent, const char[] name, bool dontBroadcast)
+public void OnEntityCreated(int iEntity, const char[] sClassname)
+{
+	g_iInfectedHP[iEntity] = -1;
+	g_iInfectedMaxHP[iEntity] = -1;
+}
+
+/**************
+ * TRACK MAXHP
+ **************/
+
+void event_player_spawn(Event hEvent, const char[] sName, bool bDontBroadcast)
 {
 	int iClient = GetClientOfUserId(hEvent.GetInt("userid"));
 	if(!nsIsInfected(iClient)) return;
 
-	TimerSpawn(INVALID_HANDLE, hEvent.GetInt("userid"));
-	CreateTimer(0.5, TimerSpawn, hEvent.GetInt("userid"), TIMER_FLAG_NO_MAPCHANGE);
-}
-
-Action TimerSpawn(Handle hTimer, int iUserId)
-{
-	int iClient = GetClientOfUserId(iUserId);
-	if(iClient && IsClientInGame(iClient))
-	{
-		int iVal = GetEntProp(iClient, Prop_Send, "m_iMaxHealth") & 0xffff;
-		g_iaPrevMAX[iClient] = (iVal <= 0) ? iVal : 1;
-		g_iaPrevHP[iClient] = 999999;
-	}
-	return Plugin_Stop;
+	g_iInfectedMaxHP[iClient] = GetEntProp(iClient, Prop_Send, "m_iMaxHealth");
+	g_iInfectedHP[iClient] = GetEntProp(iClient, Prop_Send, "m_iHealth");
 }
 
 void event_witch_spawn(Event hEvent, const char[] sName, bool bDontBroadcast)
 {
-	int iEntity = hEvent.GetInt( "witchid" );
-	int iHealth = (g_cWitchHealth == INVALID_HANDLE) ? 1000 : g_cWitchHealth.IntValue;
-	g_iaWitchMAX[iEntity] = iHealth;
-	g_iaWitchHP[iEntity] = iHealth;
-	g_iaVictimKilledBy[iEntity] = 0;
+	int iWitch = hEvent.GetInt("witchid");
+	if(!nsIsEntityValid(iWitch)) return;
+
+	g_iInfectedMaxHP[iWitch] = (g_cWitchMaxHealth == null) ? 1000 : g_iCVWitchMaxHealth;
+	g_iInfectedHP[iWitch] = g_iInfectedMaxHP[iWitch];
 }
 
-/****************
- * Update triggers
- *****************/
-
-// RequestFrame neverending loop
-void updateLoop()
-{
-	static int iFrameCount;
-	iFrameCount++;
-	if(iFrameCount >= g_iConVarUpdateInterval)
-	{
-		// reset frame counter
-		iFrameCount = 0;
-
-		// update animation of kill confirmations to the next frame
-		g_iDeathAnimFrame++;
-		if(g_iDeathAnimFrame >= g_iConVarMaxDeathAnimFrames) g_iDeathAnimFrame = 0;
-
-		// render pending client updates
-		static int iClient;
-		bool bKeepGoing;
-		for(int i = 0; i < sizeof(g_iaClientUpdatePending); i++)
-		{
-			if(g_iaClientUpdatePending[i])
-			{
-				iClient = GetClientOfUserId(g_iaClientUpdatePending[i]);
-				if(iClient)
-				{
-					for(int j = 0; j < 2; j++)
-					{
-						// temp decay anim
-						if(g_iaClientTempSubtract[iClient][j]) g_iaClientTempAmount[iClient][j] -= g_iaClientTempSubtract[iClient][j];
-						if(g_iaClientTempAmount[iClient][j] <= 0)
-						{
-							g_iaClientTempAmount[iClient][j] = 0;
-							g_iaClientTempSubtract[iClient][j] = 0;
-						}
-
-						// should this frame remove client from update pending queue
-						if(bKeepGoing) continue;
-						if(g_iaClientTempSubtract[iClient][j])
-						{
-							bKeepGoing = true;
-							continue;
-						}
-						if(g_baTargetIsWitch[iClient] && j == BAR_BOSS)
-						{
-							if(GetClientUserId(iClient) == g_iaVictimKilledBy[g_iaClientTarget[iClient][j]])
-								bKeepGoing = true;
-						}
-						else if(GetClientUserId(iClient) == g_iaVictimKilledBy[GetClientOfUserId(g_iaClientTarget[iClient][j])])
-							bKeepGoing = true;
-					}
-					if(!g_baCookiePriorityOnly[iClient]) renderBars(iClient, false);
-				}
-				if(!bKeepGoing) g_iaClientUpdatePending[i] = 0;
-			}
-		}
-	}
-	RequestFrame(updateLoop);
-}
-
-// repeat-timer callback to refresh bars for all clients at a slow frequency. Its purpose is to help enforce consistent bar disappearance times, especially if it's supposed to be longer than 2 seconds
-Action refreshBars(Handle hTimer)
-{
-	for(int i = 1; i <= MaxClients; i++)
-	{
-		if(!nsIsSurvivor(i)) continue;
-		if(g_iaClientTarget[i][BAR_NORMAL] || g_iaClientTarget[i][BAR_BOSS]) queue(i);
-	}
-
-	return Plugin_Continue;
-}
-
-// timer callback for when a temp health decay animation should start for a client's target's hp bar. Next frame of updateLoop wil recognize this
-Action startDecay(Handle hTimer, DataPack dData)
-{
-	int iClient = GetClientOfUserId(dData.ReadCell());
-	if(!nsIsSurvivor(iClient))
-	{
-		delete dData;
-		return Plugin_Stop;
-	}
-	int iBarIndex = dData.ReadCell();
-	delete dData;
-	
-	g_iaClientTempSubtract[iClient][iBarIndex] = g_iaClientTempAmount[iClient][iBarIndex] / g_iConVarDecayAnimLength;
-	queue(iClient);
-	
-	return Plugin_Stop;
-}
-
-// timer callback for when a client's target should be removed, which should trigger an update so that the bar for that target disappears
-Action removeTarget(Handle hTimer, DataPack dData)
-{
-	int iClient = GetClientOfUserId(dData.ReadCell());
-	if(!nsIsSurvivor(iClient))
-	{
-		delete dData;
-		return Plugin_Stop;
-	}
-	int iBarIndex = dData.ReadCell();
-	delete dData;
-
-	if(iBarIndex) g_baTargetIsWitch[iClient] = false;	
-	g_iaClientTarget[iClient][iBarIndex] = 0;
-	queue(iClient);
-
-	return Plugin_Stop;
-}
+/**************
+ * TRACK DAMAGE
+ *************/
 
 void event_player_hurt(Event hEvent, const char[] sName, bool bDontBroadcast)
 {
 	int iVictim = GetClientOfUserId(hEvent.GetInt("userid"));
-	if(!nsIsInfected(iVictim) || !IsPlayerAlive(iVictim)) return;
+	if(!nsIsInfected(iVictim) || g_bClientDied[iVictim]) return;
+
+	int iAmount = hEvent.GetInt("dmg_health");
+	if(iAmount > g_iInfectedHP[iVictim]) iAmount = g_iInfectedHP[iVictim];
+
+	g_iInfectedHP[iVictim] = hEvent.GetInt("health");
+	if(g_iInfectedHP[iVictim] < 0) g_iInfectedHP[iVictim] = 0;
 
 	int iAttacker = GetClientOfUserId(hEvent.GetInt("attacker"));
-	if(!nsIsSurvivor(iAttacker)) iAttacker = 0;
-	
-	int iBarIndex;
-	int iZClass = nsGetInfectedClass(iVictim);
-	if(iZClass && iZClass <= ZCLASS_MAX) iBarIndex = BAR_NORMAL;
-	else if(iZClass == ZCLASS_TANK) iBarIndex = BAR_BOSS;
-	else return;
+	if(!nsIsSurvivor(iAttacker)) return;
 
-	if(iAttacker)
-	{
-		g_iaClientTempSubtract[iAttacker][iBarIndex] = 0;
-		// Update this attacker's target
-		if(g_iaClientTarget[iAttacker][iBarIndex] != GetClientUserId(iVictim))
-		{
-			g_iaClientTempAmount[iAttacker][iBarIndex] = 0;
-		}
-		g_iaClientTarget[iAttacker][iBarIndex] = GetClientUserId(iVictim);	
-		if(iBarIndex) g_baTargetIsWitch[iAttacker] = false;
-	}
-	
-	// get current/max health
-	int iNowHP = hEvent.GetInt("health") & 0xffff;
-	int iMaxHP = GetEntProp(iVictim, Prop_Send, "m_iMaxHealth") & 0xffff;
-	int iDmgDealt = hEvent.GetInt("dmg_health");
+	int iClass = nsGetInfectedClass(iVictim);
 
-	// verify values are valid, correcting them if not
-	if(iNowHP <= 0 || g_iaPrevMAX[iVictim] < 0 || g_baTankDying[iVictim])
-	{
-		if(!g_baTankFinalShotDistributed[iVictim])
-		{
-			g_baTankFinalShotDistributed[iVictim] = true;
-			if(iNowHP > 0) iDmgDealt += iNowHP;
-		}
-		iNowHP = 0;
-	}
-
-	if(iDmgDealt > g_iaPrevHP[iVictim]) iDmgDealt = g_iaPrevHP[iVictim];
-	if(iAttacker) g_iaClientTempAmount[iAttacker][iBarIndex] += iDmgDealt; // Update temp health data for this attacker
-
-	if(iNowHP && iNowHP > g_iaPrevHP[iVictim]) iNowHP = g_iaPrevHP[iVictim];
-	else g_iaPrevHP[iVictim] = iNowHP;
-
-	if(iMaxHP < g_iaPrevMAX[iVictim]) iMaxHP = g_iaPrevMAX[iVictim];	
-	if(iMaxHP < iNowHP)
-	{
-		iMaxHP = iNowHP;
-		g_iaPrevMAX[iVictim] = iNowHP;
-	}	
-	if(iMaxHP < 1) iMaxHP = 1;
-
-	// %N will only work for clients, and since witches get passed to the same function, we should get name in these parent functions instead
-	char sClientName[MAX_NAME_LENGTH];
-	GetClientName(iVictim, sClientName, sizeof(sClientName));
-
-	// Finally, pass all this to the bar constructor function
-	constructBar(iVictim, iAttacker, !!iBarIndex, iMaxHP, iNowHP, sClientName);
-
-	// Start data reset timers
-	if(iAttacker)
-	{
-		DataPack dTargetData = CreateDataPack();
-		dTargetData.WriteCell(GetClientUserId(iAttacker));
-		dTargetData.WriteCell(iBarIndex);
-		dTargetData.Reset();
-		if(IsValidHandle(g_htClientTargetRemove[iAttacker][iBarIndex])) delete g_htClientTargetRemove[iAttacker][iBarIndex];
-		g_htClientTargetRemove[iAttacker][iBarIndex] = CreateTimer(g_fConVarTargetTimer, removeTarget, dTargetData);
-
-		DataPack dTempData = CreateDataPack();
-		dTempData.WriteCell(GetClientUserId(iAttacker));
-		dTempData.WriteCell(iBarIndex);
-		dTempData.Reset();		
-		if(IsValidHandle(g_htClientTempDecayStart[iAttacker][iBarIndex])) delete g_htClientTempDecayStart[iAttacker][iBarIndex];
-		g_htClientTempDecayStart[iAttacker][iBarIndex] = CreateTimer(g_fConVarTempTimer, startDecay, dTempData);
-	}
+	updateBar(iAttacker, iVictim, iClass, iAmount);
 }
 
 void event_infected_hurt(Event hEvent, const char[] sName, bool bDontBroadcast)
 {
 	int iVictim = hEvent.GetInt("entityid");
-	if(!nsIsEntityValid(iVictim) || g_iaWitchHP[iVictim] == -1) return;
+	if(!nsIsEntityValid(iVictim) || g_iInfectedMaxHP[iVictim] <= 0) return;
+
+	int iAmount = hEvent.GetInt("amount");
+	if(iAmount <= 0) return;
+
+	g_iInfectedHP[iVictim] -= iAmount;
+	if(g_iInfectedHP[iVictim] < 0) g_iInfectedHP[iVictim] = 0;
 
 	int iAttacker = GetClientOfUserId(hEvent.GetInt("attacker"));
-	if(!nsIsSurvivor(iAttacker)) iAttacker = 0;
+	if(!nsIsSurvivor(iAttacker)) return;
 
-	if(iAttacker)
-	{
-		g_iaClientTempSubtract[iAttacker][BAR_BOSS] = 0;
-		// Update this attacker's target
-		if(g_iaClientTarget[iAttacker][BAR_BOSS] != iVictim)
-		{
-			g_iaClientTempAmount[iAttacker][BAR_BOSS] = 0;
-		}
-		g_iaClientTarget[iAttacker][BAR_BOSS] = iVictim;
-		g_baTargetIsWitch[iAttacker] = true;
-	}
-	
-	int iDmgDealt = hEvent.GetInt("amount");
-	if(iDmgDealt > g_iaWitchHP[iVictim]) iDmgDealt = g_iaWitchHP[iVictim];
-	if(iAttacker) g_iaClientTempAmount[iAttacker][BAR_BOSS] += iDmgDealt;	
-	
-	int iNowHP = g_iaWitchHP[iVictim] - iDmgDealt;
-	if(iNowHP <= 0 || g_iaWitchMAX[iVictim] < 0) iNowHP = 0;
-	if(iNowHP && iNowHP > g_iaWitchHP[iVictim]) iNowHP = g_iaWitchHP[iVictim];
-	else g_iaWitchHP[iVictim] = iNowHP;
-	
-	int iMaxHP = g_iaWitchMAX[iVictim];
-	if(iMaxHP < 1) iMaxHP = 1;	
-
-	constructBar(iVictim, iAttacker, true, iMaxHP, iNowHP, "Witch");
-
-	// Start data reset timers
-	if(iAttacker)
-	{
-		DataPack dTargetData = CreateDataPack();
-		dTargetData.WriteCell(GetClientUserId(iAttacker));
-		dTargetData.WriteCell(BAR_BOSS);
-		dTargetData.Reset();
-		if(IsValidHandle(g_htClientTargetRemove[iAttacker][BAR_BOSS])) delete g_htClientTargetRemove[iAttacker][BAR_BOSS];
-		g_htClientTargetRemove[iAttacker][BAR_BOSS] = CreateTimer(g_fConVarTargetTimer, removeTarget, dTargetData);
-
-		DataPack dTempData = CreateDataPack();
-		dTempData.WriteCell(GetClientUserId(iAttacker));
-		dTempData.WriteCell(BAR_BOSS);
-		dTempData.Reset();
-		if(IsValidHandle(g_htClientTempDecayStart[iAttacker][BAR_BOSS])) delete g_htClientTempDecayStart[iAttacker][BAR_BOSS];
-		g_htClientTempDecayStart[iAttacker][BAR_BOSS] = CreateTimer(g_fConVarTempTimer, startDecay, dTempData);
-	}
+	updateBar(iAttacker, iVictim, ZCLASS_WITCH, iAmount);
 }
+
+/***************
+ * TRACK DEATHS
+ ***************/
 
 void event_player_death(Event hEvent, const char[] sName, bool bDontBroadcast)
 {
 	int iVictim = GetClientOfUserId(hEvent.GetInt("userid"));
-	if(!nsIsInfected(iVictim)) return;
+	if(!nsIsInfected(iVictim) || g_bSkipPlayerDeath[iVictim]) return;
 
+	g_bClientDied[iVictim] = true;
+
+	int iClass = nsGetInfectedClass(iVictim);
 	int iAttacker = GetClientOfUserId(hEvent.GetInt("attacker"));
-	if(!nsIsSurvivor(iAttacker)) iAttacker = 0;
-	if(iAttacker)
-	{
-		g_iaVictimKilledBy[iVictim] = GetClientUserId(iAttacker);
-		if(g_baCookieShowDeath[iAttacker])
-		{
-			renderBars(iAttacker, true);
-			queue(iAttacker);
-		}
-	}
 
-	g_iaPrevMAX[iVictim] = -1;
-	g_iaPrevHP[iVictim] = -1;
-}
-
-void event_player_incapacitated(Event hEvent, const char[] sName, bool bDontBroadcast)
-{
-	int iVictim = GetClientOfUserId(hEvent.GetInt("userid"));
-	if(!nsIsInfected(iVictim, ZCLASS_TANK)) return;
-
-	int iAttacker = GetClientOfUserId(hEvent.GetInt("attacker"));
-	if(!nsIsSurvivor(iAttacker)) iAttacker = 0;
-	if(iAttacker)
-	{
-		g_iaVictimKilledBy[iVictim] = GetClientUserId(iAttacker);
-		if(g_baCookieShowDeath[iAttacker]) queue(iAttacker);
-	}
-
-	g_baTankDying[iVictim] = true;
-	PrintHintTextToAll("++ %N is DEAD ++", iVictim);
-
-	int iMaxHP = GetEntProp(iVictim, Prop_Send, "m_iMaxHealth") & 0xffff;
-	if(iMaxHP < g_iaPrevMAX[iVictim]) iMaxHP = g_iaPrevMAX[iVictim];	
-	if(iMaxHP < 1) iMaxHP = 1;
-
-	char sClientName[MAX_NAME_LENGTH];
-	GetClientName(iVictim, sClientName, sizeof(sClientName));
-	constructBar(iVictim, iAttacker, true, iMaxHP, 0, sClientName);
+	if(nsIsSurvivor(iAttacker)) updateBar(iAttacker, iVictim, iClass, 0, true);		
+	setTargetAsDead(iVictim, iClass, g_iInfectedMaxHP[iVictim]);
 }
 
 void event_witch_killed(Event hEvent, const char[] sName, bool bDontBroadcast)
 {
-	int iVictim = hEvent.GetInt("witchid");
-	if(!nsIsEntityValid(iVictim)) return;
+	int iWitch = hEvent.GetInt("witchid");
+	if(!nsIsEntityValid(iWitch)) return;
 
 	int iAttacker = GetClientOfUserId(hEvent.GetInt("userid"));
-	if(!nsIsSurvivor(iAttacker)) iAttacker = 0;
-	if(iAttacker)
-	{
-		g_iaVictimKilledBy[iVictim] = GetClientUserId(iAttacker);
-		if(g_baCookieShowDeath[iAttacker]) queue(iAttacker);
-	}
 
-	constructBar(iVictim, iAttacker, true, g_iaWitchMAX[iVictim], 0, "Witch");
+	if(nsIsSurvivor(iAttacker)) updateBar(iAttacker, iWitch, ZCLASS_WITCH, 0, true);
+	setTargetAsDead(iWitch, ZCLASS_WITCH, g_iInfectedMaxHP[iWitch]);
 }
 
-/*****************************
- * Queue non-priority updates
- *****************************/
-
-void queue(int iClient)
+// tank should be labeled dead here instead of player_death
+void event_player_incapacitated(Event hEvent, const char[] sName, bool bDontBroadcast)
 {
-	int iThisOne, iQueuedClient;
-	for(int i = 0; i < sizeof(g_iaClientUpdatePending); i++)
-	{
-		iQueuedClient = GetClientOfUserId(g_iaClientUpdatePending[i]);
-		if(!iQueuedClient && !iThisOne) iThisOne = i+1;
-		if(iQueuedClient == iClient)
-		{
-			iThisOne = 0;
-			break;
-		}
-	}
-	if(iThisOne)
-	{
-		g_iaClientUpdatePending[iThisOne-1] = GetClientUserId(iClient);
-		iThisOne = 0;
-	}
+	int iTank = GetClientOfUserId(hEvent.GetInt("userid"));
+	if(!nsIsInfected(iTank, ZCLASS_TANK)) return;
+
+	g_bClientDied[iTank] = true;
+	g_bSkipPlayerDeath[iTank] = true;
+
+	int iAttacker = GetClientOfUserId(hEvent.GetInt("attacker"));
+
+	if(nsIsSurvivor(iAttacker)) updateBar(iAttacker, iTank, ZCLASS_TANK, 0, true);
+	setTargetAsDead(iTank, ZCLASS_TANK, g_iInfectedMaxHP[iTank]);
 }
 
-void queueByVictim(int iVictim, int iBarIndex)
+// in case an SI was kicked from admin etc, the plugin should treat this as death
+public void OnClientDisconnect(int iClient)
 {
+	if(g_bClientDied[iClient] || !nsIsInfected(iClient)) return;
+
+	g_bClientDied[iClient] = true;
+
+	int iClass = nsGetInfectedClass(iClient);	
+	setTargetAsDead(iClient, iClass, g_iInfectedMaxHP[iClient]);
+}
+
+// if it dies and disconnects, its maxHP will be missing. This function will remember the maxHP for
+// this client's target, and it also acts as a label for it being dead, avoiding checking the entity index later
+void setTargetAsDead(int iTarget, int iClass, int iMaxHP)
+{
+	int iBar = BAR_NORMAL;
+	if(iClass == ZCLASS_WITCH || iClass == ZCLASS_TANK) iBar = BAR_BOSS;
+
 	for(int i = 1; i <= MaxClients; i++)
 	{
-		if(!nsIsSurvivor(i) || !g_iaClientTarget[i][iBarIndex]) continue;
-		if(iBarIndex && g_baTargetIsWitch[i])
-		{
-			if(g_iaClientTarget[i][iBarIndex] != iVictim) continue;
-		}
-		else
-		{
-			if(nsIsClientValid(iVictim))
-			{
-				if(g_iaClientTarget[i][iBarIndex] != GetClientUserId(iVictim)) continue;
-			}
-			else
-			{
-				if(g_iaClientTarget[i][iBarIndex] != iVictim) continue;				
-			}
-		}
-
-		queue(i);
+		if(!nsIsSurvivor(i) || !IsPlayerAlive(i)) continue;
+		if(g_iTarget[i][iBar] == iTarget) g_iTargetDeadMaxHP[i][iBar] = iMaxHP;
 	}
 }
 
-/*************
- * Render Bars
- **************/
+/*********
+ * UPDATES
+ *********/
 
-// construct the base hp bar for an SI
-void constructBar(int iVictim, int iPriorityClient, bool bIsBoss, int iMaxHP, int iNowHP, const char[] sClientName)
+void updateBar(int iClient, int iTarget, int iClass, int iDamage, bool bDeath = false)
 {
-	int iLength = bIsBoss ? BARLEN_BOSS : BARLEN_NORMAL;
-	int iAmount = RoundToCeil((float(iNowHP) / float(iMaxHP)) * float(iLength));
-	int i;	
-	char sBar[128];
+	int iBar = BAR_NORMAL;
+	if(iClass == ZCLASS_WITCH || iClass == ZCLASS_TANK) iBar = BAR_BOSS;
+
+	// update this client's active target
+	if(g_hTimerRemoveTarget[iClient][iBar] != null) delete g_hTimerRemoveTarget[iClient][iBar];
+	if(g_iTarget[iClient][iBar] != iTarget) g_iRecentDamage[iClient][iBar] = 0;
+	g_iTarget[iClient][iBar] = iTarget;
+	g_hTimerRemoveTarget[iClient][iBar] = CreateTimer(g_fCVTargetTime, iBar ? timerRemoveBossTarget : timerRemoveTarget, iClient, TIMER_FLAG_NO_MAPCHANGE);
+
+	// update this client's recent damage
+	if(g_hTimerDecayRecentDamage[iClient][iBar] != null) delete g_hTimerDecayRecentDamage[iClient][iBar];
+	g_iRecentDamage[iClient][iBar] += iDamage;
+	g_bDecayRecentDamage[iClient][iBar] = false;
+	g_hTimerDecayRecentDamage[iClient][iBar] = CreateTimer(g_fCVRecentDamageTime, iBar ? timerDecayRecentBossDamage : timerDecayRecentDamage, iClient, TIMER_FLAG_NO_MAPCHANGE);
+
+	// update this client's target class
+	g_iTargetClass[iClient][iBar] = iClass;
+
+	// update the killer status of this client
+	g_bIsKiller[iClient][iBar] = false;
+	g_iTargetDeadMaxHP[iClient][iBar] = -1;
+	if(bDeath) g_bIsKiller[iClient][iBar] = true;
+
+	// render now for this client only
+	renderBars(iClient, iClient);
+}
+
+void timerRemoveTarget(Handle hTimer, int iClient)
+{
+	g_hTimerRemoveTarget[iClient][BAR_NORMAL] = null;
+	removeTarget(iClient, BAR_NORMAL);
+}
+
+void timerRemoveBossTarget(Handle hTimer, int iClient)
+{
+	g_hTimerRemoveTarget[iClient][BAR_BOSS] = null;
+	removeTarget(iClient, BAR_BOSS);
+}
+
+void removeTarget(int iClient, int iBar)
+{
+	g_iTarget[iClient][iBar] = -1;
+
+	if(g_hTimerDecayRecentDamage[iClient][iBar] != null) delete g_hTimerDecayRecentDamage[iClient][iBar];
+	g_iRecentDamage[iClient][iBar] = 0;
+
+	g_iTargetClass[iClient][iBar] = -1;
+
+	g_iTargetDeadMaxHP[iClient][iBar] = -1;
+	g_bIsKiller[iClient][iBar] = false;
+}
+
+void timerDecayRecentDamage(Handle hTimer, int iClient)
+{
+	g_hTimerDecayRecentDamage[iClient][BAR_NORMAL] = null;
+	decayRecentDamage(iClient, BAR_NORMAL);
+}
+
+void timerDecayRecentBossDamage(Handle hTimer, int iClient)
+{
+	g_hTimerDecayRecentDamage[iClient][BAR_BOSS] = null;
+	decayRecentDamage(iClient, BAR_BOSS);
+}
+
+void decayRecentDamage(int iClient, int iBar)
+{
+	g_bDecayRecentDamage[iClient][iBar] = true;
+	g_iSubtractRecentDamage[iClient][iBar] = g_iRecentDamage[iClient][iBar] / g_iCVDecayAnimLength;
+}
+
+/********
+ * RENDER
+ ********/
+
+public void OnGameFrame()
+{
+	static int iFramesSkipped;
+	iFramesSkipped++;
+	if(iFramesSkipped >= g_iCVFramesToSkip)
+	{
+		iFramesSkipped = 0;
+
+		// update death animation frame
+		g_iDeathAnimFrame++;
+		if(g_iDeathAnimFrame >= g_iMaxDeathAnimFrames) g_iDeathAnimFrame = 0;		
+
+		// decay recent damage
+		for(int i = 1; i <= MaxClients; i++)
+		{
+			for(int bar = 0; bar < MAX_BARS; bar++)
+			{
+				if(g_bDecayRecentDamage[i][bar])
+				{
+					g_iRecentDamage[i][bar] -= g_iSubtractRecentDamage[i][bar];
+					if(g_iRecentDamage[i][bar] < 0) g_iRecentDamage[i][bar] = 0;
+					if(!g_iRecentDamage[i][bar]) g_bDecayRecentDamage[i][bar] = false;
+				}
+			}
+		}
+
+		// render bars
+		int iClient;
+		for(int i = 1; i <= MaxClients; i++)
+		{
+			if(!nsIsSurvivor(i) || g_bCookieUpdateOnlyMyDamage[i]) continue;			
+
+			// is this player seeing their own bars, or spectating those of another player?
+			if(IsClientObserver(i))
+			{
+				iClient = GetEntPropEnt(i, Prop_Send, "m_hObserverTarget");
+				if(!nsIsSurvivor(iClient)) continue;
+			}
+			else if(IsPlayerAlive(i)) iClient = i;
+			else continue;
+
+			renderBars(i, iClient);
+		}
+	}
+}
+
+void renderBars(int iViewer, int iOwner)
+{
+	if(g_bRenderedThisFrame[iViewer] || !g_bCookieShowAll[iViewer]) return;
+	g_bRenderedThisFrame[iViewer] = true;
+	RequestFrame(resetRenderedThisFrame, iViewer);
+
+	static char sBar[BAR_MAXLEN], sBossBar[BOSSBAR_MAXLEN];
 	
+	constructBar(sBar, BAR_NORMAL, BAR_LEN, BAR_MAXLEN, iViewer, iOwner);
+	constructBar(sBossBar, BAR_BOSS, BOSSBAR_LEN, BOSSBAR_MAXLEN, iViewer, iOwner);
+
+	PrintCenterText(iViewer, "%s%s%s%s", ANCHORLINE, sBar, LINEBREAK, sBossBar);
+}
+
+void constructBar(char[] sBar, int iBarType, int iBarLength, int iMaxLength, int iViewer, int iOwner)
+{
+	static char sBarTemplate[BOSSBAR_MAXLEN];
+	int iNowHP, iMaxHP, iAmount, i;
+
 	sBar[0] = 0;
-	for(i = 0; i < iAmount && i < iLength; i ++) StrCat(sBar, iLength+2, "!");
-	for(; i < iLength; i ++) StrCat(sBar, iLength+2, ".");
-
-	if(bIsBoss) FormatEx(g_saConstructedBarsBoss[iVictim], BARMAXLEN_BOSS, "HP: %sl  [ %d ]  %s", sBar, iNowHP, sClientName);
-	else FormatEx(g_saConstructedBarsNormal[iVictim], BARMAXLEN_NORMAL, "HP: %sl  [ %d ]  %s", sBar, iNowHP, sClientName);
-	
-	if(iPriorityClient) renderBars(iPriorityClient, true); // save processing time for this client's perspective
-	queueByVictim(iVictim, bIsBoss ? BAR_BOSS : BAR_NORMAL);
-}
-
-// render the most up-to-date version of this client hud's healthbars
-void renderBars(int iClient, bool bForce)
-{
-	if(!g_baCookieShowAll[iClient] || !nsIsClientValid(iClient)) return;
-
-	// prevent updates coinciding in the same frame
-	if(g_baClientRendered[iClient] && !bForce) return;
-	else
+	if(g_bCookieShowBar[iViewer][iBarType])
 	{
-		if(!g_baClientRendered[iClient]) RequestFrame(removeRenderedFlag, iClient);
-		g_baClientRendered[iClient] = true;
-	}
-
-	char sBarModifiedNormal[BARMAXLEN_NORMAL], sBarModifiedBoss[BARMAXLEN_BOSS];
-
-	// FORMAT: normal
-	int iVictim = GetClientOfUserId(g_iaClientTarget[iClient][BAR_NORMAL]);
-	if(g_baCookieShowNormal[iClient] && iVictim && g_saConstructedBarsNormal[iVictim][0])
-	{
-		sBarModifiedNormal = g_saConstructedBarsNormal[iVictim];
-		if(g_baCookieShowTemp[iClient] && g_iaClientTempAmount[iClient][BAR_NORMAL])
-			formatTemp(sBarModifiedNormal, g_iaClientTempAmount[iClient][BAR_NORMAL], GetEntProp(iVictim, Prop_Send, "m_iMaxHealth") & 0xffff, GetEntProp(iVictim, Prop_Send, "m_iHealth"), BARLEN_NORMAL);
-		if(g_baCookieShowDeath[iClient] && g_iaVictimKilledBy[iVictim] == GetClientUserId(iClient))
-			formatDeath(sBarModifiedNormal, BARLEN_NORMAL);
-	}
-
-	// FORMAT: boss
-	iVictim = 0;
-	if(g_baTargetIsWitch[iClient])
-	{
-		if(nsIsEntityValid(g_iaClientTarget[iClient][BAR_BOSS]))
+		if(g_iTargetDeadMaxHP[iOwner][iBarType] > 0)
 		{
-			char sClassName[32];
-			GetEntityClassname(g_iaClientTarget[iClient][BAR_BOSS], sClassName, sizeof(sClassName));
-			if(strcmp(sClassName, "witch") == 0)
+			iNowHP = 0;
+			iMaxHP = g_iTargetDeadMaxHP[iOwner][iBarType];
+		}
+		else if(g_iTarget[iOwner][iBarType] != -1)
+		{
+			iNowHP = g_iInfectedHP[g_iTarget[iOwner][iBarType]];
+			iMaxHP = g_iInfectedMaxHP[g_iTarget[iOwner][iBarType]];
+		}
+
+		if(iMaxHP > 0)
+		{
+			iAmount = RoundToCeil((float(iNowHP) / float(iMaxHP)) * float(iBarLength));
+
+			sBarTemplate[0] = 0;
+			for(i = 0; i < iAmount && i < iBarLength; i++) StrCat(sBarTemplate, iBarLength+2, "!");
+			for(; i < iBarLength; i++) StrCat(sBarTemplate, iBarLength+2, ".");
+			
+			FormatEx(sBar, iMaxLength, "HP: %sl  [ %d ]  %s", sBarTemplate, iNowHP, g_sInfectedNames[g_iTargetClass[iOwner][iBarType]]);
+
+			// modify - add recent damage indicator
+			if(g_bCookieShowRecentDamage[iViewer] && g_iRecentDamage[iOwner][iBarType])
 			{
-				iVictim = g_iaClientTarget[iClient][BAR_BOSS];
+				int iRecentDamage = RoundToCeil((float(iNowHP+g_iRecentDamage[iOwner][iBarType])/float(iMaxHP))*float(iBarLength)) - RoundToCeil((float(iNowHP)/float(iMaxHP))*float(iBarLength));
+				for(i = 4; (i < (iBarLength + 5)) && iRecentDamage; i++)
+				{
+					if(sBar[i] == '.')
+					{
+						sBar[i] = ':';
+						iRecentDamage--;
+					}
+				}
+			}
+
+			// modify - add "killed by you" effect
+			if(g_bCookieShowDeath[iViewer] && !iNowHP && g_bIsKiller[iOwner][iBarType])
+			{
+				int iIndex = g_iDeathAnimFrame;
+				for(i = 4; i < (iBarLength + 5); i++)
+				{
+					if(g_sCVDeathAnimPattern[iIndex] == ',')
+					{
+						if(sBar[i] == '.') sBar[i] = ',';
+						else if(sBar[i] == ':') sBar[i] = ';';
+					}
+					iIndex++;
+					if(iIndex >= g_iMaxDeathAnimFrames) iIndex = 0;
+				}
 			}
 		}
 	}
-	else iVictim = GetClientOfUserId(g_iaClientTarget[iClient][BAR_BOSS]);
-
-	if(g_baCookieShowBoss[iClient] && iVictim && g_saConstructedBarsBoss[iVictim][0])
-	{
-		sBarModifiedBoss = g_saConstructedBarsBoss[iVictim];
-		if(g_baTargetIsWitch[iClient])
-		{
-			if(g_baCookieShowTemp[iClient] && g_iaClientTempAmount[iClient][BAR_BOSS])
-				formatTemp(sBarModifiedBoss, g_iaClientTempAmount[iClient][BAR_BOSS], g_iaWitchMAX[iVictim], g_iaWitchHP[iVictim], BARLEN_BOSS);
-			if(g_baCookieShowDeath[iClient] && g_iaVictimKilledBy[iVictim] == iClient)
-				formatDeath(sBarModifiedBoss, BARLEN_BOSS);
-		}
-		else
-		{
-			if(g_baCookieShowTemp[iClient] && g_iaClientTempAmount[iClient][BAR_BOSS])
-				formatTemp(sBarModifiedBoss, g_iaClientTempAmount[iClient][BAR_BOSS], (GetEntProp(iVictim, Prop_Send, "m_iMaxHealth") & 0xffff), (GetEntProp(iVictim, Prop_Send, "m_iHealth")), BARLEN_BOSS);
-			if(g_baCookieShowDeath[iClient] && g_iaVictimKilledBy[iVictim] == GetClientUserId(iClient))
-				formatDeath(sBarModifiedBoss, BARLEN_BOSS);			
-		}
-	}
-	PrintCenterText(iClient, "%s%s%s%s", ANCHORLINE, sBarModifiedNormal, LINEBREAK, sBarModifiedBoss);
 }
 
-// RequestFrame callback
-void removeRenderedFlag(int iClient)
+void resetRenderedThisFrame(int iClient)
 {
-	g_baClientRendered[iClient] = false;
-}
-
-void formatTemp(const char[] sModify, int iTempAmount, int iMaxHP, int iNowHP, int iLength)
-{
-	iTempAmount = RoundToCeil((float(iNowHP+iTempAmount)/float(iMaxHP))*float(iLength)) - RoundToCeil((float(iNowHP)/float(iMaxHP))*float(iLength));
-	for(int i = 4; (i < (iLength + 5)) && iTempAmount; i++)
-	{
-		if(sModify[i] == '.')
-		{
-			sModify[i] = ':';
-			iTempAmount--;
-		}
-	}
-}
-
-void formatDeath(const char[] sModify, int iLength)
-{
-	int iFrame = g_iDeathAnimFrame;
-	for(int i = 4; i < (iLength + 5); i++)
-	{
-		if(g_sDeathAnimPattern[iFrame] == ',')
-		{
-			if(sModify[i] == '.') sModify[i] = ',';
-			else if(sModify[i] == ':') sModify[i] = ';';
-		}
-		iFrame++;
-		if(iFrame >= g_iConVarMaxDeathAnimFrames) iFrame = 0;
-	}
+	g_bRenderedThisFrame[iClient] = false;
 }

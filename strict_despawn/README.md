@@ -1,0 +1,4 @@
+despawn SI who haven't moved in X seconds
+
+it's very basic right now. I have plans in the future to improve upon the vanilla range-based despawn system, making the range shorter/longer depending on the flow-based direction the SI is from survivors.
+I also want to experiment with alternative solutions to SI getting stuck, potentially helping them get unstuck. The only quirk i don't like about the current method is that they can despawn right in front of you. But making it check LOS means players can purposefully maintain LOS to cheese spawn limits, the exact cheese this plugin is meant to combat. So although it's a bit aggressive in its method, it does achieve what it's meant to achieve.
