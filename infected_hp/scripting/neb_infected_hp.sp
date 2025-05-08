@@ -244,6 +244,7 @@ public void OnClientPutInServer(int iClient)
 
 public void OnEntityCreated(int iEntity, const char[] sClassname)
 {
+	if(!nsIsEntityValid(iEntity)) return;
 	g_iInfectedHP[iEntity] = -1;
 	g_iInfectedMaxHP[iEntity] = -1;
 }
