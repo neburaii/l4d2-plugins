@@ -6,7 +6,7 @@ public Plugin myinfo =
 	name = "Kick Dead SI",
 	author = "Neburai",
 	description = "kick a special infected's client immediately after they die",
-	version = "1.1",
+	version = "1.2",
 	url = "https://github.com/neburaii/l4d2-plugins"
 };
 
@@ -18,9 +18,10 @@ public Plugin myinfo =
 #include <neb_stocks>
 
 DynamicDetour g_hDetourOnRagdollCreated;
+ConVar g_cQuickerTankDeath;
 
 int	g_iClientRagdoll[MAXPLAYERS_L4D2+1], g_iGettingRagdoll = -1;
-bool g_bClientDied[MAXPLAYERS_L4D2+1];
+bool g_bClientDied[MAXPLAYERS_L4D2+1], g_bCVQuickerTankDeath;
 
 public void OnPluginStart()
 {
@@ -36,9 +37,18 @@ public void OnPluginStart()
 	g_hDetourOnRagdollCreated.Enable(Hook_Pre, DTR_OnRagdollCreated_Pre);
 	g_hDetourOnRagdollCreated.Enable(Hook_Post, DTR_OnRagdollCreated_Post);
 
+	g_cQuickerTankDeath = CreateConVar("skip_tank_death_animation", "1", "make tank die sooner by skipping its death animation. Has a gameplay side effect of preventing his collision from lingering after death", FCVAR_NOTIFY, true, 0.0, true, 1.0);
+	g_cQuickerTankDeath.AddChangeHook(ConVarChanged_QuickerTankDeath);
+	g_bCVQuickerTankDeath = g_cQuickerTankDeath.BoolValue;
+
 	HookEvent("player_death", event_player_death);
 	HookEvent("player_incapacitated", event_player_incapacitated);
 	AddNormalSoundHook(soundHook);
+}
+
+void ConVarChanged_QuickerTankDeath(ConVar cConvar, const char[] sOldValue, const char[] sNewValue)
+{
+	g_bCVQuickerTankDeath = cConvar.BoolValue;
 }
 
 // reset client data
@@ -74,7 +84,8 @@ void event_player_incapacitated(Event hEvent, const char[] sName, bool bDontBroa
 	int iTank = GetClientOfUserId(hEvent.GetInt("userid"));
 	if(!nsIsInfected(iTank, ZCLASS_TANK)) return;
 
-	g_bClientDied[iTank] = true;
+	if(g_bCVQuickerTankDeath) ForcePlayerSuicide(iTank);
+	else g_bClientDied[iTank] = true;
 }
 
 // get ragdoll entity so that we can emit sounds from it
@@ -128,7 +139,7 @@ Action soundHook(int iaClients[MAXPLAYERS], int& iNumClients, char sSample[PLATF
 				// failsafe in case ragdoll wasn't created
 				float vPos[3];
 				GetClientAbsOrigin(iEntity, vPos);
-				EmitSound(iaClients, iNumClients, sSample, _, iChannel, iLevel, iFlags, fVolume, iPitch, _, vPos);
+				EmitSound(iaClients, iNumClients, sSample, 0, _, iLevel, iFlags, fVolume, iPitch, _, vPos);
 			}
 			return Plugin_Handled;
 		}
