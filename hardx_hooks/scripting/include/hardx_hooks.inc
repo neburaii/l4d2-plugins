@@ -92,6 +92,13 @@ native int hxGetMapArcValue();
  * @param iZClass		SI class to do some checks for (doesn't really make much of a difference)
  * 
  * @return Address		address of the start of this pool's data
+ * 
+ * @how to use
+ * 	It returns a pointer to the start of a small data structure. 1st 4byte cell is a pointer to the start of the actual nav area list, while the 3rd 4byte cell is the total number of nav areas in that list.
+ * 	The intended use is to call this to get a base pool and then apply your own filters as you load the list from the memory addresses, adding navs that pass your filters into an ArrayList or something.
+ * 	Then, get a random area from your filtered list and use that one native from left4dhooks (L4D_FindRandomSpot) and check if whatever you want to spawn can actually spawn in this position/nav area with hxCanZombieSpawnHere.
+ * 	hxCanZombieSpawnHere with its last param as true will emulate the exact same way the internal code checks if a location is valid. 
+ * 	The end result is a very powerful method of getting spawn locations for SI, allowing complete control over the pool of allowed areas
  */
 native Address hxCollectSpawnAreas(int iDirection, int iZClass);
 
@@ -105,23 +112,13 @@ native Address hxCollectSpawnAreas(int iDirection, int iZClass);
 native Address hxGetHighestAdjacentFlow(Address aRefNav);
 
 /**
- * given a nav area, it will return the address of the lowest flow nav area that's adjacent to it
- * NOTE: This doesn't work as expected, and is currently unused in Hard X
- * 
- * @param aRefNav		check nav areas adjacent to this one
- * 
- * @return 				address
- */
-native Address hxGetLowestAdjacentFlow(Address aRefNav);
-
-/**
  * given an SI class, vector position, nav area, and reference client, determine if the SI can spawn there
  * 
  * @param vPos			position to check
  * @param aNavArea		nav area to check
  * @param iZClass		SI class to check for
  * @param iRefClient	client the check is relative to
- * @param bTryTwice		emulate the logic the game uses for running this a second time with vPos[2] raised by 12.0
+ * @param bTryTwice		emulate the logic the game uses for running this a second time with vPos[2] raised by 18.0
  * 
  * @return bool			true if the SI can spawn there, false otherwise
  * 
@@ -248,6 +245,6 @@ forward void hxOnResetSpecialTimers();
 
 forward void hxOnAreAllSurvivorsInFinaleArea();
 
-// used to monitor the stack. CollectSpawnAreas gets called from many sources, Hard X's code should only run when CollectSpawnAreas is called from GetRandomPZSpawnPosition
+// solely for the forwards
 forward void hxOnGetRandomPZSpawnPosition_Pre();
 forward void hxOnGetRandomPZSpawnPosition_Post();
