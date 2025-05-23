@@ -91,14 +91,9 @@ native int hxGetMapArcValue();
  * @param iDirection	direction pool to use (Values for PreferredSpecialDirection, and similar script variables. -1 (*_NO_PREFERENCE) isn't a pool!!!)
  * @param iZClass		SI class to do some checks for (doesn't really make much of a difference)
  * 
- * @return Address		address of the start of this pool's data
- * 
- * @how to use
- * 	It returns a pointer to the start of a small data structure. 1st 4byte cell is a pointer to the start of the actual nav area list, while the 3rd 4byte cell is the total number of nav areas in that list.
- * 	The intended use is to call this to get a base pool and then apply your own filters as you load the list from the memory addresses, adding navs that pass your filters into an ArrayList or something.
- * 	Then, get a random area from your filtered list and use that one native from left4dhooks (L4D_FindRandomSpot) and check if whatever you want to spawn can actually spawn in this position/nav area with hxCanZombieSpawnHere.
- * 	hxCanZombieSpawnHere with its last param as true will emulate the exact same way the internal code checks if a location is valid. 
- * 	The end result is a very powerful method of getting spawn locations for SI, allowing complete control over the pool of allowed areas
+ * @return Address		It returns a pointer to the start of a small data structure. 
+ * 						1st 4byte cell is a pointer to the start of the actual nav area list, 
+ * 						while the 3rd 4byte cell is the total number of nav areas in that list.
  */
 native Address hxCollectSpawnAreas(int iDirection, int iZClass);
 
@@ -242,8 +237,6 @@ forward void hxOnCollectSpawnAreas_Post(int iDirection, int iZClass, Address aRe
 
 forward void hxOnResetMobTimer();
 forward void hxOnResetSpecialTimers();
-
-forward void hxOnAreAllSurvivorsInFinaleArea();
 
 // solely for the forwards
 forward void hxOnGetRandomPZSpawnPosition_Pre();
