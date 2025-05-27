@@ -471,7 +471,7 @@ public any Native_hxCanZombieSpawnHere(Handle hPlugin, int iNumParams)
 	int iRefClient = GetNativeCell(4);
 	bool bTryTwice = GetNativeCell(5);
 
-	bool bSuccess;
+	bool bSuccess, bElevate;
 	for(int i = 0; i < 2; i++)
 	{
 		switch(g_iOS)
@@ -483,9 +483,15 @@ public any Native_hxCanZombieSpawnHere(Handle hPlugin, int iNumParams)
 
 		// no idea wtf this condition does, but it's in the original code
 		if((LoadFromAddress((aNavArea + view_as<Address>(g_iOffsetCanZombieSpawnHere_RetryCondition)), NumberType_Int32) & 1 << 5) == 0) 
+		{
 			vPos[2] += 18.0; // same value the game uses
+			bElevate = true;
+		}
 		else break;
 	}
+
+	if(bSuccess && bElevate) SetNativeArray(1, vPos, sizeof(vPos));
+
 	return bSuccess;
 }
 
