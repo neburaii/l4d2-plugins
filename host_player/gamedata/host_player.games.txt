@@ -1,0 +1,69 @@
+"Games"
+{
+	"left4dead2"
+	{
+		"Functions"
+		{
+			"HX::CBaseServer::ReplyReservationRequest"
+			{
+				"signature"		"CBaseServer::ReplyReservationRequest"
+				"callconv"		"thiscall"
+				"return"		"int"
+				"this"			"ignore"
+				"arguments"
+				{
+					"a1"
+					{
+						"type"	"int"
+					}
+					"a2"
+					{
+						"type"	"objectptr"
+					}
+				}
+			}
+			"HX::CBaseServer::SetReservationCookie"
+			{
+				"signature"		"CBaseServer::SetReservationCookie"
+				"callconv"		"thiscall"
+				"return"		"int"
+				"this"			"ignore"
+				"arguments"
+				{
+					"a1"
+					{
+						"type"	"int"
+					}
+					"a2"
+					{
+						"type"	"charptr"
+					}
+				}
+			}
+		}
+		"Signatures"
+		{
+			"CBaseServer::ReplyReservationRequest"
+			{
+				"library"	"engine"
+				"linux"		"@_ZN11CBaseServer23ReplyReservationRequestER8netadr_sR7bf_read"
+				"windows"	"\x55\x8B\xEC\x81\xEC\xB4\x06\x00\x00"
+				//* search "ReplyReservationRequest" */
+			}
+			"CBaseServer::SetReservationCookie"
+			{
+				"library"	"engine"
+				"linux"		"@_ZN11CBaseServer20SetReservationCookieEyPKcz"
+				"windows"	"\x55\x8B\xEC\x81\xEC\x08\x01\x00\x00\xA1\x2A\x2A\x2A\x2A\x33\xC5\x89\x45\xFC\x53\x8B\x5D\x10"
+				//* search "-> Reservation cookie %llx:  reason %s" */
+			}
+			"netadr_s::ToString"
+			{
+				"library"	"engine"
+				"linux"		"@_ZNK8netadr_s8ToStringEb"
+				"windows"	"\x55\x8B\xEC\x56\x8B\xF1\x8B\x0D\x2A\x2A\x2A\x2A\x8B\xC1"
+				//* search "%i.%i.%i.%i:%i" */
+			}
+		}
+	}
+}

@@ -41,7 +41,6 @@ Handle	g_hTimerStopEntityRefill = null;
 
 public void OnPluginStart()
 {
-	LoadTranslations("conformed_messages_shared.phrases");
 	LoadTranslations("consistent_ammo.phrases");
 
 	g_cAmmoMax[AMMO_SMG] = FindConVar("ammo_smg_max");
@@ -148,12 +147,12 @@ Action cmdCheckAmmo(int iClient, int iArgs)
 			int iRemaining = L4D_GetReserveAmmo(iClient, iClientWeapon);
 			int iPercent = RoundToCeil((float(iRemaining) / float(g_iCVAmmoMax[iAmmotType])) * 100.0);
 
-			CReplyToCommand(iClient, "%t %t", "tag_source_ammo", "msg_ammo_check_success", iRemaining, g_iCVAmmoMax[iAmmotType], iPercent);
+			CReplyToCommand(iClient, "%t %t", "tag_cmd_ammo", "msg_ammo_check_success", iRemaining, g_iCVAmmoMax[iAmmotType], iPercent);
 			return Plugin_Handled;
 		}		
 	}
 
-	CReplyToCommand(iClient, "%t %t", "tag_source_ammo", "msg_ammo_check_fail");
+	CReplyToCommand(iClient, "%t %t", "tag_cmd_ammo", "msg_ammo_check_fail");
 	return Plugin_Handled;
 }
 

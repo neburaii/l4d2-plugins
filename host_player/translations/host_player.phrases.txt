@@ -1,0 +1,33 @@
+"Phrases"
+{
+	//***************
+	// * COMMAND TAGS
+	// **************/	
+	// /hard
+	"tag_cmd_host"
+	{
+		"en"		"{default}[{green}host{default}]"
+	}
+	
+	//***********
+	// * MESSAGES
+	// ***********/
+	"msg_cmd_host_none"
+	{
+		"en"		"{default}There is {green}no host set."
+	}
+	"msg_cmd_host_invalid"
+	{
+		"en"		"{default}The host is {green}not valid."
+	}
+	"msg_cmd_host_self"
+	{
+		"en"		"{lightgreen}You {olive}are this game's host!"
+	}
+	"msg_cmd_host_other"
+	{
+		// 1 - client of current host
+		"#format"	"{1:N}"
+		"en"		"{blue}{1} {default}is this game's host!."
+	}
+}
