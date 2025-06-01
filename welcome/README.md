@@ -1,0 +1,1 @@
+simple plugin that handles the timing of welcome messages through a forward. I made this because i wanted a simple way to sync messages from multiple plugins
