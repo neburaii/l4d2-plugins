@@ -14,29 +14,16 @@ public Plugin myinfo =
 
 #include <sdktools>
 #include <sdkhooks>
-#include <dhooks>
+#include <ragdoll_hook>
 #include <neb_stocks>
 
-DynamicDetour g_hDetourOnRagdollCreated;
 ConVar g_cQuickerTankDeath;
 
-int	g_iClientRagdoll[MAXPLAYERS_L4D2+1], g_iGettingRagdoll = -1;
+int	g_iClientRagdoll[MAXPLAYERS_L4D2+1];
 bool g_bClientDied[MAXPLAYERS_L4D2+1], g_bCVQuickerTankDeath;
 
 public void OnPluginStart()
 {
-	char sPath[PLATFORM_MAX_PATH];
-	BuildPath(Path_SM, sPath, sizeof(sPath), "gamedata/%s.txt", GAMEDATA);
-	if(!FileExists(sPath)) SetFailState("missing required file: \"%s\"", sPath);
-
-	GameData hGameData = new GameData(GAMEDATA);
-	if(hGameData == null) SetFailState("failed to load gamedata: \"%s\"", GAMEDATA);
-
-	g_hDetourOnRagdollCreated = DynamicDetour.FromConf(hGameData, "HX::CCSPlayer::CreateRagdollEntity");
-	if(g_hDetourOnRagdollCreated == null) SetFailState("failed to create detour for \"HX::CCSPlayer::CreateRagdollEntity\"");
-	g_hDetourOnRagdollCreated.Enable(Hook_Pre, DTR_OnRagdollCreated_Pre);
-	g_hDetourOnRagdollCreated.Enable(Hook_Post, DTR_OnRagdollCreated_Post);
-
 	g_cQuickerTankDeath = CreateConVar("skip_tank_death_animation", "1", "make tank die sooner by skipping its death animation. Has a gameplay side effect of preventing his collision from lingering after death", FCVAR_NOTIFY, true, 0.0, true, 1.0);
 	g_cQuickerTankDeath.AddChangeHook(ConVarChanged_QuickerTankDeath);
 	g_bCVQuickerTankDeath = g_cQuickerTankDeath.BoolValue;
@@ -89,26 +76,13 @@ void event_player_incapacitated(Event hEvent, const char[] sName, bool bDontBroa
 }
 
 // get ragdoll entity so that we can emit sounds from it
-MRESReturn DTR_OnRagdollCreated_Pre(int pThis, DHookReturn hReturn, DHookParam hParams)
+public void OnRagdollCreated_Post(int iPlayer, int iRagdoll, Address aTakeDamageInfo, bool bPluginCreated)
 {
-	if(!nsIsInfected(pThis)) return MRES_Ignored;
-	g_iGettingRagdoll = pThis;
-	return MRES_Ignored;
-}
+	if(bPluginCreated) return;
+	if(!nsIsInfected(iPlayer)) return;
+	if(!nsIsEntityValid(iRagdoll)) return;
 
-public void OnEntityCreated(int iEntity, const char[] sClassname)
-{
-	if(g_iGettingRagdoll == -1) return;
-	if(strcmp(sClassname, "cs_ragdoll") != 0) return;
-
-	g_iClientRagdoll[g_iGettingRagdoll] = iEntity;
-}
-
-// can't for the life of me figure out how to get an entity index from the return value. this 3 step solution works just as well though
-MRESReturn DTR_OnRagdollCreated_Post(int pThis, DHookReturn hReturn, DHookParam hParams)
-{
-	g_iGettingRagdoll = -1;
-	return MRES_Ignored;
+	g_iClientRagdoll[iPlayer] = iRagdoll;
 }
 
 // sounds to match as death sounds

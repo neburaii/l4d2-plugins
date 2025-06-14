@@ -31,7 +31,9 @@ stock char g_sZClassNames[][] =
 	"hunter",
 	"spitter",
 	"jockey",
-	"charger"
+	"charger",
+	"witch",
+	"tank"
 };
 
 /**

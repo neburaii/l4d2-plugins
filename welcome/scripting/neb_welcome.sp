@@ -9,7 +9,7 @@ float	g_fCVWelcomeMessageDelay;
 GlobalForward g_hForwardOnWelcomeMessage;
 
 bool	g_bWelcomeQueued[MAXPLAYERS_L4D2+1];
-int		g_iWelcomeQueuedUID[MAXPLAYERS_L4D2+1], g_iLastUID;
+int		g_iLastUID;
 
 public void OnPluginStart()
 {
@@ -35,24 +35,23 @@ public void OnClientPutInServer(int iClient)
 	if(iUID > g_iLastUID)
 	{
 		g_iLastUID = iUID;
-		if(!IsFakeClient(iClient))
-		{
-			g_iWelcomeQueuedUID[iClient] = iUID;
-			g_bWelcomeQueued[iClient] = true;
-		}
+		if(!IsFakeClient(iClient)) g_bWelcomeQueued[iClient] = true;
 	}
 }
 
 void event_player_team(Event hEvent, const char[] sName, bool bDontBroadcast)
 {
+	if(hEvent.GetBool("disconnect")) return;
+	if(hEvent.GetInt("team") < 2) return;
+
 	int iUID = hEvent.GetInt("userid");
 	int iClient = GetClientOfUserId(iUID);
-	if(!nsIsClientValid(iClient)) return;
+	if(!nsIsClientValid(iClient)) return;	
 
 	if(g_bWelcomeQueued[iClient])
 	{
 		g_bWelcomeQueued[iClient] = false;
-		if(iUID == g_iWelcomeQueuedUID[iClient]) CreateTimer(g_fCVWelcomeMessageDelay, welcomeMessage, iUID, TIMER_FLAG_NO_MAPCHANGE);
+		CreateTimer(g_fCVWelcomeMessageDelay, welcomeMessage, iUID, TIMER_FLAG_NO_MAPCHANGE);
 	}
 }
 
