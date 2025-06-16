@@ -45,6 +45,8 @@ public void OnPluginStart()
 	g_hSDKCreateRagdoll = EndPrepSDKCall();
 	if(g_hSDKCreateRagdoll == null)
 		SetFailState("could not create CCSPlayer::CreateRagdollEntity SDKCall handle!");
+
+	delete hGameData;
 }
 
 /***********************

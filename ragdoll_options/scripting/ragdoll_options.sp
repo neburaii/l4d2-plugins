@@ -6,6 +6,9 @@
 #include <clientprefs>
 #include <neb_stocks>
 
+#define COOKIE_FADE			"ragdoll_fade"
+#define	COOKIE_CI_BEGONE	"ragdoll_ci_begone"
+
 Cookie	g_hCookieEnableFader, g_hCookieEnableCIGone;
 
 int		g_iRagdollFader;
@@ -22,8 +25,8 @@ public Plugin myinfo =
 
 public void OnPluginStart()
 {
-	g_hCookieEnableFader = new Cookie("ragdoll_fade", "default: 0 | 1 or 0 | enable/disable ragdolls fading", CookieAccess_Public);
-	g_hCookieEnableCIGone = new Cookie("ragdoll_ci_begone", "default: 0 | 1 or 0 | enable/disable common infected disappearing instantly on death", CookieAccess_Public);
+	g_hCookieEnableFader = new Cookie(COOKIE_FADE, "default: 0 | 1 or 0 | enable/disable ragdolls fading", CookieAccess_Public);
+	g_hCookieEnableCIGone = new Cookie(COOKIE_CI_BEGONE, "default: 0 | 1 or 0 | enable/disable common infected disappearing instantly on death", CookieAccess_Public);
 
 	AddCommandListener(cmdListenCookies, "sm_cookies");
 
@@ -62,8 +65,8 @@ Action cmdListenCookies(int iClient, const char[] sCommand, int iArgs)
 		int iCase;
 		GetCmdArg(1, sCookie, sizeof(sCookie));
 
-		if(strcmp(sCookie, "ragdoll_fade") == 0) iCase = 1;
-		else if(strcmp(sCookie, "ragdoll_ci_begone") == 0) iCase = 2;
+		if(strcmp(sCookie, COOKIE_FADE) == 0) iCase = 1;
+		else if(strcmp(sCookie, COOKIE_CI_BEGONE) == 0) iCase = 2;
 
 		if(iCase)
 		{

@@ -1,0 +1,31 @@
+"Games"
+{
+	"left4dead2"
+	{
+		"Functions"
+		{
+			"HX::CTerrorGun::DoViewPunch"
+			{
+				"signature"	"CTerrorGun::DoViewPunch"
+				"callconv"	"thiscall"
+				"return"	"int"
+				"this"		"ignore"
+				"arguments"
+				{
+					"a1"
+					{
+						"type"	"cbaseentity"
+					}
+				}
+			}
+		}
+		"Signatures"
+		{
+			"CTerrorGun::DoViewPunch"
+			{
+				"library"	"server"
+				"linux"		"@_ZN10CTerrorGun11DoViewPunchEP13CTerrorPlayer"
+			}
+		}
+	}
+}
