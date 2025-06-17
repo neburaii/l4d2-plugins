@@ -19,7 +19,7 @@ public Plugin myinfo =
 	name = "Ragdoll Options",
 	author = "Neburai",
 	description = "Per-client implementaion of ragdoll fades and commons disappearing instantly on death",
-	version = "1.0",
+	version = "1.1",
 	url = "https://steamcommunity.com/groups/l4d2hardx"
 };
 
@@ -32,7 +32,6 @@ public void OnPluginStart()
 
 	HookEvent("round_freeze_end", event_round_freeze_end);
 	HookEvent("player_death", event_player_death);
-	HookEvent("witch_killed", event_witch_killed);
 
 	// recover data from plugin restart
 	bool bCreateFader;
@@ -158,6 +157,17 @@ public Action SetTransmit_Fader(int iEntity, int iClient)
  * CI-BE-GONE
  ***********/
 
+public void OnEntityCreated(int iEntity, const char[] sClassName)
+{
+	if(isCommonInfected(iEntity))
+	{
+		// it's supposed to happen when their entities are destroyed.
+		// Somehow a common later spawns with same entity index but invisible because it never unhooked.
+		// No errrors from unhooking here - even for ones that aren't hooked - so this works i guess
+		SDKUnhook(iEntity, SDKHook_SetTransmit, SetTransmit_CI_BeGone);
+	}
+}
+
 void event_player_death(Event hEvent, const char[] sName, bool bDontBroadcast)
 {
 	if(nsIsClientValid(GetClientOfUserId(hEvent.GetInt("userid")))) return;
@@ -167,15 +177,6 @@ void event_player_death(Event hEvent, const char[] sName, bool bDontBroadcast)
 
 	SetEntityCollisionGroup(iInfected, 1); // no collision with player
 	SDKHook(iInfected, SDKHook_SetTransmit, SetTransmit_CI_BeGone);
-}
-
-void event_witch_killed(Event hEvent, const char[] sName, bool bDontBroadcast)
-{
-	int iWitch = hEvent.GetInt("witchid");
-	if(!nsIsEntityValid(iWitch)) return;
-
-	SetEntityCollisionGroup(iWitch, 1); // no collision with player
-	SDKHook(iWitch, SDKHook_SetTransmit, SetTransmit_CI_BeGone);
 }
 
 bool isCommonInfected(int iEntity)
