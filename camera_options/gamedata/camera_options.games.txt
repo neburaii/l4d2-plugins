@@ -4,6 +4,14 @@
 	{
 		"Functions"
 		{
+			"HX::CBasePlayer::SetPunchAngle"
+			{
+				"signature"	"CBasePlayer::SetPunchAngle"
+				"callconv"	"thiscall"
+				"return"	"int"
+				"this"		"entity"
+			}
+			
 			"HX::CTerrorGun::DoViewPunch"
 			{
 				"signature"	"CTerrorGun::DoViewPunch"
@@ -18,13 +26,99 @@
 					}
 				}
 			}
+			"HX::CTerrorPlayer::OnTakeDamage_Alive"
+			{
+				"signature"		"CTerrorPlayer::OnTakeDamage_Alive"
+				"callconv"		"thiscall"
+				"return"		"int"
+				"this"			"entity"
+				"arguments"
+				{
+					"a1"
+					{
+						"type"		"objectptr"
+					}
+				}
+			}
+			"HX::CTerrorWeapon::OnHit"
+			{
+				"signature"		"CTerrorWeapon::OnHit"
+				"callconv"		"thiscall"
+				"return"		"int"
+				"this"			"ignore"
+				"arguments"
+				{
+					"a1"
+					{
+						"type"	"objectptr"
+					}
+					"a2"
+					{
+						"type"	"vectorptr"
+					}
+					"a3"
+					{
+						"type"	"bool"
+					}
+				}
+			}		
+			"HX::CCSPlayer::TraceAttack"
+			{
+				"signature"		"CCSPlayer::TraceAttack"
+				"callconv"		"thiscall"
+				"return"		"int"
+				"this"			"entity"
+				"arguments"
+				{
+					"a1"
+					{
+						"type"	"objectptr"
+					}
+					"a2"
+					{
+						"type"	"int"
+					}
+					"a3"
+					{
+						"type" "int"
+					}
+				}
+			}
 		}
 		"Signatures"
 		{
+			"CBasePlayer::SetPunchAngle"
+			{
+				"library"	"server"
+				"linux"		"@_ZN11CBasePlayer13SetPunchAngleERK6QAngle"
+				"windows"	"\x55\x8B\xEC\x51\x53\x8B\x5D\x08\xF3\x0F\x10\x03"
+			}
+
 			"CTerrorGun::DoViewPunch"
 			{
 				"library"	"server"
 				"linux"		"@_ZN10CTerrorGun11DoViewPunchEP13CTerrorPlayer"
+				"windows"	"\x53\x8B\xDC\x83\xEC\x08\x83\xE4\xF0\x83\xC4\x04\x55\x8B\x6B\x04\x89\x6C\x24\x04\x8B\xEC\x83\xEC\x38\x56\x57\xE8\x2A\x2A\x2A\x2A"
+				/* search "HorizKickDir" */
+			}
+			"CTerrorPlayer::OnTakeDamage_Alive"
+			{
+				"library"	"server"
+				"linux"		"@_ZN13CTerrorPlayer18OnTakeDamage_AliveERK15CTakeDamageInfo"
+				"windows"	"\x55\x8B\xEC\x81\xEC\x8C\x00\x00\x00\x53\x8B\x5D\x08"
+				/* search "gascan_pour_interrupted" */
+			}
+			"CTerrorWeapon::OnHit"
+			{
+				"library"	"server"
+				"linux"		"@_ZN13CTerrorWeapon5OnHitER10CGameTraceRK6Vectorb"
+				"windows"	"\x55\x8B\xEC\x81\xEC\xB0\x00\x00\x00\x80\x7D\x10\x00"
+			}
+			"CCSPlayer::TraceAttack"
+			{
+				"library"	"server"
+				"linux"		"@_ZN9CCSPlayer11TraceAttackERK15CTakeDamageInfoRK6VectorP10CGameTrace"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x7C\x8B\x45\x08"
 			}
 		}
 	}

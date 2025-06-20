@@ -159,7 +159,7 @@ public Action SetTransmit_Fader(int iEntity, int iClient)
 
 public void OnEntityCreated(int iEntity, const char[] sClassName)
 {
-	if(isCommonInfected(iEntity))
+	if(nsIsCommonInfected(iEntity))
 	{
 		// it's supposed to happen when their entities are destroyed.
 		// Somehow a common later spawns with same entity index but invisible because it never unhooked.
@@ -173,21 +173,10 @@ void event_player_death(Event hEvent, const char[] sName, bool bDontBroadcast)
 	if(nsIsClientValid(GetClientOfUserId(hEvent.GetInt("userid")))) return;
 
 	int iInfected = hEvent.GetInt("entityid");
-	if(!isCommonInfected(iInfected)) return;
+	if(!nsIsCommonInfected(iInfected)) return;
 
 	SetEntityCollisionGroup(iInfected, 1); // no collision with player
 	SDKHook(iInfected, SDKHook_SetTransmit, SetTransmit_CI_BeGone);
-}
-
-bool isCommonInfected(int iEntity)
-{
-	if(nsIsEntityValid(iEntity))
-	{
-		static char sClassName[64];
-		GetEntityClassname(iEntity, sClassName, sizeof(sClassName));
-		if(strcmp(sClassName, "infected") == 0) return true;
-	}
-	return false;
 }
 
 public Action SetTransmit_CI_BeGone(int iEntity, int iClient)

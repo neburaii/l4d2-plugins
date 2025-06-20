@@ -125,6 +125,23 @@ stock bool nsIsSurvivor(int iClient)
 }
 
 /**
+ * is this entity a common infected?
+ * 
+ * @param iEntity	entity index to check
+ * @return			bool
+ */
+stock bool nsIsCommonInfected(int iEntity)
+{
+	if(nsIsEntityValid(iEntity))
+	{
+		static char sClassName[64];
+		GetEntityClassname(iEntity, sClassName, sizeof(sClassName));
+		if(strcmp(sClassName, "infected") == 0) return true;
+	}
+	return false;
+}
+
+/**
  * get the absolute value of an integer
  * 
  * @param n	input integer
