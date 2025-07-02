@@ -374,6 +374,13 @@
 				/* F6 05 ? ? ? ? 01 75 ? 83 0D ? ? ? ? 01 68 80 00 00 00 6A 00 6A 00 6A FF 6A 04 6A 00 68 ? ? ? ? 68 ? ? ? ? E8 ? ? ? ? A1 ? ? ? ? 68 80 00 00 00 68 ? ? ? ? 50 6A 00 68 ? ? ? ? 68 ? ? ? ? E8 ? ? ? ? 6A 01 68 30 04 00 00 */
 				/* Search "DT_ScavengeProgressDisplay" */
 			}
+			"CNavArea::GetZ"
+			{
+				"library"	"server"
+				"linux"		"@_ZNK8CNavArea4GetZEff"
+				"windows"	"\x55\x8B\xEC\x51\xF3\x0F\x10\x49\x1C"
+				// untested on windows
+			}
 
 			// taken from l4dhooks
 			"ZombieManager::GetRandomPZSpawnPosition" // for forwards to provide best timing for certain code, not to manipulate it in any way though

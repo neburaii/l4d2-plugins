@@ -3,6 +3,8 @@
 #endif
 #define _hardx_hooks_included_
 
+#include <left4dhooks>
+
 // int values for the panic event type argument passed for map invoked panic events
 #define	PANIC_GENERIC	0
 #define	PANIC_CAR_ALARM	1
@@ -132,6 +134,15 @@ native bool hxAreAllSurvivorsInBattlefield();
  * @return int		amount of nav areas added to the list
  */
 native int hxRecursivelyAddAdjacentAreas(ArrayList aList, float fRadius);
+
+/**
+ * given an X and Y coordinate that's within a nav area, it returns the correct Z coordinate
+ * 
+ * @param aNavArea	nav area to check
+ * @param X			X coordinate to check
+ * @param Y			Y coordinate to check
+ */
+native float hxGetNavAreaZ(Address aNavArea, float X, float Y);
 
 ////////////////////////////////////////
 // FORWARDS

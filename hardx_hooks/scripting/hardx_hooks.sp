@@ -6,6 +6,7 @@
 #include <dhooks>
 #include <left4dhooks> // used to get some pointers
 #include <neb_stocks>
+#include <multicolors>
 
 ConVar			g_cAdjacentFlowThreshold;
 float			g_fCVAdjacentFlowThreshold;
@@ -27,7 +28,7 @@ GlobalForward	g_hForwardOnMapInvokedPanicEvent_Pre, g_hForwardOnMapInvokedPanicE
 				g_hForwardOnResetMobTimer, g_hForwardOnResetSpecialTimers;
 
 Handle			g_hSDKResetNonVirtual, g_hSDKEndLocalScript, g_hSDKIntensityReset, g_hSDKGetMapArcValue, g_hSDKCollectSpawnAreas,
-				g_hSDKIntensityIncrease, g_hSDKCanZombieSpawnHere, g_hSDKAreAllSurvivorsInBattlefield;
+				g_hSDKIntensityIncrease, g_hSDKCanZombieSpawnHere, g_hSDKAreAllSurvivorsInBattlefield, g_hSDKGetNavAreaZ;
 
 int				g_iOffsetIntensity, g_iOffsetCanZombieSpawnHere_RetryCondition;
 OS_Type			g_iOS;
@@ -54,7 +55,7 @@ public APLRes AskPluginLoad2(Handle hMyself, bool bLate, char[] sError, int iErr
 
 	CreateNative("hxAreAllSurvivorsInBattlefield", Native_hxAreAllSurvivorsInBattlefield);
 
-	CreateNative("hxRecursivelyAddAdjacentAreas", Native_hxRecursivelyAddAdjacentAreas);
+	CreateNative("hxGetNavAreaZ", Native_hxGetNavAreaZ);
 
 	return APLRes_Success;
 }
@@ -260,6 +261,16 @@ public void OnPluginStart()
 	if(g_hSDKAreAllSurvivorsInBattlefield == null)
 		SetFailState("could not create CDirectorScriptedEventManager::AreAllSurvivorsInBattlefield SDKCall handle!");
 
+	StartPrepSDKCall(SDKCall_Raw);
+	if(!PrepSDKCall_SetFromConf(hGameData, SDKConf_Signature, "CNavArea::GetZ"))
+		SetFailState("could not load CNavArea::GetZ signature!!");
+	PrepSDKCall_AddParameter(SDKType_Float, SDKPass_Plain);
+	PrepSDKCall_AddParameter(SDKType_Float, SDKPass_Plain);
+	PrepSDKCall_SetReturnInfo(SDKType_Float, SDKPass_Plain);
+	g_hSDKGetNavAreaZ = EndPrepSDKCall();
+	if(g_hSDKGetNavAreaZ == null)
+		SetFailState("could not create CNavArea::GetZ SDKCall handle!");
+
 
 	g_iOffsetIntensity = hGameData.GetOffset("Intensity");
 	g_iOffsetCanZombieSpawnHere_RetryCondition = hGameData.GetOffset("CanZombieSpawnHere_RetryCondition");
@@ -394,74 +405,6 @@ public any Native_hxGetHighestAdjacentFlow(Handle hPlugin, int iNumParams)
 	return aHighestNav;
 }
 
-int	g_iRecursivelyAddAdjacentAreas_WriteCount;
-int g_iRecursivelyAddAdjacentAreas_Stack;
-public any Native_hxRecursivelyAddAdjacentAreas(Handle hPlugin, int iNumParams)
-{
-	ArrayList aList = GetNativeCell(1);
-	float fRadius = GetNativeCell(2);
-	Address	aLoadedNav;
-	int iMax = aList.Length;
-	float vStart[3];
-	g_iRecursivelyAddAdjacentAreas_WriteCount = 0;
-	g_iRecursivelyAddAdjacentAreas_Stack = 0;
-
-	for(int i = 0; i < iMax; i++)
-	{
-		aLoadedNav = aList.Get(i);
-		L4D_GetNavAreaCenter(aLoadedNav, vStart);
-
-		g_iRecursivelyAddAdjacentAreas_Stack++;
-		recursivelyAddAdjacentAreas(aLoadedNav, aLoadedNav, aList, vStart, fRadius);
-		g_iRecursivelyAddAdjacentAreas_Stack--;
-	}
-
-	return g_iRecursivelyAddAdjacentAreas_WriteCount;
-}
-
-void recursivelyAddAdjacentAreas(Address aStart, Address aLast, ArrayList aList, float vStart[3], float fRadius)
-{
-	if(g_iRecursivelyAddAdjacentAreas_Stack > 255)
-	{
-		//PrintToServer("[DEBUG] [recursivelyAddAdjacentAreas] Stack overflow!");
-		return; // prevent stack overflow
-	}
-
-	Address aAdjacentList;
-	Address aLoaded;
-	int iTotal;
-	float vLoaded[3];
-	float fLastFlow, fLoadedFlow;
-	fLastFlow = L4D2Direct_GetTerrorNavAreaFlow(aLast);
-
-	for(int dir = 0; dir < 4; dir++)
-	{
-		aAdjacentList = LoadFromAddress(aLast + view_as<Address>(dir*4 + 88), NumberType_Int32);
-		iTotal = LoadFromAddress(aAdjacentList, NumberType_Int32);
-
-		if(iTotal > 0)
-		{
-			for(int i = 0; i < iTotal; i++)
-			{
-				aLoaded = LoadFromAddress(aAdjacentList + view_as<Address>((2*i + 1)*4), NumberType_Int32);
-
-				fLoadedFlow = L4D2Direct_GetTerrorNavAreaFlow(aLoaded);
-				if(FloatAbs(fLoadedFlow - fLastFlow) > g_fCVAdjacentFlowThreshold) continue; // likely not a "walkable" connection
-
-				L4D_GetNavAreaCenter(aLoaded, vLoaded);
-				if(aList.FindValue(aLoaded) == -1 && GetVectorDistance(vStart, vLoaded) < fRadius)
-				{
-					aList.Push(aLoaded);
-					g_iRecursivelyAddAdjacentAreas_WriteCount++;
-					g_iRecursivelyAddAdjacentAreas_Stack++;
-					recursivelyAddAdjacentAreas(aStart, aLoaded, aList, vStart, fRadius);
-					g_iRecursivelyAddAdjacentAreas_Stack--;
-				}
-			}
-		}
-	}
-}
-
 public any Native_hxCanZombieSpawnHere(Handle hPlugin, int iNumParams)
 {
 	float vPos[3];
@@ -482,7 +425,7 @@ public any Native_hxCanZombieSpawnHere(Handle hPlugin, int iNumParams)
 		if(!bTryTwice || bSuccess || i) break;
 
 		// no idea wtf this condition does, but it's in the original code
-		if((LoadFromAddress((aNavArea + view_as<Address>(g_iOffsetCanZombieSpawnHere_RetryCondition)), NumberType_Int32) & 1 << 5) == 0) 
+		if((LoadFromAddress((aNavArea + view_as<Address>(g_iOffsetCanZombieSpawnHere_RetryCondition)), NumberType_Int32) & (1 << 5)) == 0) 
 		{
 			vPos[2] += 18.0; // same value the game uses
 			bElevate = true;
@@ -493,6 +436,15 @@ public any Native_hxCanZombieSpawnHere(Handle hPlugin, int iNumParams)
 	if(bSuccess && bElevate) SetNativeArray(1, vPos, sizeof(vPos));
 
 	return bSuccess;
+}
+
+public any Native_hxGetNavAreaZ(Handle hPlugin, int iNumParams)
+{
+	Address aNavArea = GetNativeCell(1);
+	float X = GetNativeCell(2);
+	float Y = GetNativeCell(3);
+
+	return SDKCall(g_hSDKGetNavAreaZ, aNavArea, X, Y);
 }
 
 /***********

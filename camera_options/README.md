@@ -12,6 +12,7 @@ The ConVars:
 * **camera_block_punch_ci**
 * **camera_block_punch_si**
 * **camera_block_punch_shoved**
+
 all are 0 by default. Set to 1 to block that source of camera punch
 
 ## COMPLETELY UNTESTED ON WINDOWS!!
