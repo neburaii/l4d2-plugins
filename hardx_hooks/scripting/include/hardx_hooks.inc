@@ -126,16 +126,6 @@ native bool hxCanZombieSpawnHere(float vPos[3], Address aNavArea, int iZClass, i
 native bool hxAreAllSurvivorsInBattlefield();
 
 /**
- * Pass it an ArrayList of nav areas, and it will expand it to include all adjacent areas within the given radius
- * 
- * @param aList		ArrayList of nav areas to expand
- * @param fRadius	radius to expand to
- * 
- * @return int		amount of nav areas added to the list
- */
-native int hxRecursivelyAddAdjacentAreas(ArrayList aList, float fRadius);
-
-/**
  * given an X and Y coordinate that's within a nav area, it returns the correct Z coordinate
  * 
  * @param aNavArea	nav area to check
