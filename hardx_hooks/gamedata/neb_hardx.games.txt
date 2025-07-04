@@ -232,12 +232,6 @@
 			{
 				"windows"	"464"
 			}
-
-			"CanZombieSpawnHere_RetryCondition"
-			{
-				"linux"		"87"
-				"windows"	"84"
-			}
 		}
 
 		"Signatures"

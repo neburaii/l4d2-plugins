@@ -29,7 +29,7 @@ GlobalForward	g_hForwardOnMapInvokedPanicEvent_Pre, g_hForwardOnMapInvokedPanicE
 Handle			g_hSDKResetNonVirtual, g_hSDKEndLocalScript, g_hSDKIntensityReset, g_hSDKGetMapArcValue, g_hSDKCollectSpawnAreas,
 				g_hSDKIntensityIncrease, g_hSDKCanZombieSpawnHere, g_hSDKAreAllSurvivorsInBattlefield, g_hSDKGetNavAreaZ;
 
-int				g_iOffsetIntensity, g_iOffsetCanZombieSpawnHere_RetryCondition;
+int				g_iOffsetIntensity;
 OS_Type			g_iOS;
 
 char			g_sCurrentVscript[128];
@@ -270,10 +270,7 @@ public void OnPluginStart()
 	if(g_hSDKGetNavAreaZ == null)
 		SetFailState("could not create CNavArea::GetZ SDKCall handle!");
 
-
 	g_iOffsetIntensity = hGameData.GetOffset("Intensity");
-	g_iOffsetCanZombieSpawnHere_RetryCondition = hGameData.GetOffset("CanZombieSpawnHere_RetryCondition");
-	PrintToServer("CanZombieSpawnHere Retry Condition Offset: %i", g_iOffsetCanZombieSpawnHere_RetryCondition);
 
 	delete hGameData;
 
@@ -423,8 +420,7 @@ public any Native_hxCanZombieSpawnHere(Handle hPlugin, int iNumParams)
 		}
 		if(!bTryTwice || bSuccess || i) break;
 
-		// no idea wtf this condition does, but it's in the original code
-		if((LoadFromAddress((aNavArea + view_as<Address>(g_iOffsetCanZombieSpawnHere_RetryCondition)), NumberType_Int32) & (1 << 5)) == 0) 
+		if((L4D_GetNavArea_AttributeFlags(aNavArea) & NAV_BASE_MOSTLY_FLAT) == 0)
 		{
 			vPos[2] += 18.0; // same value the game uses
 			bElevate = true;
