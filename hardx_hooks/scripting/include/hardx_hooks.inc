@@ -3,8 +3,6 @@
 #endif
 #define _hardx_hooks_included_
 
-#include <left4dhooks>
-
 // int values for the panic event type argument passed for map invoked panic events
 #define	PANIC_GENERIC	0
 #define	PANIC_CAR_ALARM	1
