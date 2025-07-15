@@ -13,7 +13,6 @@ public Plugin myinfo =
 };
 
 #include <dhooks>
-#include <neb_stocks>
 
 Handle g_hSDKShowMOTD;
 DynamicDetour g_hDetourKeyValueSetString, g_hDetourShowMOTD;
