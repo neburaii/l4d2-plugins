@@ -1,0 +1,47 @@
+"Games"
+{
+	"left4dead2"
+	{
+		"Functions"
+		{
+			"HX::KeyValues::SetString"
+			{
+				"signature"	"KeyValues::SetString"
+				"callconv"	"thiscall"
+				"return"	"int"
+				"this"		"ignore"
+				"arguments"
+				{
+					"a1"
+					{
+						"type"	"charptr"
+					}
+					"a2"
+					{
+						"type"	"charptr"
+					}
+				}
+			}
+			"HX::CCSPlayer::ShowMOTD"
+			{
+				"signature"	"CCSPlayer::ShowMOTD"
+				"callconv"	"thiscall"
+				"return"	"int"
+				"this"		"ignore"
+			}
+		}
+		"Signatures"
+		{
+			"KeyValues::SetString"
+			{
+				"library"	"server"
+				"linux"		"@_ZN9KeyValues9SetStringEPKcS1_"
+			}
+			"CCSPlayer::ShowMOTD"
+			{
+				"library"	"server"
+				"linux"		"@_ZN9CCSPlayer8ShowMOTDEv"
+			}
+		}
+	}
+}

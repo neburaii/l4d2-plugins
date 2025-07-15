@@ -27,7 +27,8 @@ GlobalForward	g_hForwardOnMapInvokedPanicEvent_Pre, g_hForwardOnMapInvokedPanicE
 				g_hForwardOnResetMobTimer, g_hForwardOnResetSpecialTimers;
 
 Handle			g_hSDKResetNonVirtual, g_hSDKEndLocalScript, g_hSDKIntensityReset, g_hSDKGetMapArcValue, g_hSDKCollectSpawnAreas,
-				g_hSDKIntensityIncrease, g_hSDKCanZombieSpawnHere, g_hSDKAreAllSurvivorsInBattlefield, g_hSDKGetNavAreaZ;
+				g_hSDKIntensityIncrease, g_hSDKCanZombieSpawnHere, g_hSDKAreAllSurvivorsInBattlefield, g_hSDKGetNavAreaZ,
+				g_hSDKShouldLockTempo;
 
 int				g_iOffsetIntensity;
 OS_Type			g_iOS;
@@ -55,6 +56,8 @@ public APLRes AskPluginLoad2(Handle hMyself, bool bLate, char[] sError, int iErr
 	CreateNative("hxAreAllSurvivorsInBattlefield", Native_hxAreAllSurvivorsInBattlefield);
 
 	CreateNative("hxGetNavAreaZ", Native_hxGetNavAreaZ);
+
+	CreateNative("hxGetLockTempo", Native_hxGetLockTempo);
 
 	return APLRes_Success;
 }
@@ -270,6 +273,14 @@ public void OnPluginStart()
 	if(g_hSDKGetNavAreaZ == null)
 		SetFailState("could not create CNavArea::GetZ SDKCall handle!");
 
+	StartPrepSDKCall(SDKCall_Raw);
+	if(!PrepSDKCall_SetFromConf(hGameData, SDKConf_Signature, "CDirector::ShouldLockTempo"))
+		SetFailState("could not load CDirector::ShouldLockTempo signature!!");
+	PrepSDKCall_SetReturnInfo(SDKType_Bool, SDKPass_Plain);
+	g_hSDKShouldLockTempo = EndPrepSDKCall();
+	if(g_hSDKShouldLockTempo == null)
+		SetFailState("could not create CDirector::ShouldLockTempo SDKCall handle!");
+
 	g_iOffsetIntensity = hGameData.GetOffset("Intensity");
 
 	delete hGameData;
@@ -440,6 +451,11 @@ public any Native_hxGetNavAreaZ(Handle hPlugin, int iNumParams)
 	float Y = GetNativeCell(3);
 
 	return SDKCall(g_hSDKGetNavAreaZ, aNavArea, X, Y);
+}
+
+public any Native_hxGetLockTempo(Handle hPlugin, int iNumParams)
+{
+	return SDKCall(g_hSDKShouldLockTempo, L4D_GetPointer(POINTER_DIRECTOR));
 }
 
 /***********

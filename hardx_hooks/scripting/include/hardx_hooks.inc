@@ -132,6 +132,13 @@ native bool hxAreAllSurvivorsInBattlefield();
  */
 native float hxGetNavAreaZ(Address aNavArea, float X, float Y);
 
+/**
+ * returns if tempo should be locked or not. if LockTempo director var is set, it just returns that. Otherwise it returns something based on several conditions
+ * 
+ * @return bool		true if tempo is locked, false otherwise
+ */
+native bool hxGetLockTempo();
+
 ////////////////////////////////////////
 // FORWARDS
 ////////////////////////////////////////
