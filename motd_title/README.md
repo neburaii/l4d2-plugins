@@ -1,3 +1,5 @@
+Change the title as seen in this screenshot
+![motd_title](image/motd_title.png)
 
 ## RANT
 i originally went into this with the goal of modifying the text that appears above/below the hostfile banner. It would be so cool to remove that text and have just the banner itself. Manually invoke it to display, have it display a different image depending on what a plugin decides. Wouldn't that be so cool? Like have a notification system for things like "tank has spawned" etc but done in a much more visually pleasing way, not requiring the clients install any mods.
