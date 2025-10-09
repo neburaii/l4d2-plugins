@@ -29,7 +29,40 @@
 				"return"	"int"
 				"this"		"ignore"
 			}
+			"HX::SendUserMessage"
+			{
+				"offset"	"SendUserMessage"
+				"callconv"	"thiscall"
+				"hooktype"	"entity"
+				"return"	"void"
+				"this"		"entity"
+
+				"arguments"
+				{
+					"sMessage"
+					{
+						"type"	"charptr"
+					}
+					"a2"
+					{
+						"type"	"int"
+					}
+					"a3"
+					{
+						"type"	"int"
+					}
+				}
+			}
 		}
+
+		"Offsets"
+		{
+			"SendUserMessage"
+			{
+				"linux"	"352"
+			}
+		}
+
 		"Signatures"
 		{
 			"KeyValues::SetString"

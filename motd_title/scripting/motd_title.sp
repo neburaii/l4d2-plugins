@@ -3,12 +3,12 @@
 
 #define GAMEDATA "motd_title.games"
 
-public Plugin myinfo = 
+public Plugin myinfo =
 {
 	name = "MOTD Title",
 	author = "Neburai",
 	description = "Provides ConVar for modifying the \"Message of the day\" title",
-	version = "1.0",
+	version = "1.1",
 	url = "https://github.com/neburaii/l4d2-plugins/motd_title"
 };
 
@@ -16,7 +16,8 @@ public Plugin myinfo =
 
 Handle g_hSDKShowMOTD;
 DynamicDetour g_hDetourKeyValueSetString, g_hDetourShowMOTD;
-bool g_bIsMOTD;
+DynamicHook g_hHookSendUserMessage;
+bool g_bIsMOTD, g_bFromServer;
 
 ConVar g_cMOTDTitle;
 char g_sCVMOTDTitle[256];
@@ -47,6 +48,9 @@ public void OnPluginStart()
 	if(g_hSDKShowMOTD == null)
 		SetFailState("could not create CCSPlayer::ShowMOTD SDKCall handle!");
 
+	g_hHookSendUserMessage = DynamicHook.FromConf(hGameData, "HX::SendUserMessage");
+	if(g_hHookSendUserMessage == null) SetFailState("could not create HX::SendUserMessage dhook");
+
 	delete hGameData;
 
 	HookUserMessage(GetUserMessageId("VGUIMenu"), umHook, true);
@@ -57,9 +61,27 @@ public void OnPluginStart()
 	g_cMOTDTitle.GetString(g_sCVMOTDTitle, sizeof(g_sCVMOTDTitle));
 }
 
+public void OnClientPutInServer(int iClient)
+{
+	g_hHookSendUserMessage.HookEntity(Hook_Pre, iClient, DHOOK_SendUserMessage_Pre);
+	g_hHookSendUserMessage.HookEntity(Hook_Post, iClient, DHOOK_SendUserMessage_Post);
+}
+
 void updateConVar(ConVar cConvar, const char[] sOldValue, const char[] sNewValue)
 {
 	g_cMOTDTitle.GetString(g_sCVMOTDTitle, sizeof(g_sCVMOTDTitle));
+}
+
+MRESReturn DHOOK_SendUserMessage_Pre(int pThis, DHookParam hParams)
+{
+	g_bFromServer = true;
+	return MRES_Ignored;
+}
+
+MRESReturn DHOOK_SendUserMessage_Post(int pThis, DHookParam hParams)
+{
+	g_bFromServer = false;
+	return MRES_Ignored;
 }
 
 MRESReturn DTR_ShowMOTD_Pre(DHookReturn hReturn, DHookParam hParams)
@@ -79,18 +101,18 @@ Action umHook(UserMsg umID, BfRead bfMsg, const int[] iPlayers, int iTotalPlayer
 	static char sMsg[32];
 
 	// we need MOTD to display via CCSPlayer::ShowMOTD so that the KeyValues data containing our title change is passed
-	if(!g_bIsMOTD)
+	if(!g_bFromServer)
 	{
 		bfMsg.ReadString(sMsg, sizeof(sMsg));
 		if(strcmp(sMsg, "info") == 0)
-		{			
+		{
 			if(iTotalPlayers > 0)
 			{
 				for(int i = 0; i < iTotalPlayers; i++)
 				{
 					SDKCall(g_hSDKShowMOTD, iPlayers[i]);
 				}
-			}			
+			}
 			return Plugin_Handled;
 		}
 	}
