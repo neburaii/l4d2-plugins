@@ -1251,8 +1251,6 @@ forward Action OnGetFreeClient(NetAdrType adrType, int ipv4, int port);
  */
 forward void OnGetFreeClient_Post(NetAdrType adrType, int ipv4, int port, int client, bool handled);
 
-forward void OnServerShutdown();
-
 /***********
  * Natives
  ***********/
