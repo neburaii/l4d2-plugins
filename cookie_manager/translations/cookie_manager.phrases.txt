@@ -1,0 +1,359 @@
+"Phrases"
+{
+	// tags
+	"#tag_cmd_set"
+	{
+		"en"	"{default}[{olive}/set{default}]"
+	}
+
+	"#tag_cmd_cookies"
+	{
+		"en"	"{default}[{olive}/cookies{default}]"
+	}
+
+	// command responses - problem
+	"#usage_hint"
+	{
+		"en"	"{default}Usage: {lightgreen}/set <name> <value>"
+	}
+
+	"#error_cookie_not_found"
+	{
+		// 1	cookie name
+		"#format"	"{1:s}"
+
+		"en"		"{green}Could not find cookie {lightgreen}{1}"
+		"zho"		"{green}未發現快取設定 {lightgreen}{1}"
+		"sv"		"{green}Kunde inte hitta cookie {lightgreen}{1}"
+		"ro"		"{green}Nu am putut gasi cookie {lightgreen}{1}"
+		"de"		"{green}Cookie {lightgreen}{1} {green}konnte nicht gefunden werden"
+		"jp"		"{green}クッキー {lightgreen}{1} {green}は見つかりませんでした。"
+		"sk"		"{green}Nebolo možné nájsť cookie {lightgreen}{1}"
+		"da"		"{green}Kunne ikke finde cookien  {lightgreen}{1}"
+		"chi"		"{green}无法找到 cookie {lightgreen}{1}"
+		"vi"		"{green}Không tìm thấy cookie {lightgreen}{1}"
+		"pt_p"		"{green}Não foi possível encontrar o cookie {lightgreen}{1}"
+		"nl"		"{green}Kan geen cookie {lightgreen}{1} {green}vinden"
+		"it"		"{green}Impossibile trovare il cookie {lightgreen}{1}  "
+		"ar"		"{green}لم يتم العثور على الكوكي {lightgreen}{1}"
+		"bg"		"{green}Бисквитата \"{lightgreen}{1} {green}не може да бъде намерена"
+		"cze"		"{green}Nelze nalezt cookie {lightgreen}{1}"
+		"pt"		"{green}Não foi possível encontrar o cookie {lightgreen}{1}"
+		"ru"		"{green}Не удалось найти сохраненное значение {lightgreen}{1}"
+		"hu"		"{lightgreen}{1} {green}nem létező süti"
+		"lv"		"{green}Nevar atrast {lightgreen}{1} {green}cepumiņu"
+		"las"		"{green}Cookie {lightgreen}{1} {green}no encontrada"
+		"ua"		"{green}Не вдалося знайти збережене значення {lightgreen}{1}"
+		"pl"		"{green}Nie można znaleźć ciasteczka {lightgreen}{1}"
+		"lt"		"{green}Nepavyko rasti sausainėlio {lightgreen}{1}"
+		"ko"		"{green}쿠키 {lightgreen}{1} {green}을 찾을 수 없습니다"
+		"fr"		"{green}Impossible de trouver le cookie {lightgreen}{1}"
+		"tr"		"{lightgreen}{1}  {green}adlı kurabiye bulunamadı"
+		"fi"		"{green}Evästettä {lightgreen}{1} {green}ei löytynyt"
+		"el"		"{green}Δεν μπορεί να βρεθεί το cookie {lightgreen}{1}"
+		"es"		"{green}Cookie {lightgreen}{1} {green}no encontrada"
+	}
+
+	"#error_cookie_protected"
+	{
+		// 1	cookie name
+		"#format"	"{1:s}"
+
+		"en"		"{green}Cannot change the value of protected cookie {lightgreen}{1}"
+		"zho"		"{green}無法更改受保護快取設定 {lightgreen}{1} {green}的值"
+		"sv"		"{green}Kan inte ändra värdet av den skyddade cookien {lightgreen}{1}"
+		"ro"		"{green}Nu poate fi schimbata valoarea unui cookie protejat {lightgreen}{1}"
+		"de"		"{green}Der Wert des geschützten Cookie {lightgreen}{1} {green}kann nicht geändert werden "
+		"jp"		"{green}保護されたクッキー {lightgreen}{1} {green}の値を変更する事は出来ません。"
+		"sk"		"{green}Nemožno zmeniť hodnotu chránenej cookie {lightgreen}{1}"
+		"da"		"{green}Kan ikke ændre værdien af den beskyttede cookie {lightgreen}{1}"
+		"chi"		"{green}无法更改受保护 cookie {lightgreen}{1} {green}的值"
+		"vi"		"{green}Không thể thay đổi giá trị của cookie đã được bảo vệ {lightgreen}{1}"
+		"pt_p"		"{green}Não é possível alterar o valor do cookie protegido {lightgreen}{1} "
+		"nl"		"{green}Kan de waarde van de beveiligde cookie {lightgreen}{1} {green}niet aanpassen"
+		"it"		"{green}Impossibile modificare il valore del cookie protetto {lightgreen}{1}  "
+		"ar"		"{green}لا يمكن تغيروحدة الكوكي المحمية {lightgreen}{1}"
+		"bg"		"{green}Стойността на защитената бисквита {lightgreen}{1} {green}не може да бъде променена"
+		"cze"		"{green}Nelze zmenit hodnotu chranene cookie {lightgreen}{1}"
+		"pt"		"{green}Não é possível alterar o valor do cookie protegido {lightgreen}{1}"
+		"ru"		"{green}Невозможно изменить защищенное значение {lightgreen}{1}"
+		"hu"		"{green}Védett sütinek nem lehet megváltoztatni az értékét! {lightgreen}{1}"
+		"lv"		"{green}Nevar nomainīt aizsargātā {lightgreen}{1} {green}cepumiņa vērtību"
+		"las"		"{green}No se puede cambiar el valor de una cookie protegida {lightgreen}{1}"
+		"ua"		"{green}Неможливо змінити захищене значення {lightgreen}{1}"
+		"pl"		"{green}Nie można zmienić wartości zabezpieczonego ciasteczka {lightgreen}{1}"
+		"lt"		"{green}Negalima pakeisti apsaugoto sausainėlio {lightgreen}{1} {green}reikšmės"
+		"ko"		"{green}보호된 쿠키 {lightgreen}{1} {green}의 값을 바꿀 수 없습니다"
+		"fr"		"{green}Impossible de changer la valeur de {lightgreen}{1} {green}(cookie protégé)"
+		"tr"		"{green}Korumalı kurabiye {lightgreen}{1}{green}in değeri değiştirilemez"
+		"fi"		"{green}Suojatun evästeen {lightgreen}{1} {green}arvoa ei voida muuttaa"
+		"el"		"{green}Δεν γίνεται να αλλάξει η τιμή ενός προστατευμένου cookie {lightgreen}{1}"
+		"es"		"{green}No se puede cambiar el valor de una cookie protegida {lightgreen}{1}"
+	}
+
+	// command responses - no problem
+	"#cmd_set_success"
+	{
+		// 1	cookie name
+		// 2	cookie value
+		"#format"	"{1:s},{2:s}"
+
+		"en"		"{default}Changed the value of cookie {lightgreen}{1} {default}to {olive}{2}"
+		"zho"		"{default}快取設定值已由 {lightgreen}{1} {default}改為 {olive}{2}"
+		"sv"		"{default}Ändrade värdet av cookie {lightgreen}{1} {default}till {olive}{2}"
+		"ro"		"{default}A fost schimbata valoarea pentru cookie din {lightgreen}{1} {default}in {olive}{2}"
+		"de"		"{default}Wert des Cookies wurde von {lightgreen}{1} {default}zu {olive}{2} {default}geändert "
+		"jp"		"{default}クッキー {lightgreen}{1} {default}の値を{olive}{2}{default}に変更しました。"
+		"sk"		"{default}Zmenená hodnota cookie {lightgreen}{1} {default}na {olive}{2}"
+		"da"		"{default}Ændrede værdien af cookien {lightgreen}{1} {default}til {olive}{2}"
+		"chi"		"{default}更改 cookie {lightgreen}{1} {default}的值为 {olive}{2}"
+		"vi"		"{default}Đã thay đổi giá trị của cookie {lightgreen}{1} {default}sang {olive}{2}"
+		"pt_p"		"{default}O valor do cookie foi alterado de {lightgreen}{1} {default}para {olive}{2} "
+		"nl"		"{default}De waarde van cookie {lightgreen}{1} {default}is naar {olive}{2} {default}veranderd"
+		"it"		"{default}Valore del cookie {lightgreen}{1} {default}modificato in {olive}{2}"
+		"ar"		"{default}تم تغيير الكوكيز من {lightgreen}{1} {default}إلى {olive}{2}"
+		"bg"		"{default}Стойността на бисквитата е сменена от {lightgreen}{1} {default}на {olive}{2}"
+		"cze"		"{default}Zmena hodnoty cookie {lightgreen}{1} {default}na {olive}{2}"
+		"pt"		"{default}Alterou o valor do cookie {lightgreen}{1} {default}para {olive}{2}"
+		"ru"		"{default}Изменение сохраненного значения {lightgreen}{1} {default}на {olive}{2}"
+		"hu"		"{default}Süti értéke módositva {lightgreen}{1} {default}-ről {olive}{2} {default}-re"
+		"lv"		"{default}Nomainīja {lightgreen}{1} {default}cepumiņa vērtību uz {olive}{2}"
+		"las"		"{default}Cambiado el valor de cookie {lightgreen}{1} {default}a {olive}{2}"
+		"ua"		"{default}Зміна збереженого значення {lightgreen}{1} {default}на {olive}{2}"
+		"pl"		"{default}Zmieniono wartość ciasteczka {lightgreen}{1} {default}na {olive}{2}"
+		"lt"		"{default}Pakeistas sausainėlio nustatymas iš {lightgreen}{1} {default}į {olive}{2}"
+		"ko"		"{default}쿠키 {lightgreen}{1} {default}의 값을 {olive}{2} {default}로 바꾸었습니다"
+		"fr"		"{default} Valeur du cookie changée de {lightgreen}{1} {default}à {olive}{2} "
+		"tr"		"{lightgreen}{1} {default}adlı kurabiyenin değeri {olive}{2} {default}olarak değiştirildi"
+		"fi"		"{default}Vaihda evästeen {lightgreen}{1} {default}arvoksi {olive}{2}"
+		"el"		"{default}Άλλαξε την τιμή του cookie από {lightgreen}{1} {default}σε {olive}{2}"
+		"es"		"{default}Cambiado el valor de cookie {lightgreen}{1} {default}a {olive}{2}"
+	}
+
+	"#printing_cookie_list"
+	{
+		"en"	"Printing cookie list to console"
+		"zho"	"在控制台中顯示快取設定列表"
+		"fr"	"Liste de(s) cookie(s) affichée dans la console"
+		"vi"	"Đang viết danh sách cookie vào bảng điều khiển"
+		"sk"	"Tlačenie zoznamu cookies do konzoly"
+		"chi"	"打印 cookie 列表至控制台"
+		"fi"	"Kirjoitetaan evästeluetteloa konsoliin"
+		"ar"	"يتم عرض لائحة الكوكيز إلى وحدة التحكم"
+		"es"	"Mostrando lista de cookies en consola"
+		"bg"	"Извеждане на списъка с бисквитите в конзолата"
+		"ua"	"Виведення списку збережених значень в консоль"
+		"ru"	"Вывод списка сохраненных значений в консоль"
+		"nl"	"Cookie lijst laten zien naar de console"
+		"da"	"Udskriver cookie listen til konsollen"
+		"el"	"Προβολή λίστας cookie στην κονσόλα"
+		"las"	"Mostrando lista de cookies en consola"
+		"lv"	"Izraksta cepumiņu sarakstu konsolē"
+		"lt"	"Atvaizduoti sausainėlių sąrašą konsolėje"
+		"pt"	"Listando cookies no console"
+		"cze"	"Vypisuji seznam cookie do konzole"
+		"tr"	"Kurabiye listesi konsola görüntüleniyor"
+		"ro"	"Printeaza lista cookie in consola"
+		"de"	"Ausgabe der Cookie-Liste in der Konsole "
+		"jp"	"クッキーリストをコンソールに表示中。"
+		"ko"	"콘솔에 쿠키 목록을 출력합니다"
+		"pl"	"Wyświetlanie listy ciasteczek w konsoli"
+		"pt_p"	"A listar cookies na consola"
+		"sv"	"Skriver ut cookielistan till consolen"
+		"it"	"Stampa della lista dei cookie nella console"
+		"hu"	"Sütik listájának megjelenitése konzolba"
+	}
+
+	"#cookie_value"
+	{
+		// 1	internal cookie name
+		// 2	value
+		"#format"	"{1:s},{2:s}"
+
+		"en"		"{default}{1}'s value is {lightgreen}{2}"
+		"zho"		"{default}{1} 的值為 {lightgreen}{2} "
+		"ar"		"{default}{1} قيمة هي {lightgreen}{2}"
+		"pl"		"{default}{1} posiada wartość {lightgreen}{2}"
+		"bg"		"{default}Стойността на {1} е {lightgreen}{2}"
+		"hu"		"{default}{1} süti értéke {lightgreen}{2}"
+		"cze"		"{default}Hodnota hrace {1} je {lightgreen}{2}"
+		"nl"		"{default}{1} zijn waarde is {lightgreen}{2}"
+		"chi"		"{default}{1} 的值为 {lightgreen}{2}"
+		"fr"		"{default}La valeur du Cookie {1} est {lightgreen}{2}"
+		"lv"		"{default}{1} vērība ir {lightgreen}{2}  "
+		"sv"		"{default}{1}s värde är {lightgreen}{2}"
+		"de"		"{default}Der Wert von {1} ist {lightgreen}{2}"
+		"sk"		"{default}Hodnota {1} je {lightgreen}{2}"
+		"fi"		"{default}Evästeen {1} arvo on {lightgreen}{2}"
+		"lt"		"{default}{1} nustatymas yra {lightgreen}{2}"
+		"da"		"{default}Værdien af {1} er {lightgreen}{2}"
+		"es"		"{default} El valor de {1} es {lightgreen}{2}"
+		"el"		"{default}η τιμή του {1} είναι {lightgreen}{2}"
+		"las"		"{default} El valor de {1} es {lightgreen}{2}"
+		"ru"		"{default}Значение {1}: {lightgreen}{2}"
+		"ro"		"{default}Valoarea lui {1} este {lightgreen}{2}"
+		"ua"		"{default}Значення {1}: {lightgreen}{2}"
+		"vi"		"{default}Giá trị của {1} là {lightgreen}{2}"
+		"tr"		"{default}{1}'in değeri {lightgreen}{2}  "
+		"pt_p"		"{default}O valor de {1} é {lightgreen}{2}"
+		"ko"		"{default}{1} 의 값은 {lightgreen}{2} {default}입니다"
+		"it"		"{default}Il valore di {1} è {lightgreen}{2}"
+		"jp"		"{default}{1}の値は{lightgreen}{2}"
+		"pt"		"{default}O valor de {1} é {lightgreen}{2}"
+	}
+
+	/** console messages */
+	"#cookie_list_header"
+	{
+		"en"	"Sourcemod Cookie List"
+		"zho"	"Sourcemod 快取設定列表"
+		"fr"	"Liste des cookies Sourcemod"
+		"vi"	"Danh sách cookie của Sourcemod"
+		"sk"	"Sourcemod Cookie zoznam"
+		"chi"	"Sourcemod Cookie 列表"
+		"fi"	"Sourcemodin evästeluettelo"
+		"ar"	"لائحة الكوكيز "
+		"es"	"Lista de Cookies de Sourcemod"
+		"bg"	"Sourcemod списък с бисквити"
+		"ua"	"Список збережених значень"
+		"ru"	"Список сохраненных значений"
+		"nl"	"Sourcemod Cookie lijst"
+		"da"	"Sourcemod cookie liste"
+		"el"	"Λίστα SourceMod Cookies"
+		"las"	"Lista de Cookies de Sourcemod"
+		"lv"	"Sourcemod cepumiņu saraksts"
+		"lt"	"Sourcemod Sausainėlių Sąrašas"
+		"pt"	"Lista de cookies do Sourcemod"
+		"cze"	"Seznam Sourcemod Cookies"
+		"tr"	"Sourcemod Kurabiye Listesi"
+		"ro"	"Lista Cookie Sourcemod"
+		"de"	"SourceMod-Cookie-Liste"
+		"jp"	"SourceMod クッキーリスト"
+		"ko"	"소스모드 쿠키 목록"
+		"pl"	"Lista ciasteczek SourceModa "
+		"pt_p"	"Lista de cookies do Sourcemod"
+		"sv"	"Sourcemods cookielista"
+		"it"	"Lista dei cookie di Sourcemod"
+		"hu"	"Sütik listája"
+	}
+
+	"#error_cmd_not_from_client"
+	{
+		"en"		"Cannot display settings menu to console"
+		"zho"		"無法於控制台中顯示設定目錄"
+		"sv"		"Kan inte visa inställningsmenyn i consolen"
+		"ro"		"Nu pot fi afisate setarile meniului in consola"
+		"de"		"Einstellungsmenü kann nicht in der Konsole angezeigt werden "
+		"jp"		"セッティングメニューをコンソールに表示出来ません。"
+		"sk"		"Nemožno zobraziť menu nastavení do konzoly"
+		"da"		"Indstillingsmenuen kan ikke vises i konsollen"
+		"chi"		"无法显示设置菜单至控制台"
+		"vi"		"Không thể hiển thị menu cài đặt lên bảng điều khiển"
+		"pt_p"		"Não é possível exibir o menu de definições na consola"
+		"nl"		"Kan geen instellingsmenu laten zien naar de console"
+		"it"		"Impossibile mostrare il menu delle impostazioni nella console"
+		"ar"		"لا يمكن عرض التعديلات في وحدت التحكم"
+		"bg"		" Менюто за настройките не може да бъде показано в конзолата "
+		"cze"		"Nelze zobrazit menu nastaveni do konzole"
+		"pt"		"Não é possível exibir o menu de configurações no console"
+		"ru"		"Невозможно отобразить меню настроек в консоли"
+		"hu"		"Nem lehet konzolban megjeleniteni a beállitások menüjét"
+		"lv"		"Nevar parādīt uzstādījumu izvēlni konsolē"
+		"las"		"No puedes ver el menú de configuración desde la consola."
+		"ua"		"Неможливо відобразити меню налаштувань в консолі"
+		"pl"		"Nie można wyświetlić menu ustawień w konsoli"
+		"lt"		"Nepavyko atvaizduoti nustatymų meniu konsolėje"
+		"ko"		"콘솔에는 설정 메뉴를 보여줄 수 없습니다"
+		"fr"		"Impossible d'afficher le menu paramètres dans la console. "
+		"tr"		"Ayarlar menüsü konsola görüntülenemiyor"
+		"fi"		"Asetusvalikkoa ei voida näyttää konsolissa"
+		"el"		"Το μενού επιλογών δεν μπορεί να εμφανιστεί στην κονσόλα"
+		"es"		"Imposible mostrar el menu de configuración en consola"
+	}
+
+	/** panel text */
+	"#cookie_input_text_prompt"
+	{
+		"en"	"Send a value as a message through chat."
+	}
+
+	"#cookie_input_on"
+	{
+		"en"	"On"
+	}
+
+	"#cookie_input_off"
+	{
+		"en"	"Off"
+	}
+
+	"#cookie_input_yes"
+	{
+		"en"	"Yes"
+	}
+
+	"#cookie_input_no"
+	{
+		"en"	"No"
+	}
+
+	"#cookie_input_current"
+	{
+		"en"	"Current:"
+	}
+
+	"#cookie_input_slider_done"
+	{
+		"en"	"Done."
+	}
+
+	"#panel_prev_page"
+	{
+		"en"	"Prev. Page"
+	}
+
+	"#panel_next_page"
+	{
+		"en"	"Next Page"
+	}
+
+	"#panel_back"
+	{
+		"en"	"Go Back"
+	}
+
+	"#panel_exit"
+	{
+		"en"	"Exit"
+	}
+
+	"#panel_item_search"
+	{
+		"en"	"Search"
+	}
+
+	"#panel_item_all"
+	{
+		"en"	"View all"
+	}
+
+	"#panel_item_categorized"
+	{
+		"en"	"View categorized"
+	}
+
+	"#panel_item_uncategorized"
+	{
+		"en"	"View uncategorized"
+	}
+
+	"#panel_title_special"
+	{
+		"en"	"Cookies"
+	}
+
+	"#panel_search_prompt"
+	{
+		"en"	"Send your search query in chat."
+	}
+}

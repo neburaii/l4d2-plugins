@@ -1,147 +1,130 @@
 #pragma newdecls required
 #pragma semicolon 1
 
-#include <host_player>
-#include <neb_stocks>
-
-public Plugin myinfo =
-{
-	name = "Vote Blocker",
-	author = "Neburai",
-	description = "block votes from being started based on who the issuer and target are",
-	version = "1.0",
-	url = "https://steamcommunity.com/groups/l4d2hardx"
-};
-
-char g_sIssues[][] =
-{
-	"kick",
-	"returntolobby",
-	"changealltalk",
-	"restartgame",
-	"changemission",
-	"changechapter",
-	"changedifficulty"
-};
+#include <sourcemod>
+#include <multicolors>
 
 enum IssueType
 {
-	Issue_Null,
-	Issue_Kick = 0,
+	Issue_None = -1,
+
+	Issue_Kick,
 	Issue_ReturnToLobby,
 	Issue_ChangeAllTalk,
 	Issue_RestartGame,
 	Issue_ChangeMission,
 	Issue_ChangeChapter,
 	Issue_ChangeDifficulty,
+
 	Issue_MAX
 };
 
-#define USER_REGULAR 1 << 0
-#define USER_HOST 1 << 1
-#define USER_ADMIN 1 << 2
+StringMap	g_hIssues;
 
-ConVar g_cBlockVote[Issue_MAX], g_cBlockKickTarget, g_cAdminFlag, g_cRespectLevels;
-int g_iCVBlockVote[Issue_MAX], g_iCVBlockKickTarget, g_iCVAdminFlag;
-bool g_bCVRespectLevels;
+ConVar		g_hConVar_RequiredAdminFlags[Issue_MAX];
+int			g_iRequiredAdminFlags[Issue_MAX];
+
+ConVar		g_hConVar_KickImmunity;
+bool		g_bKickImmunity;
+
+public Plugin myinfo =
+{
+	name = "Vote Blocker",
+	author = "Neburai",
+	description = "block votes from being started based on who the issuer and target are",
+	version = "1.1",
+	url = "https://github.com/neburaii/l4d2-plugins/tree/main/vote_blocker"
+};
 
 public void OnPluginStart()
 {
+	LoadTranslations("vote_blocker.phrases");
+
+	char sIssues[Issue_MAX][] =
+	{
+		"kick",
+		"returntolobby",
+		"changealltalk",
+		"restartgame",
+		"changemission",
+		"changechapter",
+		"changedifficulty"
+	};
+
+	g_hIssues = new StringMap();
 	char sBuffer[64];
-	for(IssueType i = Issue_Kick; i < Issue_MAX; i++)
+
+	for (any i = 0; i < Issue_MAX; i++)
 	{
-		FormatEx(sBuffer, sizeof(sBuffer), "vb_block_%s", g_sIssues[i]);
-		g_cBlockVote[i] = CreateConVar(sBuffer, "0", "block this vote from being issued by this type of user. bitfield, add numbers together: 1 = regular | 2 = host | 4 = admin", FCVAR_NOTIFY, true, 0.0, true, 7.0);
-		g_cBlockVote[i].AddChangeHook(ConVarChanged_update);
+		FormatEx(sBuffer, sizeof(sBuffer), "vote_require_admin_%s", sIssues[i]);
+		g_hConVar_RequiredAdminFlags[i] = CreateConVar(
+			sBuffer, "", "a string of admin flags a user must have to call a vote of this type. \
+			empty string means anyone can call the vote",
+			FCVAR_NOTIFY);
+		g_hConVar_RequiredAdminFlags[i].AddChangeHook(ConVarChanged_Update);
+
+		g_hIssues.SetValue(sIssues[i], i);
 	}
-	g_cAdminFlag = CreateConVar("vb_admin_flag", "0", "AdminFlag vote_blocker plugin uses to identify admins", FCVAR_NOTIFY, true, 0.0, true, 20.0);
-	g_cBlockKickTarget = CreateConVar("vb_block_target_kick", "6", "block kick vote if it's targetting this type of user. bitfield, add numbers together: 1 = regular | 2 = host | 4 = admin", FCVAR_NOTIFY, true, 0.0, true, 7.0);
-	g_cRespectLevels = CreateConVar("vb_admin_can_always_target", "1", "0 = no, 1 = yes | admin issuers can override votes blocked by vb_block_target_kick", FCVAR_NOTIFY);
-	g_cBlockKickTarget.AddChangeHook(ConVarChanged_update);
-	g_cAdminFlag.AddChangeHook(ConVarChanged_update);
-	g_cRespectLevels.AddChangeHook(ConVarChanged_update);
 
-	AutoExecConfig(true, "vote_blocker");
-	readConVars();
+	g_hConVar_KickImmunity = CreateConVar(
+		"vote_kick_immunity", "1",
+		"should admin immunity level be used to block vote-kicks targetting admins of higher immunity? 1 = yes; 2 = no",
+		FCVAR_NOTIFY, true, 0.0, true, 1.0);
+	g_hConVar_KickImmunity.AddChangeHook(ConVarChanged_Update);
 
-	AddCommandListener(cmdListen_callvote, "callvote");
+	ReadConVars();
+	AutoExecConfig(_, "vote_blocker");
+
+	AddCommandListener(Listener_Callvote, "callvote");
 }
 
-public void OnAllPluginsLoaded()
+void ConVarChanged_Update(ConVar hConVar, const char[] sOldValue, const char[] sNewValue)
 {
-	if(!LibraryExists("host_player")) SetFailState("host_player.smx is not installed");
+	ReadConVars();
 }
 
-void ConVarChanged_update(ConVar cConvar, const char[] sOldValue, const char[] sNewValue)
+void ReadConVars()
 {
-	readConVars();
-}
+	char sFlags[AdminFlags_TOTAL + 1];
 
-void readConVars()
-{
-	for(IssueType i = Issue_Kick; i < Issue_MAX; i++)
+	for (any i = 0; i < Issue_MAX; i++)
 	{
-		g_iCVBlockVote[i] = g_cBlockVote[i].IntValue;
+		g_hConVar_RequiredAdminFlags[i].GetString(sFlags, sizeof(sFlags));
+		g_iRequiredAdminFlags[i] = ReadFlagString(sFlags);
 	}
-	g_iCVBlockKickTarget = g_cBlockKickTarget.IntValue;
-	g_iCVAdminFlag = g_cAdminFlag.IntValue;
-	g_bCVRespectLevels = g_cRespectLevels.BoolValue;
+
+	g_bKickImmunity = g_hConVar_KickImmunity.BoolValue;
 }
 
-Action cmdListen_callvote(int iClient, const char[] sCommand, int iArgs)
+Action Listener_Callvote(int iClient, const char[] sCommand, int iArgs)
 {
-	static char sBuffer[32];
-	int iUserType_client, iUserType_target;
+	if (!iClient || !iArgs)
+		return Plugin_Continue;
 
-	if(iArgs < 1 || !nsIsClientValid(iClient)) return Plugin_Continue;
+	static char sIssueName[17];
+	IssueType issue;
 
-	// get which issue is being voted
-	GetCmdArg(1, sBuffer, sizeof(sBuffer));
-	IssueType iIssue = getIssueType(sBuffer);
-	if(iIssue == Issue_Null) return Plugin_Continue;
+	GetCmdArg(1, sIssueName, sizeof(sIssueName));
+	if (!g_hIssues.GetValue(sIssueName, issue))
+		return Plugin_Continue;
 
-	// check if user is allowed to issue this command
-	iUserType_client = getUserType(iClient);
-	if(g_iCVBlockVote[iIssue] & iUserType_client) return Plugin_Handled;
+	if (g_iRequiredAdminFlags[issue]
+		&& !CheckCommandAccess(iClient, "callvote", g_iRequiredAdminFlags[issue]))
+	{
+		CPrintToChat(iClient, "%t %t", "#tag_callvote", "#reply_no_permission", sIssueName);
+		return Plugin_Handled;
+	}
 
-	// is this a kick vote targetting someone?
-	if(iIssue == Issue_Kick && iArgs >= 2)
+	if (g_bKickImmunity && issue == Issue_Kick && iArgs >= 2)
 	{
 		int iTarget = GetClientOfUserId(GetCmdArgInt(2));
-
-		if(nsIsClientValid(iClient))
+		if (iTarget && !CanUserTarget(iClient, iTarget))
 		{
-			iUserType_target = getUserType(iTarget);
-
-			// allow admins to override block 
-			if(g_bCVRespectLevels && iUserType_client == USER_ADMIN)
-			{
-				if(	iUserType_target < USER_ADMIN ||
-					(iUserType_target == USER_ADMIN && CanUserTarget(iClient, iTarget))) return Plugin_Continue;
-			}
-
-			// check if user is allowed to issue a command against this target
-			if(g_iCVBlockKickTarget & iUserType_target) return Plugin_Handled;
+			CPrintToChatEx(iClient, iTarget, "%t %t", "#tag_callvote", "#reply_target_is_immune", iTarget);
+			CPrintToChatEx(iTarget, iClient, "%t %t", "#tag_callvote", "#you_were_target_of_failed_kick", iClient);
+			return Plugin_Handled;
 		}
 	}
-	
+
 	return Plugin_Continue;
-}
-
-IssueType getIssueType(const char[] sIssue)
-{
-	for(IssueType i = Issue_Kick; i < Issue_MAX; i++) if(strcmp(sIssue, g_sIssues[i], false) == 0) return i;
-	return Issue_Null;
-}
-
-bool isAdmin(int iClient)
-{
-	return CheckCommandAccess(iClient, "", 1 << g_iCVAdminFlag, true);
-}
-
-int getUserType(int iClient)
-{
-	if(isAdmin(iClient)) return USER_ADMIN;
-	if(IsPlayerHost(iClient)) return USER_HOST;
-	return USER_REGULAR;
 }

@@ -1,0 +1,15 @@
+// to view all language codes, check this file that came with your SM installation:
+// sourcemod/configs/languages.cfg
+//
+// the language keys here should match the shorthand code seen in the first column of
+// that file.
+
+"Phrases"
+{
+	"#example_phrase"
+	{
+		"en"	"directory name in english"
+		"fr"	"directory name in french"
+		// and so on...
+	}
+}

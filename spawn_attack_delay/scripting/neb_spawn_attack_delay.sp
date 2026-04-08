@@ -1,6 +1,8 @@
+#pragma newdecls required
+#pragma semicolon 1
+
 #include <sourcemod>
-#include <neb_stocks>
-#include <entity_prop_stocks>
+#include <hxstocks>
 
 #define	CVAR_FLAGS	FCVAR_NOTIFY
 
@@ -39,11 +41,13 @@ void event_player_spawn(Event event, const char[] name, bool dontBroadcast)
 {
 	int iClient = GetClientOfUserId(event.GetInt("userid"));
 	g_baClientsBlocked[iClient] = false;
-	if(!nsIsInfected(iClient)) return;
+
+	if (!IsValidClient(iClient) || GetClientTeam(iClient) != Team_Infected)
+		return;
 
 	g_baClientsBlocked[iClient] = true;
 	CreateTimer(g_fConVarBlockTime, unblock, iClient);
-} 
+}
 
 Action unblock(Handle hTimer, int iClient)
 {

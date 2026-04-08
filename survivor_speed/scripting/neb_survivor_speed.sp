@@ -1,17 +1,17 @@
 #include <sourcemod>
 #include <left4dhooks>
-#include <neb_stocks>
+#include <hxstocks>
 
 ConVar g_cSpeedHPVeryLow, g_cSpeedHPLow, g_cSpeedAdren, g_cSpeedRunning, g_cSpeedCrouching, g_cSpeedWalking, g_cHPThresholdLow, g_cHPThresholdVeryLow, g_cSpeedWater, g_cSpeedScoped;
 float g_fSpeedHPVeryLow, g_fSpeedHPLow, g_fSpeedAdren, g_fSpeedRunning, g_fSpeedCrouching, g_fSpeedWalking, g_fHPThresholdLow, g_fHPThresholdVeryLow, g_fSpeedWater, g_fSpeedScoped;
 
-public Plugin myinfo = 
+public Plugin myinfo =
 {
 	name = "survivor speed control",
 	author = "Neburai",
 	description = "convars to overwrite survivor speeds when low health, in water, etc",
 	version = "1.0",
-	url = "https://github.com/neburaii/l4d2-plugins"
+	url = "https://github.com/neburaii/l4d2-plugins/tree/main/survivor_speed"
 };
 
 public void OnPluginStart()
@@ -27,7 +27,7 @@ public void OnPluginStart()
 	g_cSpeedWater =			CreateConVar("sspeed_water",					"115.0",	"survivor max speed from water slowdown", FCVAR_NOTIFY);
 	g_cSpeedScoped =		CreateConVar("sspeed_scoped",					"85.0",		"survivor max speed when scoped in with a sniper", FCVAR_NOTIFY);
 	convarSet();
-	
+
 	g_cSpeedRunning.AddChangeHook(convarHook);
 	g_cSpeedWalking.AddChangeHook(convarHook);
 	g_cSpeedCrouching.AddChangeHook(convarHook);
@@ -63,8 +63,9 @@ void convarSet()
 
 public Action L4D_OnGetCrouchTopSpeed(int iTarget, float &fRetVal)
 {
-	if(!nsIsSurvivor(iTarget)) return Plugin_Continue;
-	
+	if (!IsValidClient(iTarget) || GetClientTeam(iTarget) != Team_Survivor)
+		return Plugin_Continue;
+
 	// adren
 	if(g_fSpeedAdren < g_fSpeedCrouching)
 	{
@@ -84,9 +85,10 @@ public Action L4D_OnGetCrouchTopSpeed(int iTarget, float &fRetVal)
 	return Plugin_Handled;
 }
 
-public Action L4D_OnGetWalkTopSpeed(int iTarget, float &fRetVal) 
+public Action L4D_OnGetWalkTopSpeed(int iTarget, float &fRetVal)
 {
-	if(!nsIsSurvivor(iTarget)) return Plugin_Continue;
+	if (!IsValidClient(iTarget) || GetClientTeam(iTarget) != Team_Survivor)
+		return Plugin_Continue;
 
 	// adren
 	if(g_fSpeedAdren < g_fSpeedWalking)
@@ -109,7 +111,8 @@ public Action L4D_OnGetWalkTopSpeed(int iTarget, float &fRetVal)
 
 public Action L4D_OnGetRunTopSpeed(int iTarget, float &fRetVal)
 {
-	if(!nsIsSurvivor(iTarget)) return Plugin_Continue;
+	if (!IsValidClient(iTarget) || GetClientTeam(iTarget) != Team_Survivor)
+		return Plugin_Continue;
 
 	// adren
 	if(GetEntProp(iTarget, Prop_Send, "m_bAdrenalineActive"))
@@ -121,7 +124,7 @@ public Action L4D_OnGetRunTopSpeed(int iTarget, float &fRetVal)
 		}
 		return Plugin_Handled;
 	}
-	
+
 	fRetVal = getFinalSpeed(g_fSpeedRunning, iTarget);
 
 	return Plugin_Handled;

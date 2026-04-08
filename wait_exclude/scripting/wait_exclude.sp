@@ -1,13 +1,13 @@
 ConVar g_cAllowWaitCommand, g_cExcludeAdminFlag;
 int g_iCVExcludeAdminFlag;
 
-public Plugin myinfo = 
+public Plugin myinfo =
 {
 	name = "wait exclude",
 	author = "Neburai",
 	description = "only players with a certain admin flag are allowed to use wait command",
 	version = "1.0",
-	url = "https://github.com/neburaii/l4d2-plugins"
+	url = "https://github.com/neburaii/l4d2-plugins/tree/main/wait_exclude"
 };
 
 public void OnPluginStart()
@@ -28,7 +28,7 @@ void ConVarChanged_update(ConVar cConvar, const char[] sOldValue, const char[] s
 public void OnClientPostAdminCheck(int iClient)
 {
 	if(IsFakeClient(iClient)) return;
-	
+
 	if(CheckCommandAccess(iClient, "", 1 << g_iCVExcludeAdminFlag, true)) g_cAllowWaitCommand.ReplicateToClient(iClient, "1");
-	else g_cAllowWaitCommand.ReplicateToClient(iClient, "0");	
+	else g_cAllowWaitCommand.ReplicateToClient(iClient, "0");
 }

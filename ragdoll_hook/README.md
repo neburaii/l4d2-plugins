@@ -1,1 +1,0 @@
-native to create ragdoll of player, and forward of ragdolls created from players.

@@ -1,0 +1,31 @@
+"Phrases"
+{
+	"#tag_callvote"
+	{
+		"en"		"{default}[{olive}callvote{default}]"
+	}
+
+	"#reply_no_permission"
+	{
+		// 1 - name of vote issue, as it is written for the callvote command arg
+		"#format"	"{1:s}"
+
+		"en"		"{green}You lack the necessary permission to call a {lightgreen}{1} {green}vote."
+	}
+
+	"#reply_target_is_immune"
+	{
+		// 1 - name of the immune target
+		"#format"	"{1:N}"
+
+		"en"		"{teamcolor}{1} {green}is immune to being vote-kicked."
+	}
+
+	"#you_were_target_of_failed_kick"
+	{
+		// 1 - name of vote issuer
+		"#format"	"{1:N}"
+
+		"en"		"{teamcolor}{1} {green}tried to vote-kick you."
+	}
+}

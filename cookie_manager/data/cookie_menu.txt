@@ -1,0 +1,57 @@
+// subsections represent directories. the name of a section will be the
+// name of the directory. optionally this section name could be a phrase
+// to look up in translations/cookie_manager_directories.phrases.txt.
+// to enable this behaviour, add the following keyvalue to the directory's
+// section:
+// "translate"	"true"
+
+// directories can be nested into eachother, going as deep as you want.
+
+// aside from subdirectories and the translate key, the other accepted
+// keys are:
+//	- "cookie"
+//	- "special"
+
+// the value for a "cookie" key should be the internal name of a cookie.
+// the cookie with this name will exist in this directory.
+
+// "special" key possible values:
+//
+//	- "search": open text input prompt asking for search query. upon
+//		receiving message input, the panel will populate with search
+//		results.
+//
+//	- "all": open a panel displaying every publicly accessible cookie.
+//		this shows cookies that are menually added to other directories,
+//		along with cookies that aren't manually added anywhere.
+//
+//	- "all_categorized": open a panel displaying every cookie manually
+//		added to any directory. uncategorized cookies are ignored.
+//
+//	- "all_uncategorized": open a panel displaying every uncategorized
+//		cookie. cookies added to directories here are considered
+//		categorized, and so will be excluded in this list.
+
+// example structure:
+//
+//	"/"
+//	{
+//		"special"	"search"
+//		"special"	"all_uncategorized"
+//
+//		"Example Top-level Directory"
+//		{
+//			"special"	"search"
+//
+//			"cookie"	"example_cookie_1"
+//			"cookie"	"example_cookie_2"
+//		}
+//
+//		"cookie"	"example_cookie_4"
+//	}
+
+"/"
+{
+	"special"	"search"
+	"special"	"all"
+}

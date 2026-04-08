@@ -1,0 +1,102 @@
+"Cookies"
+{
+	"hp_display_common"
+	{
+		"#name"
+		{
+			"en"	"Show Healthbar - Common Infected"
+		}
+
+		"#desc"
+		{
+			"en"	"Should a healthbar be displayed through center text for common infected you are targetting?"
+		}
+
+		"default_convar"	"cookie_hp_display_common"
+
+		"input"
+		{
+			"type"	"onoff"
+		}
+	}
+
+	"hp_display_special"
+	{
+		"#name"
+		{
+			"en"	"Show Healthbar - Special Infected"
+		}
+
+		"#desc"
+		{
+			"en"	"Should a healthbar be displayed through center text for special infected you are targetting?"
+		}
+
+		"default_convar"	"cookie_hp_display_special"
+
+		"input"
+		{
+			"type"	"onoff"
+		}
+	}
+
+	"hp_display_boss"
+	{
+		"#name"
+		{
+			"en"	"Show Healthbar - Boss Infected"
+		}
+
+		"#desc"
+		{
+			"en"	"Should a healthbar be displayed through center text for the tank or witch you are targetting?"
+		}
+
+		"default_convar"	"cookie_hp_display_boss"
+
+		"input"
+		{
+			"type"	"onoff"
+		}
+	}
+
+	"hp_show_recent_damage"
+	{
+		"#name"
+		{
+			"en"	"Show recent damage in healthbars"
+		}
+
+		"#desc"
+		{
+			"en"	"For healthbars displayed through center text, should recent damage you deal to the target be represented in the bar?"
+		}
+
+		"default_convar"	"cookie_hp_show_recent_damage"
+
+		"input"
+		{
+			"type"	"onoff"
+		}
+	}
+
+	"hp_celebrate_your_kills"
+	{
+		"#name"
+		{
+			"en"	"Animate healthbar for infected you kill"
+		}
+
+		"#desc"
+		{
+			"en"	"Should the empty healthbars of target infected that you've killed animate? Note: this effect can look very bad in some custom fonts."
+		}
+
+		"default_convar"	"cookie_hp_celebrate_your_kills"
+
+		"input"
+		{
+			"type"	"onoff"
+		}
+	}
+}

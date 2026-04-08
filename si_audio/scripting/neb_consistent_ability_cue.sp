@@ -1,9 +1,10 @@
+#pragma semicolon 1
+#pragma newdecls required
+
 #include <sdktools>
 #include <sourcemod>
-#include <neb_stocks>
 #include <left4dhooks>
-#pragma newdecls required
-#pragma semicolon 1
+#include <hxstocks>
 
 #define CONFIG "data/neb_consistent_ability_cue.cfg"
 #define IDENTIFIER_CHANNEL 8
@@ -18,7 +19,7 @@ char g_saPrioritySounds[][] =
 	"", // jockey, they don't have sounds for this
 	"attack/charger_charge_0"
 };
-char g_saZClass[][] = 
+char g_saZClass[][] =
 {
 	"",
 	"smoker",
@@ -102,12 +103,14 @@ public void L4D_OnShovedBySurvivor_Post(int iClient, int iVictim, const float vD
 void event_ability_use(Event hEvent, const char[] sName, bool bDontBroadcast)
 {
 	int iClient = GetClientOfUserId(hEvent.GetInt("userid"));
-	if(!nsIsInfected(iClient)) return;
-	int iZClass = nsGetInfectedClass(iClient);
-	if(!(iZClass == ZCLASS_HUNTER || iZClass == ZCLASS_CHARGER)) return;
+	if (!IsValidClient(iClient) || GetClientTeam(iClient) != Team_Infected)
+		return;
+
+	ZombieClass iZClass = GetZombieClass(iClient);
+	if(!(iZClass == ZClass_Hunter || iZClass == ZClass_Charger)) return;
 
 	char sPath[PLATFORM_MAX_PATH];
-	if(iZClass == ZCLASS_HUNTER)
+	if(iZClass == ZClass_Hunter)
 	{
 		if(!hEvent.GetInt("context")) return; // context of 0 is for his retreat jump, not the actual ability
 		FormatEx(sPath, sizeof(sPath), "player/hunter/voice/attack/hunter_attackmix_0%i.wav", GetRandomInt(1, 3));
@@ -126,13 +129,16 @@ Action soundHook(int iaClients[MAXPLAYERS], int& iNumClients, char sSample[PLATF
 	// filter out irrelevant sounds. do less expensive checks first
 	if(!(iChannel == SNDCHAN_VOICE || iChannel == IDENTIFIER_CHANNEL)) return Plugin_Continue;
 	if(!fVolume) return Plugin_Continue;
-	if(!nsIsInfected(iEntity)) return Plugin_Continue;
-	int iZClass = nsGetInfectedClass(iEntity);
-	if(!(iZClass && iZClass <= ZCLASS_MAX) || iZClass == ZCLASS_JOCKEY) return Plugin_Continue;
+	if(!IsValidClient(iEntity)) return Plugin_Continue;
+	if(GetClientTeam(iEntity) != Team_Infected) return Plugin_Continue;
+
+	ZombieClass iZClass = GetZombieClass(iEntity);
+	if(iZClass < ZCLASS_SI_MIN || iZClass >= ZCLASS_SI_MAX || iZClass == ZClass_Jockey)
+		return Plugin_Continue;
 
 	// determine if this is a "priority" sound
 	bool bIsPriority;
-	if(iZClass == ZCLASS_BOOMER)
+	if(iZClass == ZClass_Boomer)
 	{
 		for(int i = 0; i < sizeof(g_saPrioritySoundsBoomer); i++)
 		{
@@ -164,18 +170,18 @@ Action soundHook(int iaClients[MAXPLAYERS], int& iNumClients, char sSample[PLATF
 
 	// any samples making it this far are priority sounds
 	// in the case of hunters and chargers, there will be many times where vanilla does successfully play their cue sound. This line will avoid the sound from playing twice by forcing our version of it coming from the ability_use hook
-	if((iZClass == ZCLASS_HUNTER || iZClass == ZCLASS_CHARGER) && iChannel == SNDCHAN_VOICE) return Plugin_Handled;
+	if((iZClass == ZClass_Hunter || iZClass == ZClass_Charger) && iChannel == SNDCHAN_VOICE) return Plugin_Handled;
 
 	// set up non-priority sound block for this entity, with a termination timer set
 	if(g_htAbilityDuration[iEntity] != null) delete g_htAbilityDuration[iEntity];
 	g_baNoInterrupt[iEntity] = true;
 	g_htAbilityDuration[iEntity] = CreateTimer(getDuration(sSample), allowInterrupt, iEntity, TIMER_FLAG_NO_MAPCHANGE);
-	
+
 	// record this as last sound play so that we can interrupt it manually
 	g_saLastSound[iEntity] = sSample;
 
 	// move hunter/charger sounds to the correct channel. (it's originally in channel IDENTIFIER_CHANNEL for identification reasons)
-	if(iZClass == ZCLASS_HUNTER || iZClass == ZCLASS_CHARGER)
+	if(iZClass == ZClass_Hunter || iZClass == ZClass_Charger)
 	{
 		iChannel = SNDCHAN_VOICE;
 		return Plugin_Changed;
@@ -224,7 +230,7 @@ float getDuration(const char[] sSample)
 	{
 		if(!sPath[i]) break;
 		if(IsCharUpper(sPath[i])) sPath[i] = CharToLower(sPath[i]);
-	}	
+	}
 	if(!FileExists(sPath)) return 0.1;
 
 	int iByteSize = FileSize(sPath);
@@ -239,11 +245,11 @@ void cancelPrev(int iClient)
 
 	if(g_baNoInterrupt[iClient] && g_saLastSound[iClient][0]) StopSound(iClient, SNDCHAN_VOICE, g_saLastSound[iClient]);
 
-	g_baNoInterrupt[iClient] = false;		
+	g_baNoInterrupt[iClient] = false;
 	g_saLastSound[iClient][0] = 0;
 
 	// plays sounds that got block before this within the same tick
-	if(!nsIsClientValid(iClient)) return;
+	if(!IsValidClient(iClient)) return;
 	if(IsPlayerAlive(iClient) && g_saBlockedSound[iClient][0])
 	{
 		EmitSoundToAll(g_saBlockedSound[iClient], iClient, SNDCHAN_VOICE, SNDLEVEL_HELICOPTER);

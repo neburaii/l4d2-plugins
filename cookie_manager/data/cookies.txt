@@ -1,0 +1,184 @@
+// cookie data defined here will take priority over any drop-in file (data/cookies.d/*).
+// it's intended for server operators to have a central place to manage how any cookie
+// on their server is represented by the interfaces cookie_manager provides.
+//
+// these comments will guide you in formatting, along with all options. but first, just
+// a summary on the cookie_manager plugin:
+//
+// this plugin replaces clientprefs.smx. we still rely on the extension for the core functionality
+// of cookies. clientprefs.smx is what provides the sm_settings and sm_cookies commands for
+// clients to interface with publicly accessible cookies.
+//
+// cookie_manager implements the same commands, with more features. cookies as they appear
+// in menus can have display names and descriptions that are configurable here. both of
+// which support tranlsation, with every language you want to include defined inline in these
+// configs.
+// it also has far more input prefabs than just "yes/no" or "on/off", such as sliders for
+// numeric ranges, or text input.
+//
+// with the increased amount of input methods, any cookie, no matter its expected value, can
+// now be represented by a GUI.
+//
+// and so that brings us to this config file. for cookie_manager to know what type of input
+// the cookie expects, along with the translation-friendly display text associated with the
+// cookie - we need to configure this extra data. this extra data isn't native to clientprefs,
+// and so is handled locally within cookie_manager. these config files are how we externally
+// set this data for any cookie.
+//
+// last thing about the plugin: it's important to note that this file here is for server operator's
+// use. a plugin developer may include a drop-in config file within the plugin's files to leverage
+// cookie_manager out of the box. this file is for when you want to override what's in one of
+// these drop-ins provided by a plugin, or to write entries for cookies in plugins that don't
+// include a drop-in configuration file.
+
+// ok, now here's the guide.
+
+// the layout is like this. example_cookie is the name of a cookie. you can create sections
+// for as many cookies as you'd like.
+//
+//	"Cookies"
+//	{
+//		"example_cookie"
+//		{
+//			"#name"
+//			{
+//				"lang"	"display name"
+//			}
+//
+//			"#desc"
+//			{
+//				"lang"	"translation-friendly description"
+//			}
+//
+//			"default_convar"	"name_of_convar_to_use_for_default_value"
+//
+//			"input"
+//			{
+//				"type"	"input_type"
+//				// additional data is dependant on the input type. see below
+//			}
+//		}
+//	}
+
+// within a cookie, "#name" and "#desc" will expect keys being a language code, as defined in
+// configs/languages.conf, and the value is the phrase to use for that language.
+// you don't need to define every possible language. if a client's language isn't here, it will
+// attempt to fallback to server's language, and if that also isn't defined then it falls back
+// to the first language defined here here.
+
+// "default_convar" is optional. if present, the value will be the name of a ConVar to find. the
+// value of this ConVar will be recognized as the Cookie's "default value", in the event that there's
+// no value currently set for a client. the only purposes it serves are informational (like the
+// initial value a "slider" input type should start at).
+
+// the "input" subsection's contents will vary based on the input type. the types are as follow:
+// - "text"
+// - "text2"
+// - "yesno"
+// - "onoff"
+// - "multiple_choice"
+// - "slider"
+
+// "text" will have no additional data in the "input" section.
+// this is also the default input for cookies with an unknown input method.
+// selecting a cookie with this input will use the menu panel to display a hardcoded prompt, asking
+// the client to send a message in chat. the panel only has 1 button, which is to abort. it will abort
+// from timeout too, as well as if the client obeys the prompt and sends a desired value in chat.
+// when the chat message sends, it's blocked from actually sending as a message and redirected
+// to cookie_manager to use as the cookie's value, concluding the input.
+
+// "text2" is the same as "text", but it allows you to set a custom prompt. it's formatted like:
+//
+//	"input"
+//	{
+//		"type"	"text2"
+//
+//		"#prompt"
+//		{
+//			"lang"	"display text for prompt in this language"
+//		}
+//	}
+//
+// the "#prompt" section behaves the same as the "#name" and "#desc" sections described above.
+// any section name that starts with a # will be this type of section.
+
+// "yesno" will accept input via selectable options in the panel. the options are hardcoded, one
+// for "yes" which will set the cookie value to 1, and the other for "no" which will set the cookie
+// value to 0.
+
+// "onoff" is identical to "yesno", but the hardcoded option names are "on" and "off", instead of
+// "yes" and "no".
+
+// "mulitple_choice" accepts input via selectable options like "yesno" and "onoff", but every option
+// must be manually defined. the format looks like:
+//
+//	"input"
+//	{
+//		"type"	"multiple_choice"
+//
+//		"1"
+//		{
+//			"#name"
+//			{
+//				"lang"	"display text for option 1"
+//			}
+//
+//			"value"	"value for option 1"
+//		}
+//
+//		"2"
+//		{
+//			"#name"
+//			{
+//				"lang"	"display text for option 2"
+//			}
+//
+//			"value"	"value for option 2"
+//		}
+//
+//		// can continue with as many options as you'd like
+//	}
+//
+// so the subsections that represent a choice will be named as a number. the number is the order
+// they'll appear in the list. so option from subsection "1" will be the choice activated with
+// 1 in the panel, and so on. within a choice subsection, we see "#name" which expects keyvalues
+// for translation phrases as seen in previous explanations. the "value" key is for which value
+// to set the cookie to when this option is pressed. the value can be any type - int, float, string,
+// doesn't matter.
+
+// "slider" is for number ranges. you define a min, max, and step amount. the min is the lowest value
+// of the number range, max is highest, and step is how much the value should increment/decrement by
+// when the client moves the slider. in game, the panel will look something like this:
+//
+// Current: 0.5
+// 0.0  -----|-----  1.0
+//
+// 1. - 0.1
+// 2. + 0.1
+//
+// we can see the current value of the cookie, and a visual representation of where that value is in the
+// slider. the left end of the slider shows the range min, and right end shows the max. the panel will
+// have buttons 1 and 2 for decrementing/incrementing the current value by the step amount.
+//
+// its configuration looks like:
+//
+//	"input"
+//	{
+//		"type"	"slider"
+//		"min"	"0.0"
+//		"max"	"1.0"
+//		"step"	"0.1"
+//	}
+//
+// the range can be for an integer value or float value. how it should be read and shown in the panel is
+// inferred by how you type the numbers here. (so if you don't add decimal numbers to any value, then
+// it will be treated like an integer).
+
+// and that's everything to know!
+// last thing of note, is that cookies that are completely undefined will still be supported to display
+// in a menu, etc. for these undefined cookies, the display name will just be the internal name, the
+// description the internal description (if found), and input will be the "text" type
+
+"Cookies"
+{
+}

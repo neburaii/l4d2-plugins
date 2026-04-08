@@ -1,0 +1,1 @@
+// maps listed here will have intro cutscenes play, otherwise it's skipped. type each map name on a new line

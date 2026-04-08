@@ -1,0 +1,22 @@
+"Cookies"
+{
+	"view_punch_recoil"
+	{
+		"#name"
+		{
+			"en"	"View Punch On Weapon Recoil"
+		}
+
+		"#desc"
+		{
+			"en"	"Toggle for punching your camera view up when firing your weapon (recoil)."
+		}
+
+		"default_convar"	"cookie_view_punch_recoil"
+
+		"input"
+		{
+			"type"	"onoff"
+		}
+	}
+}

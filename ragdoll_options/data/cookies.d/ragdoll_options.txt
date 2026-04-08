@@ -1,0 +1,42 @@
+"Cookies"
+{
+	"ragdoll_fade"
+	{
+		"#name"
+		{
+			"en"	"Fade Ragdolls"
+		}
+
+		"#desc"
+		{
+			"en"	"When infected die, have their ragdolls fade away quickly like what you see with -lv launch option."
+		}
+
+		"default_convar"	"cookie_ragdoll_fade"
+
+		"input"
+		{
+			"type"	"onoff"
+		}
+	}
+
+	"ragdoll_ci_begone"
+	{
+		"#name"
+		{
+			"en"	"Common Infected Be-Gone"
+		}
+
+		"#desc"
+		{
+			"en"	"When common infected die, instantly delete their bodies from view."
+		}
+
+		"default_convar"	"cookie_ragdoll_ci_begone"
+
+		"input"
+		{
+			"type"	"onoff"
+		}
+	}
+}

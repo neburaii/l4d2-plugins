@@ -1,33 +1,86 @@
 "Phrases"
 {
-	//***************
-	// * COMMAND TAGS
-	// **************/	
-	// /hard
-	"tag_cmd_host"
+	// /*********
+	//  * TAGS
+	//  ********/
+	"#tag_host"
 	{
-		"en"		"{default}[{green}host{default}]"
+		"en"		"{default}[{olive}host{default}]"
 	}
-	
-	//***********
-	// * MESSAGES
-	// ***********/
-	"msg_cmd_host_none"
+
+	"#tag_cmd_host"
 	{
-		"en"		"{default}There is {green}no host set."
+		"en"		"{default}[{olive}/host{default}]"
 	}
-	"msg_cmd_host_invalid"
+
+	"#tag_cmd_host_transfer"
 	{
-		"en"		"{default}The host is {green}not valid."
+		"en"		"{default}[{olive}/host_transfer{default}]"
 	}
-	"msg_cmd_host_self"
+
+	// /***********
+	//  * REPLIES
+	//  ***********/
+
+	// problem
+	"#reply_no_host"
 	{
-		"en"		"{lightgreen}You {olive}are this game's host!"
+		"en"		"{green}Could not identify a lobby host."
 	}
-	"msg_cmd_host_other"
+
+	"#reply_transfer_no_args"
 	{
-		// 1 - client of current host
+		"en"		"{green}Incorrect usage. Usage: {lightgreen}/host_transfer <player name>"
+	}
+
+	"#reply_target_must_be_higher"
+	{
+		// 1 - attempted target client
 		"#format"	"{1:N}"
-		"en"		"{blue}{1} {default}is this game's host!."
+
+		"en"		"{teamcolor}{1} {green}has higher host priority than you! Only they can perform the transfer."
+	}
+
+	"#reply_target_is_a_bot"
+	{
+		// 1 - attempted target client
+		"#format"	"{1:N}"
+
+		"en"		"{teamcolor}{1} {green}is a bot. Only human players can be targetted."
+	}
+
+	// no problem
+	"#reply_host_name"
+	{
+		// 1 - name of the current lobby host
+		"#format"	"{1:N}"
+
+		"en"		"{teamcolor}{1} {default}is the lobby host."
+	}
+
+	"#reply_you_are_host"
+	{
+		"en"		"{lightgreen}You {default}are the lobby host."
+	}
+
+	"#reply_transfer_successful"
+	{
+		// 1 - client host priority transfered to
+		"#format"	"{1:N}"
+
+		"en"		"{default}Successfully exchanged host priorities with {teamcolor}{1}"
+	}
+
+	// /******************
+	//  * SYSTEM MESSAGES
+	//  ******************/
+
+	"#announce_host_change"
+	{
+		// 1 - client of old host
+		// 2 - client of new host
+		"#format"	"{1:N},{2:N}"
+
+		"en"		"{default}Lobby host has changed from {olive}{1} {default}to {teamcolor}{2}"
 	}
 }

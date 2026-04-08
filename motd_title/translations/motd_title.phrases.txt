@@ -1,0 +1,22 @@
+/**
+ * you're expected to edit this file!!!
+ * if you want a title that supports translation to the client's language,
+ * you must set the motd_title_type convar to 2, which will ignore the convar set title,
+ * and use the #MOTD_Title translation tag instead. fill out what that tag displays
+ * as for each language in this file.
+ * check this wiki page for formatting: https://wiki.alliedmods.net/Translations_(SourceMod_Scripting)
+ */
+
+"Phrases"
+{
+	"#MOTD_Title"
+	{
+		// english
+		"en"	"english title"
+
+		// chinese
+		"chi"	"中文标题"
+
+		// and so on...
+	}
+}

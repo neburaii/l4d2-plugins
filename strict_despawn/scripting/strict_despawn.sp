@@ -3,7 +3,7 @@
 
 #define	CVAR_FLAGS	FCVAR_NOTIFY
 
-#include <neb_stocks> // is infected stocks
+#include <hxstocks> // is infected stocks
 #include <left4dhooks> // get survivor victim stock
 
 ConVar	g_cDeviation, g_cDuration, g_cEnabled;
@@ -43,7 +43,7 @@ void loadConVars()
 
 Action timerDespawnStuck(Handle hTimer)
 {
-	if(!g_bCVEnabled) 
+	if(!g_bCVEnabled)
 	{
 		for(int i = 1; i <= MaxClients; i++)
 		{
@@ -53,14 +53,17 @@ Action timerDespawnStuck(Handle hTimer)
 		return Plugin_Continue;
 	}
 
-	int iZClass, iUID;
+	ZombieClass iZClass;
+	int iUID;
 	float vPos[3];
 
 	for(int i = 1; i <= MaxClients; i++)
 	{
-		if(!nsIsInfected(i)) continue;
-		iZClass = nsGetInfectedClass(i);
-		if(iZClass < 1 || iZClass > 6) continue;
+		if (!IsClientInGame(i)) continue;
+		if (GetClientTeam(i) != Team_Infected) continue;
+
+		iZClass = GetZombieClass(i);
+		if(iZClass < ZCLASS_SI_MIN || iZClass >= ZCLASS_SI_MAX) continue;
 
 		GetClientAbsOrigin(i, vPos);
 		iUID = GetClientUserId(i);

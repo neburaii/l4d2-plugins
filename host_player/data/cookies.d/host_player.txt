@@ -1,0 +1,52 @@
+"Cookies"
+{
+	"announce_host_change"
+	{
+		"#name"
+		{
+			"en"	"Announce Host Change"
+		}
+
+		"#desc"
+		{
+			"en"	"Do you want to receive a system message in chat notifying of the lobby host changing?"
+		}
+
+		"default_convar"	"cookie_announce_host_change"
+
+		"input"
+		{
+			"type"	"multiple_choice"
+
+			"1"
+			{
+				"#name"
+				{
+					"en"	"Do not announce"
+				}
+
+				"value"	"0"
+			}
+
+			"2"
+			{
+				"#name"
+				{
+					"en"	"Announce if my host status is affected"
+				}
+
+				"value"	"1"
+			}
+
+			"3"
+			{
+				"#name"
+				{
+					"en"	"Always announce"
+				}
+
+				"value"	"2"
+			}
+		}
+	}
+}

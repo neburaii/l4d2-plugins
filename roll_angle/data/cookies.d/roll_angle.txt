@@ -1,0 +1,28 @@
+"Cookies"
+{
+	"roll_angle"
+	{
+		"#name"
+		{
+			"en"	"Roll Angle"
+		}
+
+		"#desc"
+		{
+			"en"	"The angle to roll your camera by on strafe movements. Accepted values are 0 through 360"
+		}
+
+		"default_convar"	"sv_rollangle"
+
+		"input"
+		{
+			// no sane person will actually choose values > 20.
+			// if they really want an absurd roll angle, they
+			// can just type out a full cookie set command.
+			"type"	"slider"
+			"min"	"0"
+			"max"	"20"
+			"step"	"1"
+		}
+	}
+}

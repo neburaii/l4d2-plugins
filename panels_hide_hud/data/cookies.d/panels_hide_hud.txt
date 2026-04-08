@@ -1,0 +1,42 @@
+"Cookies"
+{
+	"panels_hide_hud_survivor"
+	{
+		"#name"
+		{
+			"en"	"Panels Hide HUD (Survivor)"
+		}
+
+		"#desc"
+		{
+			"en"	"If you are on the Survivor team, HUD elements that are likely to overlap a panel/menu (like this menu) will be hidden while the panel is opened."
+		}
+
+		"default_convar"	"cookie_panels_hide_hud_survivor"
+
+		"input"
+		{
+			"type"	"onoff"
+		}
+	}
+
+	"panels_hide_hud_infected"
+	{
+		"#name"
+		{
+			"en"	"Panels Hide HUD (Infected)"
+		}
+
+		"#desc"
+		{
+			"en"	"If you are on the Infected team, HUD elements that are likely to overlap a panel/menu (like this menu) will be hidden while the panel is opened."
+		}
+
+		"default_convar"	"cookie_panels_hide_hud_infected"
+
+		"input"
+		{
+			"type"	"onoff"
+		}
+	}
+}

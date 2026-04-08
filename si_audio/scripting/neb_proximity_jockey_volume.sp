@@ -1,8 +1,9 @@
-#include <sourcemod>
-#include <sdktools>
-#include <neb_stocks>
 #pragma newdecls required
 #pragma semicolon 1
+
+#include <sourcemod>
+#include <sdktools>
+#include <hxstocks>
 
 // sounds processed will be emttied outside of the standard channel range, allowing an optimized way to distinguish them in the sound hook
 #define CHANNEL_OFFSET 8
@@ -64,8 +65,12 @@ void readConVars()
 
 Action soundHook(int iaClients[MAXPLAYERS], int& iNumClients, char sSample[PLATFORM_MAX_PATH], int& iEntity, int& iChannel, float& fVolume, int& iLevel, int& iPitch, int& iFlags, char sSoundEntry[PLATFORM_MAX_PATH], int& iSeed)
 {
-	if(iChannel > 7) return Plugin_Continue;
-	if(!fVolume || !nsIsInfected(iEntity, ZCLASS_JOCKEY)) return Plugin_Continue;
+	if (iChannel > 7
+		|| !fVolume
+		|| !IsValidClient(iEntity)
+		|| GetClientTeam(iEntity) != Team_Infected
+		|| GetZombieClass(iEntity) != ZClass_Jockey)
+		return Plugin_Continue;
 
 	if(StrContains(sSample, "player/jockey/voice/idle/", false) == 0) // start filtering for samples we want to apply proximity volume to
 	{
@@ -80,7 +85,7 @@ Action soundHook(int iaClients[MAXPLAYERS], int& iNumClients, char sSample[PLATF
 void processSound(int iEntity)
 {
 	iEntity = GetClientOfUserId(iEntity);
-	if(!nsIsClientValid(iEntity)) return;
+	if(!IsValidClient(iEntity)) return;
 
 	stopPrevSound(iEntity);
 
@@ -88,19 +93,19 @@ void processSound(int iEntity)
 	for(int i = 1; i <= MAXPLAYERS_L4D2; i++)
 	{
 		iListener = 0;
-		if(!nsIsClientValid(i)) continue;
+		if(!IsValidClient(i)) continue;
 		if(IsFakeClient(i)) continue;
-		
+
 		if(IsClientObserver(i))
 		{
 			iListener = GetEntPropEnt(i, Prop_Send, "m_hObserverTarget");
-			if(!nsIsClientValid(iListener)) continue;
+			if(!IsValidClient(iListener)) continue;
 		}
 		else if(IsPlayerAlive(i))
 			iListener = i;
 		else continue;
 
-		EmitSoundToClient(i, g_saUseSound[iEntity], iEntity, rotateChannel(iEntity), SNDLEVEL_HELICOPTER, _, getVolume(iListener, iEntity));		
+		EmitSoundToClient(i, g_saUseSound[iEntity], iEntity, rotateChannel(iEntity), SNDLEVEL_HELICOPTER, _, getVolume(iListener, iEntity));
 	}
 	if(g_iaLastChannelAmount[iEntity]) strcopy(g_saLastSound[iEntity], PLATFORM_MAX_PATH, g_saUseSound[iEntity]);
 }
@@ -114,7 +119,12 @@ public void OnClientPutInServer(int iClient)
 void event_player_death(Event hEvent, const char[] sName, bool bDontBroadcast)
 {
 	int iClient = GetClientOfUserId(hEvent.GetInt("userid"));
-	if(nsIsInfected(iClient, ZCLASS_JOCKEY)) stopPrevSound(iClient);
+	if (!IsValidClient(iClient)
+		|| GetClientTeam(iClient) != Team_Infected
+		|| GetZombieClass(iClient) != ZClass_Jockey)
+		return;
+
+	stopPrevSound(iClient);
 }
 
 /********

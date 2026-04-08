@@ -1,186 +1,285 @@
 #pragma newdecls required
 #pragma semicolon 1
 
-#include <sdkhooks>
+#include <sourcemod>
 #include <sdktools>
+#include <sdkhooks>
 #include <clientprefs>
-#include <neb_stocks>
+#include <hxlib>
+
+#undef REQUIRE_PLUGIN
+#include <cookie_manager>
+
+#define CVAR_FLAGS			FCVAR_NOTIFY
 
 #define COOKIE_FADE			"ragdoll_fade"
 #define	COOKIE_CI_BEGONE	"ragdoll_ci_begone"
 
-Cookie	g_hCookieEnableFader, g_hCookieEnableCIGone;
-
-int		g_iRagdollFader;
-bool	g_bClientEnableFader[MAXPLAYERS_L4D2+1], g_bClientEnableCIGone[MAXPLAYERS_L4D2+1];
-
-public Plugin myinfo = 
+public Plugin myinfo =
 {
 	name = "Ragdoll Options",
 	author = "Neburai",
 	description = "Per-client implementaion of ragdoll fades and commons disappearing instantly on death",
-	version = "1.1",
-	url = "https://steamcommunity.com/groups/l4d2hardx"
+	version = "1.2",
+	url = "https://github.com/neburaii/l4d2-plugins/tree/main/ragdoll_options"
 };
+
+bool	g_bLateLoaded;
+
+#if defined _cookie_manager_included_
+	bool g_bCookiesHooked;
+#endif
+
+Setting	g_fadeEnabled;
+Setting	g_removeCommonRagdoll;
+Fader	g_ragdollFader;
+
+public APLRes AskPluginLoad2(Handle hMyself, bool bLate, char[] sError, int iErrMax)
+{
+	g_bLateLoaded = bLate;
+	return APLRes_Success;
+}
 
 public void OnPluginStart()
 {
-	g_hCookieEnableFader = new Cookie(COOKIE_FADE, "default: 0 | 1 or 0 | enable/disable ragdolls fading", CookieAccess_Public);
-	g_hCookieEnableCIGone = new Cookie(COOKIE_CI_BEGONE, "default: 0 | 1 or 0 | enable/disable common infected disappearing instantly on death", CookieAccess_Public);
+	g_ragdollFader.Init();
 
-	AddCommandListener(cmdListenCookies, "sm_cookies");
+	g_removeCommonRagdoll.Init(
+		COOKIE_CI_BEGONE, "toggle common infected disappearing instantly on death. \
+		1 for enabled, 0 for disabled", false);
 
-	HookEvent("round_freeze_end", event_round_freeze_end);
-	HookEvent("player_death", event_player_death);
+	g_fadeEnabled.Init(
+		COOKIE_FADE, "toggle infected ragdolls fading on death", false);
 
-	// recover data from plugin restart
-	bool bCreateFader;
-	for(int i = 1; i <= MaxClients; i++)
+	#if defined _cookie_manager_included_
+		if (LibraryExists(COOKIE_MANAGER_LIBRARY))
+			HookCookies();
+	#endif
+
+	if (g_bLateLoaded)
 	{
-		if(!nsIsClientValid(i)) continue;
-		bCreateFader = true;
-		if(IsFakeClient(i)) continue;
-
-		readCookies(i);
+		g_removeCommonRagdoll.UpdateAll();
+		g_fadeEnabled.UpdateAll();
+		g_ragdollFader.Create();
 	}
 
-	if(bCreateFader) createRagdollFader();
+	HookEvent("round_freeze_end", Event_RoundFreezeEnd);
 }
 
 public void OnPluginEnd()
 {
-	deleteRagdollFader();
+	g_ragdollFader.Remove();
 }
 
-/*********
- * COOKIES
- *********/
-
-Action cmdListenCookies(int iClient, const char[] sCommand, int iArgs)
+void Event_RoundFreezeEnd(Event hEvent, const char[] sName, bool bDontBroadcast)
 {
-	if(nsIsClientValid(iClient) && iArgs == 2)
+	g_ragdollFader.Refresh();
+}
+
+/**********
+ * settings
+ **********/
+
+enum struct Setting
+{
+	Cookie cookie;
+	bool value[MAXPLAYERS_L4D2 + 1];
+
+	ConVar defaultConVar;
+	bool defaultValue;
+
+	void Init(const char[] sName, const char[] sDesc, bool bDefault)
 	{
-		char sCookie[64];
-		int iCase;
-		GetCmdArg(1, sCookie, sizeof(sCookie));
+		char sConVarName[COOKIE_MAX_NAME_LENGTH + 8];
+		char sConVarDesc[COOKIE_MAX_NAME_LENGTH + COOKIE_MAX_DESCRIPTION_LENGTH + 50];
 
-		if(strcmp(sCookie, COOKIE_FADE) == 0) iCase = 1;
-		else if(strcmp(sCookie, COOKIE_CI_BEGONE) == 0) iCase = 2;
+		FormatEx(sConVarName, sizeof(sConVarName), "cookie_%s", sName);
+		FormatEx(sConVarDesc, sizeof(sConVarDesc), "default value for \"%s\" cookie. description: %s", sName, sDesc);
 
-		if(iCase)
+		this.defaultConVar = CreateConVar(
+			sConVarName, bDefault ? "1" : "0", sConVarDesc,
+			CVAR_FLAGS, true, 0.0, true, 1.0);
+		this.defaultConVar.AddChangeHook(ConVarChanged_Update);
+		this.defaultValue = bDefault;
+
+		this.cookie = new Cookie(sName, sDesc, CookieAccess_Public);
+	}
+
+	bool UpdateDefault()
+	{
+		this.defaultValue = this.defaultConVar.BoolValue;
+		return this.UpdateAll();
+	}
+
+	bool UpdateAll()
+	{
+		bool bRet = false;
+
+		for (int i = 1; i <= MaxClients; i++)
 		{
-			int iValue = GetCmdArgInt(2);
-			if(!(0 <= iValue <= 1))
-			{
-				ReplyToCommand(iClient, "%s only accepts 1 or 0 as a value (1 = enable, 0 = disable).", sCookie);
-				return Plugin_Handled;
-			}
+			if (!IsClientConnected(i)) continue;
+			if (IsFakeClient(i)) continue;
 
-			switch(iCase)
+			if (this.Update(i)) bRet = true;
+		}
+
+		return bRet;
+	}
+
+	bool Update(int iClient)
+	{
+		bool bSet = this.defaultValue;
+
+		if (AreClientCookiesCached(iClient))
+		{
+			char sValue[2];
+			this.cookie.Get(iClient, sValue, sizeof(sValue));
+			switch (sValue[0])
 			{
-				case 1:
-				{
-					g_bClientEnableFader[iClient] = !!iValue;
-					if(!g_bClientEnableFader[iClient]) recreateRagdollFader();
-				}
-				case 2: g_bClientEnableCIGone[iClient] = !!iValue;
+				case '0': bSet = false;
+				case '1': bSet = true;
 			}
 		}
-	}	
 
-	return Plugin_Continue;
+		bool bRet = false;
+		if (this.value[iClient] != bSet) bRet = true;
+
+		this.value[iClient] = bSet;
+		return bRet;
+	}
+}
+
+#if defined _cookie_manager_included_
+	void HookCookies()
+	{
+		g_bCookiesHooked = true;
+		HookCookieChange(COOKIE_FADE, OnCookieChanged);
+		HookCookieChange(COOKIE_CI_BEGONE, OnCookieChanged);
+	}
+
+	public void OnLibraryAdded(const char[] sName)
+	{
+		if (strcmp(sName, COOKIE_MANAGER_LIBRARY) == 0)
+			HookCookies();
+	}
+
+	public void OnLibraryRemoved(const char[] sName)
+	{
+		if (g_bCookiesHooked && strcmp(sName, COOKIE_MANAGER_LIBRARY) == 0)
+			g_bCookiesHooked = false;
+	}
+
+	void OnCookieChanged(const char[] sCookie, int iClient, const char[] sOldValue, const char[] sNewValue)
+	{
+		g_removeCommonRagdoll.Update(iClient);
+		if (g_fadeEnabled.Update(iClient)) g_ragdollFader.Refresh();
+	}
+#endif
+
+public void OnClientPutInServer(int iClient)
+{
+	if (IsFakeClient(iClient))
+		return;
+
+	g_removeCommonRagdoll.Update(iClient);
+	if (g_fadeEnabled.Update(iClient)) g_ragdollFader.Refresh();
 }
 
 public void OnClientCookiesCached(int iClient)
 {
-	readCookies(iClient);
+	if (IsFakeClient(iClient))
+		return;
+
+	g_removeCommonRagdoll.Update(iClient);
+	if (g_fadeEnabled.Update(iClient)) g_ragdollFader.Refresh();
 }
 
-void readCookies(int iClient)
+void ConVarChanged_Update(ConVar hConVar, const char[] sOldValue, const char[] sNewValue)
 {
-	g_bClientEnableFader[iClient] = !!g_hCookieEnableFader.GetInt(iClient, 0);
-	g_bClientEnableCIGone[iClient] = !!g_hCookieEnableCIGone.GetInt(iClient, 0);
+	g_removeCommonRagdoll.UpdateDefault();
+	if (g_fadeEnabled.UpdateDefault()) g_ragdollFader.Refresh();
 }
 
-/********
- * FADER
+/*******
+ * Fade
  *******/
 
-void event_round_freeze_end(Event hEvent, const char[] sName, bool bDontBroadcast)
+enum struct Fader
 {
-	if(g_iRagdollFader && EntRefToEntIndex(g_iRagdollFader) != INVALID_ENT_REFERENCE)
-		return;
-	
-	createRagdollFader();
-}
+	int entref;
 
-void recreateRagdollFader()
-{
-	deleteRagdollFader();
-	createRagdollFader();
-}
-
-void createRagdollFader()
-{
-	if(g_iRagdollFader && EntRefToEntIndex(g_iRagdollFader) != INVALID_ENT_REFERENCE)
-		return;
-
-	int iFaderEnt = CreateEntityByName("func_ragdoll_fader");
-	if(iFaderEnt != -1)
+	void Init()
 	{
-		SDKHook(iFaderEnt, SDKHook_SetTransmit, SetTransmit_Fader);
-		DispatchSpawn(iFaderEnt);
-		SetEntPropVector(iFaderEnt, Prop_Send, "m_vecMaxs", view_as<float>({ 999999.0, 999999.0, 999999.0 }));
-		SetEntPropVector(iFaderEnt, Prop_Send, "m_vecMins", view_as<float>({ -999999.0, -999999.0, -999999.0 }));
-		SetEntProp(iFaderEnt, Prop_Send, "m_nSolidType", 2);
-		g_iRagdollFader = EntIndexToEntRef(iFaderEnt);
+		this.entref = INVALID_ENT_REFERENCE;
+	}
+
+	void Refresh()
+	{
+		this.Remove();
+		this.Create();
+	}
+
+	void Remove()
+	{
+		int iEntity = EntRefToEntIndex(this.entref);
+		if (iEntity != INVALID_ENT_REFERENCE)
+			RemoveEntity(iEntity);
+	}
+
+	void Create()
+	{
+		int iEntity = CreateEntityByName("func_ragdoll_fader");
+		if (iEntity == INVALID_ENT_REFERENCE)
+		{
+			this.entref = INVALID_ENT_REFERENCE;
+			return;
+		}
+
+		SDKHook(iEntity, SDKHook_SetTransmit, OnTransmitFader);
+		TeleportEntity(iEntity, {0.0, 0.0, 0.0});
+		DispatchSpawn(iEntity);
+		this.entref = EntIndexToEntRef(iEntity);
+
+		SetEntPropVector(iEntity, Prop_Send, "m_vecMaxs", {999999.0, 999999.0, 999999.0});
+		SetEntPropVector(iEntity, Prop_Send, "m_vecMins", {-999999.0, -999999.0, -999999.0});
+		SetEntProp(iEntity, Prop_Send, "m_nSolidType", 2);
 	}
 }
 
-void deleteRagdollFader()
+Action OnTransmitFader(int iEntity, int iClient)
 {
-	int iFaderEnt = EntRefToEntIndex(g_iRagdollFader);
-	if(g_iRagdollFader && iFaderEnt != INVALID_ENT_REFERENCE)
+	if (g_fadeEnabled.value[iClient])
+		return Plugin_Continue;
+
+	return Plugin_Handled;
+}
+
+/******************
+ * commons be-gone
+ *****************/
+
+public void OnEntityCreated(int iEntity, const char[] sClass)
+{
+	if (strcmp(sClass, "infected") == 0)
+		AddEntityHook(iEntity, EntityHook_EventKilled, EHook_Post, OnKilled_Post);
+}
+
+void OnKilled_Post(int iVictim, int iAttacker, int iInflictor, float fDamage, int iDamageType,
+	int iWeapon, const float vDamageForce[3], const float vDamagePos[3], bool bHandled)
+{
+	if (!bHandled) SDKHook(iVictim, SDKHook_SetTransmit, OnTransmitCommon);
+}
+
+Action OnTransmitCommon(int iEntity, int iClient)
+{
+	if (IsEntityAlive(iEntity))
 	{
-		RemoveEntity(iFaderEnt);
-		g_iRagdollFader = 0;
+		SDKUnhook(iEntity, SDKHook_SetTransmit, OnTransmitCommon);
+		return Plugin_Continue;
 	}
-}
 
-public Action SetTransmit_Fader(int iEntity, int iClient)
-{
-    if(g_bClientEnableFader[iClient]) return Plugin_Continue;
-    return Plugin_Handled;
-}
+	if (g_removeCommonRagdoll.value[iClient])
+		return Plugin_Handled;
 
-/************
- * CI-BE-GONE
- ***********/
-
-public void OnEntityCreated(int iEntity, const char[] sClassName)
-{
-	if(nsIsCommonInfected(iEntity))
-	{
-		// it's supposed to happen when their entities are destroyed.
-		// Somehow a common later spawns with same entity index but invisible because it never unhooked.
-		// No errrors from unhooking here - even for ones that aren't hooked - so this works i guess
-		SDKUnhook(iEntity, SDKHook_SetTransmit, SetTransmit_CI_BeGone);
-	}
-}
-
-void event_player_death(Event hEvent, const char[] sName, bool bDontBroadcast)
-{
-	if(nsIsClientValid(GetClientOfUserId(hEvent.GetInt("userid")))) return;
-
-	int iInfected = hEvent.GetInt("entityid");
-	if(!nsIsCommonInfected(iInfected)) return;
-
-	SetEntityCollisionGroup(iInfected, 1); // no collision with player
-	SDKHook(iInfected, SDKHook_SetTransmit, SetTransmit_CI_BeGone);
-}
-
-public Action SetTransmit_CI_BeGone(int iEntity, int iClient)
-{
-    if(g_bClientEnableCIGone[iClient]) return Plugin_Handled;
-    return Plugin_Continue;
+	return Plugin_Continue;
 }

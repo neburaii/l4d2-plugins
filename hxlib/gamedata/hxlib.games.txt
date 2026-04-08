@@ -1,0 +1,2040 @@
+"Games"
+{
+	"left4dead2"
+	{
+		"Functions"
+		{
+			"HX::AcceptInput"
+			{
+				"offset"	"AcceptInput"
+				"callconv"	"thiscall"
+				"hooktype"	"entity"
+				"return"	"bool"
+				"this"		"entity"
+
+				"arguments"
+				{
+					"input"
+					{
+						"type"	"charptr"
+					}
+					"activator"
+					{
+						"type"	"int"	// CBaseEntity
+					}
+					"source"
+					{
+						"type"	"int"	// CBaseEntity
+					}
+					"params"
+					{
+						"type"	"int"
+						// "type"	"object" // variant_t
+						// "size"	"20"
+						// "flags"	"byval/odtor/octor/oassignop"
+					}
+				}
+			}
+
+			"HX::CreateRagdollEntity"
+			{
+				"offset"	"CreateRagdollEntity"
+				"callconv"	"thiscall"
+				"hooktype"	"entity"
+				"return"	"int"
+				"this"		"entity"
+
+				"arguments"
+				{
+					"takedamgeinfo"
+					{
+						"type"	"int"
+					}
+				}
+			}
+
+			"HX::Event_Killed"
+			{
+				"offset"	"Event_Killed"
+				"callconv"	"thiscall"
+				"hooktype"	"entity"
+				"return"	"void"
+				"this"		"entity"
+
+				"arguments"
+				{
+					"takedamageinfo"
+					{
+						"type"	"int"
+					}
+				}
+			}
+
+			"HX::SetObserverTarget"
+			{
+				"offset"	"SetObserverTarget"
+				"callconv"	"thiscall"
+				"hooktype"	"entity"
+				"return"	"int"
+				"this"		"entity"
+
+				"arguments"
+				{
+					"target"
+					{
+						"type"	"int"	// CBaseEntity
+					}
+				}
+			}
+
+			"HX::OnNavAreaChanged"
+			{
+				"offset"	"OnNavAreaChanged"
+				"callconv"	"thiscall"
+				"hooktype"	"entity"
+				"return"	"void"
+				"this"		"entity"
+
+				"arguments"
+				{
+					"newArea"
+					{
+						"type"	"int"
+					}
+					"oldArea"
+					{
+						"type"	"int"
+					}
+				}
+			}
+
+			"HX::Intensity::Increase"
+			{
+				"signature"	"Intensity::Increase"
+				"callconv"	"thiscall"
+				"return"	"int"
+				"this"		"address"
+
+				"arguments"
+				{
+					"IntensityType"
+					{
+						"type"	"int"
+					}
+				}
+			}
+
+			"HX::CDirectorScriptedEventManager::OnMapInvokedPanicEventNonVirtual"
+			{
+				"signature"	"CDirectorScriptedEventManager::OnMapInvokedPanicEventNonVirtual"
+				"callconv"	"thiscall"
+				"return"	"int"
+				"this"		"ignore"
+
+				"arguments"
+				{
+					"activator"
+					{
+						"type"	"cbaseentity"
+					}
+					"panic_event_reason"
+					{
+						"type"	"int"
+					}
+				}
+			}
+
+			"HX::CDirectorScriptedEventManager::StartPanicEvent"
+			{
+				"signature"	"CDirectorScriptedEventManager::StartPanicEvent"
+				"callconv"	"thiscall"
+				"return"	"int"
+				"this"		"address"
+
+				"arguments"
+				{
+					"waves"
+					{
+						"type"	"int"
+					}
+					"activator"
+					{
+						"type"	"cbaseentity"
+					}
+				}
+			}
+
+			"HX::CDirector::PostRunScript"
+			{
+				"signature"	"CDirector::PostRunScript"
+				"callconv"	"thiscall"
+				"return"	"void"
+				"this"		"ignore"
+			}
+
+			"HX::CDirector::BeginLocalScript"
+			{
+				"signature"	"CDirector::BeginLocalScript"
+				"callconv"	"thiscall"
+				"return"	"int"
+				"this"		"ignore"
+
+				"arguments"
+				{
+					"scriptName"
+					{
+						"type"	"charptr"
+					}
+				}
+			}
+
+			"HX::CDirector::EndLocalScript"
+			{
+				"signature"	"CDirector::EndLocalScript"
+				"callconv"	"thiscall"
+				"return"	"void"
+				"this"		"ignore"
+			}
+
+			"HX::VScriptServerRunScript"
+			{
+				"signature"	"VScriptServerRunScript"
+				"callconv"	"cdecl"
+				"return"	"int"
+
+				"arguments"
+				{
+					"name"
+					{
+						"type"	"charptr"
+					}
+
+					"scope" // HSCRIPT_* enum
+					{
+						"type"	"int"
+					}
+
+					"compiled"
+					{
+						"type"	"bool"
+					}
+				}
+			}
+
+			"HX::CFinaleTrigger::StartFinale"
+			{
+				"signature"	"CFinaleTrigger::StartFinale"
+				"callconv"	"thiscall"
+				"return"	"void"
+				"this"		"address"
+
+				"arguments"
+				{
+					"activator"
+					{
+						"type"	"cbaseentity"
+					}
+				}
+			}
+
+			"HX::ZombieManager::GetRandomPZSpawnPosition"
+			{
+				"signature"	"ZombieManager::GetRandomPZSpawnPosition"
+				"callconv"	"thiscall"
+				"return"	"int"
+				"this"		"ignore"
+
+				"arguments"
+				{
+					"zClass"
+					{
+						"type"	"int"
+					}
+					"tries"
+					{
+						"type"	"int"
+					}
+					"refClient"
+					{
+						"type"	"cbaseentity"
+					}
+					"pos"
+					{
+						"type"	"int"
+					}
+				}
+			}
+
+			"HX::ZombieManager::CollectSpawnAreas"
+			{
+				"signature"	"ZombieManager::CollectSpawnAreas"
+				"callconv"	"thiscall"
+				"return"	"int"
+				"this"		"address"
+
+				"arguments"
+				{
+					"location"
+					{
+						"type"	"int"
+					}
+					"class"
+					{
+						"type"	"int"
+					}
+				}
+			}
+
+			"HX::CDirector::ResetMobTimer"
+			{
+				"signature"	"CDirector::ResetMobTimer"
+				"callconv"	"thiscall"
+				"return"	"void"
+				"this"		"ignore"
+			}
+
+			"HX::CDirector::OnMobRushStart"
+			{
+				"signature"	"CDirector::OnMobRushStart"
+				"callconv"	"thiscall"
+				"return"	"void"
+				"this"		"ignore"
+			}
+
+			"HX::CDirector::ResetSpecialTimers"
+			{
+				"signature"	"CDirector::ResetSpecialTimers"
+				"callconv"	"thiscall"
+				"return"	"void"
+				"this"		"ignore"
+			}
+
+			"HX::ZombieManager::CanZombieSpawnHere"
+			{
+				"signature"	"ZombieManager::CanZombieSpawnHere"
+				"callconv"	"thiscall"
+				"return"	"bool"
+				"this"		"ignore"
+
+				"arguments"
+				{
+					"pos"
+					{
+						"type"	"vectorptr"
+					}
+					"area"
+					{
+						"type"	"int"
+					}
+					"zclass"
+					{
+						"type"	"int"
+					}
+					"unused"
+					{
+						"type"	"bool"
+					}
+					"ghost"
+					{
+						"type"	"cbaseentity"
+					}
+				}
+			}
+
+			"HX::TerrorNavMesh::RemoveWanderersInActiveAreaSet"
+			{
+				"signature"	"TerrorNavMesh::RemoveWanderersInActiveAreaSet"
+				"callconv"	"cdecl"
+				"return"	"void"
+			}
+
+			"HX::CDirector::UpdateTempo"
+			{
+				"signature"	"CDirector::UpdateTempo"
+				"callconv"	"thiscall"
+				"return"	"void"
+				"this"		"ignore"
+			}
+
+			"HX::CTerrorPlayer::GoAwayFromKeyboard"
+			{
+				"signature"	"CTerrorPlayer::GoAwayFromKeyboard"
+				"callconv"	"thiscall"
+				"return"	"void"
+				"this"		"entity"
+			}
+
+			"HX::CSpitterProjectile::Create"
+			{
+				"signature"	"CSpitterProjectile::Create"
+				"callconv"	"cdecl"
+				"return"	"cbaseentity"
+
+				"arguments"
+				{
+					"origin"
+					{
+						"type"	"vectorptr"
+					}
+					"angles"
+					{
+						"type"	"vectorptr"
+					}
+					"velocity"
+					{
+						"type"	"vectorptr"
+					}
+					"rotation"
+					{
+						"type"	"vectorptr"
+					}
+					"owner"
+					{
+						"type"	"cbaseentity"
+					}
+				}
+			}
+
+			"HX::CInferno::CreateFire"
+			{
+				"signature"	"CInferno::CreateFire"
+				"callconv"	"thiscall"
+				"return"	"bool"
+				"this"		"address"
+
+				"arguments"
+				{
+					"origin"
+					{
+						"type"	"vectorptr"
+					}
+					"direction"
+					{
+						"type"	"vectorptr"
+					}
+					"parent"
+					{
+						"type"	"int"	// FireInfo *
+					}
+					"depth"
+					{
+						"type"	"int"
+					}
+				}
+			}
+
+			"HX::CBasePlayer::SetPunchAngle"
+			{
+				"signature"	"CBasePlayer::SetPunchAngle"
+				"callconv"	"thiscall"
+				"return"	"void"
+				"this"		"entity"
+
+				"arguments"
+				{
+					"angle"
+					{
+						"type"	"vectorptr"	// QAngle
+					}
+				}
+			}
+
+			"HX::CTerrorGun::DoViewPunch"
+			{
+				"signature"	"CTerrorGun::DoViewPunch"
+				"callconv"	"thiscall"
+				"return"	"void"
+				"this"		"entity"
+
+				"arguments"
+				{
+					"player"
+					{
+						"type"	"cbaseentity"
+					}
+				}
+			}
+
+			"HX::CInsectSwarm::GetFlameLifetime"
+			{
+				"address"	"CInsectSwarm::GetFlameLifetime"
+				"callconv"	"thiscall"
+				"return"	"float"
+				"this"		"address"
+			}
+
+			"HX::CBaseServer::ProcessConnectionlessPacket"
+			{
+				"signature"	"CBaseServer::ProcessConnectionlessPacket"
+				"callconv"	"thiscall"
+				"return"	"int"
+				"this"		"ignore"
+
+				"arguments"
+				{
+					"packet"
+					{
+						"type"	"int" // netpacket_s
+					}
+				}
+			}
+
+			"HX::CBaseServer::SetReservationCookie"
+			{
+				"signature"	"CBaseServer::SetReservationCookie"
+				"callconv"	"thiscall"
+				"return"	"void"
+				"this"		"ignore"
+
+				"arguments"
+				{
+					"cookie1"
+					{
+						"type"	"int"
+					}
+
+					"cookie2"
+					{
+						"type"	"int"
+					}
+
+					"reason"
+					{
+						"type"	"charptr"
+					}
+				}
+			}
+
+			"HX::CCSPlayer::ShowMOTD"
+			{
+				"signature"	"CCSPlayer::ShowMOTD"
+				"callconv"	"thiscall"
+				"return"	"void"
+				"this"		"entity"
+			}
+
+			"HX::CTerrorPlayer::ShowHostDetails"
+			{
+				"signature"	"CTerrorPlayer::ShowHostDetails"
+				"callconv"	"thiscall"
+				"return"	"void"
+				"this"		"entity"
+			}
+
+			"HX::CBaseServer::GetFreeClientInternal"
+			{
+				"signature"	"CBaseServer::GetFreeClientInternal"
+				"callconv"	"thiscall"
+				"return"	"int"
+				"this"		"ignore"
+
+				"arguments"
+				{
+					"netadr"
+					{
+						"type"	"int"
+					}
+				}
+			}
+		}
+
+		"Addresses"
+		{
+			"CDirector" // ty left4dhooks
+			{
+				"windows"
+				{
+					"signature" "CDirectorMusicBanks::OnRoundStart"
+					"read"		"12"
+				}
+				"linux"
+				{
+					"signature" "TheDirector"
+				}
+				"read" "0"
+			}
+
+			"ZombieManager" // ty left4dhooks
+			{
+				"windows"
+				{
+					"signature"	"StartChangeLevel"
+					"read"	"293"
+				}
+				"linux"
+				{
+					"signature" "TheZombieManager"
+				}
+				"read" "0"
+			}
+
+			"CL4DGameStats"
+			{
+				"windows"
+				{
+					"signature"	"CDirectorScriptedEventManager::UpdatePanicEvents"
+					"read"		"606"
+				}
+				"linux"
+				{
+					"signature"	"CL4D_GameStats"
+				}
+			}
+
+			"CNavMesh"
+			{
+				"windows"
+				{
+					"signature"	"CBaseCombatCharacter::UpdateLastKnownArea"
+					"read"		"159"
+				}
+				"linux"
+				{
+					"signature"	"TheNavMesh"
+				}
+				"read" "0"
+			}
+
+			"AllNavAreas"
+			{
+				"windows"
+				{
+					"signature"	"TerrorNavMesh::ComputeFlowDistances"
+					"read"		"273"
+				}
+				"linux"
+				{
+					"signature"	"TheNavAreas"
+				}
+			}
+
+			"DefaultViewVectors"
+			{
+				"linux"
+				{
+					"signature"	"g_DefaultViewVectors"
+				}
+				"windows"
+				{
+					"signature"	"CGameRules::CGameRules"
+					"read"		"15"	// vtable pointer
+					"read"		"120"	// GetViewVectors function
+					"read"		"1"		// g_DefaultViewVectors
+					/** untested. hopefully this works */
+				}
+			}
+
+			"CTraceFilterSimple_vtable"
+			{
+				"linux"
+				{
+					"signature"	"CTraceFilterSimple::CTraceFilterSimple"
+					"read"		"11"
+				}
+				"windows"
+				{
+					"signature"	"CTraceFilterSimple::CTraceFilterSimple"
+					"read"		"19"
+				}
+			}
+
+			"CInsectSwarm::GetFlameLifetime"
+			{
+				"linux"
+				{
+					"signature"	"CInsectSwarm::GetFlameLifetime"
+				}
+				"windows"
+				{
+					"signature"	"CEntityFactory<CInsectSwarm>::Create"
+					"read"		"32"  // CInsectSwarm vtable
+					"read"		"820" // target function!
+				}
+			}
+
+			"CAmmoDef"
+			{
+				"linux"
+				{
+					"signature"	"ammoDef"
+				}
+				"windows"
+				{
+					"signature"	"CTerrorAmmoDefSystem::Init"
+					"read"		"2"
+				}
+			}
+
+			/********************************************************************************
+			 * FUNCTIONS FROM CALL INSTRUCTION
+			 *
+			 * if a function doesn't have a unique signature when we want the exact function,
+			 * addresses prefixed with CALL:: will be interpreted as the address of the
+			 * relative offset bytes in a CALL instruction, using it to calculate the final
+			 * address.
+			 *******************************************************************************/
+
+			"CALL::CUtlVector<NavArea>::GrowVector"
+			{
+				"windows"
+				{
+					"signature"	"ZombieManager::AccumulateSpawnAreaCollection"
+					"offset"	"1090"
+				}
+			}
+
+			"CALL::TerrorNavMesh::RemoveWanderersInActiveAreaSet"
+			{
+				"windows"
+				{
+					"signature"	"CDirector::UpdateTempo"
+					"offset"	"180"
+				}
+			}
+
+			"CALL::CL4DGameStats::Event_DirectorRelaxed"
+			{
+				"windows"
+				{
+					"signature"	"CDirector::UpdateTempo"
+					"offset"	"538"
+				}
+			}
+
+			"CALL::NextBotCreatePlayerBot<SurvivorBot>"
+			{
+				"windows"
+				{
+					"signature"	"CDirector::AddSurvivorBot"
+					"offset"	"268"
+				}
+			}
+		}
+
+		"Offsets"
+		{
+			"HX::OS"
+			{
+				"linux"		"1"
+				"windows"	"2"
+			}
+
+			/**********
+			 * vtable
+			 **********/
+
+			"AcceptInput"
+			{
+				"windows"	"44"
+				"linux"		"45"
+			}
+
+			"CreateRagdollEntity"
+			{
+				"linux"		"552"
+				"windows"	"551"
+			}
+
+			"OnNavAreaChanged"
+			{
+				"linux"		"335"
+				"windows"	"334"
+			}
+
+			"GetLastKnownArea"
+			{
+				"windows"	"330"
+				"linux"		"331"
+				/** CTerrorPlayer vtable. follow instructions for CNavArea::m_spawnAttributes,
+				 * it's referenced in the call to get the nav area
+				*/
+			}
+
+			"IsInFieldOfView"
+			{
+				"linux"		"266"
+				"windows"	"264"
+			}
+
+			"IsHiddenByFog"
+			{
+				"linux"		"256"
+				"windows"	"257"
+			}
+
+			"ShouldHitEntity"
+			{
+				"linux"		"0"
+				"windows"	"0"
+			}
+
+			"GetTraceType"
+			{
+				"linux"		"1"
+				"windows"	"1"
+			}
+
+			"SetTimescale"
+			{
+				"linux"		"31"
+				"windows"	"30"
+			}
+
+			"HandleCommand_JoinTeam"
+			{
+				"linux"		"563"
+				"windows"	"562"
+			}
+
+			"FlashlightIsOn"
+			{
+				"linux"		"381"
+				"windows"	"380"
+			}
+
+			"FlashlightTurnOn"
+			{
+				"linux"		"382"
+				"windows"	"381"
+			}
+
+			"FlashlightTurnOff"
+			{
+				"linux"		"383"
+				"windows"	"382"
+			}
+
+			"GetWeaponID"
+			{
+				"linux"		"398"
+				"windows"	"397"
+			}
+
+			"Weapon_Switch"
+			{
+				"linux"		"285"
+				"windows"	"284"
+			}
+
+			"MaxCarry"
+			{
+				"linux"		"0"
+				"windows"	"0"
+			}
+
+			"GetMaxClip1"
+			{
+				"linux"		"324"
+				"windows"	"323"
+			}
+
+			"IsAlive"
+			{
+				"linux"		"75"
+				"windows"	"74"
+			}
+
+			"Event_Killed"
+			{
+				"linux"		"76"
+				"windows"	"75"
+			}
+
+			"SetObserverTarget"
+			{
+				"linux"		"403"
+				"windows"	"402"
+			}
+
+			/*****************
+			 * various offsets
+			 *****************/
+
+			"Intensity"
+			{
+				"linux"		"12000"
+				"windows"	"12020"
+				/** check any call to an intensity function where it passes a player object.
+				 * windows: search PlayerIncapacitated, cross reference with linux to find the Intensity::Increase call
+				 */
+			}
+
+			"EHandle"
+			{
+				"windows"	"928"
+				"linux"		"948"
+				/** accessed by CBaseEntity::GetRefEHandle.
+				 * windows: pointer to that function 8 bytes into CBaseEntity vtable
+				 */
+			}
+
+			// "lastKnownArea"
+			// {
+			// 	"linux"		"6676"
+			// 	"windows"	"6676"
+			// }
+
+			"CDirectorChallengeMode"
+			{
+				"linux"		"1608"
+				"windows"	"1608"
+			}
+
+			"CDirectorChallengeMode::allow_script_variables"
+			{
+				"linux"		"1"
+				"windows"	"1"
+			}
+
+			"variant_t::type"
+			{
+				"linux"		"16"
+				"windows"	"16"
+			}
+
+			"CUtlVector::list"
+			{
+				"linux"		"0"
+				"windows"	"0"
+			}
+
+			"CUtlVector::size"
+			{
+				"linux"		"4"
+				"windows"	"4"
+			}
+
+			"CUtlVector::count"
+			{
+				"linux"		"12"
+				"windows"	"12"
+			}
+
+			"CUtlVector::listPtr"
+			{
+				"linux"		"16"
+				"windows"	"16"
+			}
+
+			"CFinaleTrigger::finaleType"
+			{
+				"windows"	"5656"
+				"linux"		"5668"
+			}
+
+			"ZombieManager::spawnAreaVectors"
+			{
+				"linux"		"112"
+				"windows"	"112"
+			}
+
+			"CBaseEntity::teamNumber"
+			{
+				"linux"		"588"
+				"windows"	"568"
+			}
+
+			"CDirector::survivorsLeftSafeArea"
+			{
+				"linux"		"352"
+				"windows"	"352"
+			}
+
+			"CTraceFilterSimple::vtablePtr"
+			{
+				"linux"		"0"
+				"windows"	"0"
+			}
+
+			"CTraceFilterSimple::passEnt"
+			{
+				"linux"		"4"
+				"windows"	"4"
+			}
+
+			"CTraceFilterSimple::collisionGroup"
+			{
+				"linux"		"8"
+				"windows"	"8"
+			}
+
+			"CTraceFilterSimple::extraCallback"
+			{
+				"linux"		"12"
+				"windows"	"12"
+			}
+
+			"CTerrorPlayer::activeSet"
+			{
+				"linux"		"12520"
+				"windows"	"12540"
+			}
+
+			"CBasePlayer::punchAngle"
+			{
+				"linux"		"6832"
+				"windows"	"6836"
+			}
+
+			"CTerrorPlayer::character"
+			{
+				"linux"		"11168"
+				"windows"	"11188"
+			}
+
+			"CGameClient::index"
+			{
+				"linux"		"52"
+				"windows"	"52"
+			}
+
+			"CTerrorPlayer::timeLastAlive"
+			{
+				"linux"		"13324"
+				"windows"	"13344"
+			}
+
+			"CTerrorPlayer::detachedWeapon"
+			{
+				"linux"		"16288"
+				"windows"	"16308"
+			}
+
+			"CBaseCombatCharacter::lastHitGroup"
+			{
+				"linux"		"6200"
+				"windows"	"6200"
+			}
+
+			/*****************
+			 * CountdownTimer
+			 ****************/
+
+			"CountdownTimer::time"
+			{
+				"linux"		"4"
+				"windows"	"4"
+			}
+			"CountdownTimer::timestamp"
+			{
+				"linux"		"8"
+				"windows"	"8"
+			}
+
+			/************
+			 * CNavLadder
+			 ************/
+
+			"CNavLadder::connectedNavs"
+			{
+				"linux"		"36"
+				"windows"	"36"
+			}
+
+			"CNavLadder::ehandle"
+			{
+				"linux"		"56"
+				"windows"	"56"
+			}
+
+			"CNavLadder::topOrigin"
+			{
+				"linux"		"4"
+				"windows"	"4"
+			}
+
+			"CNavLadder::length"
+			{
+				"linux"		"28"
+				"windows"	"28"
+			}
+
+			/***********
+			 * CNavArea
+			 **********/
+
+			"CNavArea::wandererPopulation"
+			{
+				"linux"		"296"
+				"windows"	"292"
+			}
+
+			"CNavArea::baseAttributes"
+			{
+				"linux"		"84"
+				"windows"	"84"
+			}
+
+			"CNavArea::spawnAttributes"
+			{
+				"windows"	"296"
+				"linux"		"300"
+				/** condition in ForEachTerrorPlayer<NoSurvivorInBattlefieldOrFinaleScan>,
+				 * called in StartPanicEvent, part of the checks to determine wave count if waves is 0:
+				 * (navarea + offset) & 0x140
+				 */
+			}
+
+			"CNavArea::adjacentAreas"
+			{
+				"linux"		"88"
+				"windows"	"88"
+			}
+
+			"CNavArea::flow"
+			{
+				"linux"		"340"
+				"windows"	"332"
+			}
+
+			"CNavArea::id"
+			{
+				"linux"		"140"
+				"windows"	"140"
+			}
+
+			"CNavArea::connectedLadders"
+			{
+				"linux"		"104"
+				"windows"	"104"
+			}
+
+			"CNavArea::center"
+			{
+				"linux"		"44"
+				"windows"	"44"
+			}
+
+			"CNavArea::connectedElevator"
+			{
+				"linux"		"132"
+				"windows"	"132"
+			}
+
+			"CNavArea::elevatorConnectedAreas"
+			{
+				"linux"		"136"
+				"windows"	"136"
+			}
+
+			"CNavArea::incomingConnections"
+			{
+				"linux"		"276"
+				"windows"	"272"
+			}
+
+			"CNavArea::cornerNx"
+			{
+				"linux"		"4"
+				"windows"	"4"
+			}
+
+			"CNavArea::cornerPx"
+			{
+				"linux"		"16"
+				"windows"	"16"
+			}
+
+			"CNavArea::cornerNy"
+			{
+				"linux"		"8"
+				"windows"	"8"
+			}
+
+			"CNavArea::cornerPy"
+			{
+				"linux"		"20"
+				"windows"	"20"
+			}
+
+			"CNavArea::cornerNNz"
+			{
+				"linux"		"12"
+				"windows"	"12"
+			}
+
+			"CNavArea::cornerPPz"
+			{
+				"linux"		"24"
+				"windows"	"24"
+			}
+
+			"CNavArea::cornerPNz"
+			{
+				"linux"		"36"
+				"windows"	"36"
+			}
+
+			"CNavArea::cornerNPz"
+			{
+				"linux"		"40"
+				"windows"	"40"
+			}
+
+			/************
+			 * CDirector
+			 ***********/
+
+			"CDirector::mobTimer"
+			{
+				"linux"		"660"
+				"windows"	"660"
+			}
+
+			"CDirector::nextMobSize"
+			{
+				"linux"		"900"
+				"windows"	"900"
+			}
+
+			"CDirector::mobRechargeProgress"
+			{
+				"linux"		"904"
+				"windows"	"904"
+			}
+
+			"CDirector::tempo"
+			{
+				"linux"		"404"
+				"windows"	"404"
+			}
+
+			"CDirector::tempoTimer"
+			{
+				"linux"		"408"
+				"windows"	"408"
+			}
+
+			"CDirector::relaxStartFlow"
+			{
+				"linux"		"420"
+				"windows"	"420"
+			}
+
+			"CDirectorTacticalServices"
+			{
+				"linux"		"1576"
+				"windows"	"1576" // not verified, but also not used atm
+			}
+
+			/***********************************
+			 * Scripted Event Manager structure
+			 **********************************/
+
+			"CDirectorScriptedEventManager"
+			{
+				"linux"		"1592"
+				"windows"	"1592"
+			}
+
+			"CDirectorScriptedEventManager::panicStageDelayTimer"
+			{
+				"linux"		"300"
+				"windows"	"300"
+			}
+
+			"CDirectorScriptedEventManager::panicStage"
+			{
+				"linux"		"296"
+				"windows"	"296"
+			}
+
+			"CDirectorScriptedEventManager::crescendoOngoing"
+			{
+				"linux"		"273"
+				"windows"	"273"
+			}
+
+			"CDirectorScriptedEventManager::finaleType"
+			{
+				"linux"		"0"
+				"windows"	"0"
+			}
+
+			"CDirectorScriptedEventManager::finaleStage"
+			{
+				"linux"		"4"
+				"windows"	"4"
+			}
+
+			"CDirectorScriptedEventManager::crescendoHasOccured"
+			{
+				"linux"		"272"
+				"windows"	"272"
+			}
+
+			"CDirectorScriptedEventManager::completedPanicWaves"
+			{
+				"linux"		"312"
+				"windows"	"312"
+			}
+
+			"CDirectorScriptedEventManager::totalPanicWaves"
+			{
+				"linux"		"316"
+				"windows"	"316"
+			}
+
+			/****************
+			 * IntervalTimer
+			 ***************/
+
+			"IntervalTimer::timestamp"
+			{
+				"linux"		"4"
+				"windows"	"4"
+			}
+
+			/***********
+			 * CInferno
+			 **********/
+
+			"CInferno::type"
+			{
+				"linux"		"2628"
+				"windows"	"2608"
+			}
+
+			"CInferno::maxFires"
+			{
+				"linux"		"2980"
+				"windows"	"2960"
+			}
+
+			"CInferno::startTime"
+			{
+				"linux"		"2968"
+				"windows"	"2948"
+			}
+
+			"CInferno::minBounds"
+			{
+				"linux"		"2896"
+				"windows"	"2876"
+			}
+
+			"CInferno::maxBounds"
+			{
+				"linux"		"2908"
+				"windows"	"2888"
+			}
+
+			"CInferno::flameCount"
+			{
+				"linux"		"2624"
+				"windows"	"2604"
+			}
+
+			"CInferno::flameList"
+			{
+				"linux"		"2632"
+				"windows"	"2612"
+			}
+
+			"CInferno::origin"
+			{
+				"linux"		"2956"
+				"windows"	"2936"
+			}
+
+			/***********
+			 * FireInfo
+			 ***********/
+
+			"FireInfo::depth"
+			{
+				"linux"		"36"
+				"windows"	"36"
+			}
+
+			"FireInfo::parent"
+			{
+				"linux"		"44"
+				"windows"	"44"
+			}
+
+			"FireInfo::spreadDuration"
+			{
+				"linux"		"48"
+				"windows"	"48"
+			}
+
+			"FireInfo::lifetime"
+			{
+				"linux"		"72"
+				"windows"	"72"
+			}
+
+			"FireInfo::origin"
+			{
+				"linux"		"0"
+				"windows"	"0"
+			}
+
+			"FireInfo::direction"
+			{
+				"linux"		"24"
+				"windows"	"24"
+			}
+
+			/***********
+			 * netadr_s
+			 **********/
+
+			"netadr_s::type"
+			{
+				"linux"		"0"
+				"windows"	"0"
+			}
+
+			"netadr_s::ipv4"
+			{
+				"linux"		"4"
+				"windows"	"4"
+			}
+
+			"netadr_s::port"
+			{
+				"linux"		"8"
+				"windows"	"8"
+			}
+
+			/**************
+			 * netpacket_s
+			 *************/
+
+			"netpacket_s::from"
+			{
+				"linux"		"0"
+				"windows"	"0"
+			}
+
+			"netpacket_s::packet"
+			{
+				"linux"		"24"
+				"windows"	"24"
+			}
+
+			"netpacket_s::bitbuffer"
+			{
+				"linux"		"28"
+				"windows"	"28"
+			}
+
+			/***********
+			 * CBitRead
+			 ***********/
+
+			"CBitRead::info"
+			{
+				"linux"		"16"
+				"windows"	"16"
+			}
+
+			"CBitRead::bytesLeft"
+			{
+				"linux"		"20"
+				"windows"	"20"
+			}
+
+			/******************
+			 * CTakeDamageInfo
+			 *****************/
+
+			"CTakeDamageInfo::attacker"
+			{
+				"linux"		"52"
+				"windows"	"52"
+			}
+
+			"CTakeDamageInfo::inflictor"
+			{
+				"linux"		"48"
+				"windows"	"48"
+			}
+
+			"CTakeDamageInfo::damage"
+			{
+				"linux"		"60"
+				"windows"	"60"
+			}
+
+			"CTakeDamageInfo::damageType"
+			{
+				"linux"		"72"
+				"windows"	"72"
+			}
+
+			"CTakeDamageInfo::damageForce"
+			{
+				"linux"		"0"
+				"windows"	"0"
+			}
+
+			"CTakeDamageInfo::damagePos"
+			{
+				"linux"		"12"
+				"windows"	"12"
+			}
+
+			"CTakeDamageInfo::weapon"
+			{
+				"linux"		"56"
+				"windows"	"56"
+			}
+		}
+
+		"Signatures"
+		{
+			/********************
+			 * for some addresses
+			 *******************/
+
+			"TheDirector" // ty left4dhooks
+			{
+				"library"	"server"
+				"linux"		"@TheDirector"
+			}
+
+			/* Used solely to get the offset for TheDirector
+			 * CDirectorMusicBanks::OnRoundStart
+			 * Has unique string "Event.Reveal"
+			*/
+			"CDirectorMusicBanks::OnRoundStart" // ty left4dhooks
+			{
+				"library"	"server"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x2A\x56\x57\x8B\xF9\x8B\x0D\x2A\x2A\x2A\x2A\xE8\x2A\x2A\x2A\x2A\x84\xC0\x0F"
+				/* 55 8B EC 83 EC ? 56 57 8B F9 8B 0D ? ? ? ? E8 ? ? ? ? 84 C0 0F */
+			}
+
+			"CL4D_GameStats"
+			{
+				"library"	"server"
+				"linux"		"@CL4D_GameStats"
+			}
+
+			/** Used solely to get the offset for CL4D_GameStats */
+			"CDirectorScriptedEventManager::UpdatePanicEvents"
+			{
+				"library"	"server"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x08\x57\x8B\xF9\x8B\x87\x2A\x2A\x2A\x2A\x83\xF8\x03"
+			}
+
+			/** used to get CUtlVector<NavArea>::GrowVector for windows */
+			"ZombieManager::AccumulateSpawnAreaCollection"
+			{
+				"library"	"server"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x48\xA1\x2A\x2A\x2A\x2A\x53\x56\x33\xF6\x89\x75\x2A\x89\x75\x2A\x57\x89\x4D\x2A"
+			}
+
+			"TheZombieManager"
+			{
+				"library"	"server"
+				"linux"		"@TheZombieManager"
+			}
+
+			"StartChangeLevel"
+			{
+				"library"	"server"
+				"windows"	"\x55\x8B\xEC\xA1\x2A\x2A\x2A\x2A\x83\x78\x30\x00\x56\x8B\xF1\x74"
+				/* 55 8B EC A1 ? ? ? ? 83 78 30 00 56 8B F1 74 */
+			}
+
+			"CBaseCombatCharacter::UpdateLastKnownArea"
+			{
+				"library"	"server"
+				"windows"	"\xA1\x2A\x2A\x2A\x2A\x83\xB8\x2C\x05\x00\x00\x00\x56\x8B\xF1\x74\x2A"
+			}
+
+			"TheNavMesh"
+			{
+				"library"	"server"
+				"linux"		"@TheNavMesh"
+			}
+
+			"TerrorNavMesh::ComputeFlowDistances"
+			{
+				"library"	"server"
+				"windows"	"\x55\x8B\xEC\x81\xEC\x88\x00\x00\x00\xA1\x2A\x2A\x2A\x2A\x53"
+				/* 55 8B EC 81 EC 88 00 00 00 A1 ? ? ? ? 53 */
+			}
+
+			"TheNavAreas"
+			{
+				"library"	"server"
+				"linux"		"@TheNavAreas"
+			}
+
+			"g_DefaultViewVectors"
+			{
+				"library"	"server"
+				"linux"		"@_ZL20g_DefaultViewVectors"
+			}
+
+			"CGameRules::CGameRules"
+			{
+				"library"	"server"
+				"windows"	"\x56\x68\x2A\x2A\x2A\x2A\x8B\xF1\xE8\x2A\x2A\x2A\x2A\xC7\x06\x2A\x2A\x2A\x2A"
+				/** 56 68 ? ? ? ? 8B F1 E8 ? ? ? ? C7 06 ? ? ? ? */
+			}
+
+			"CTraceFilterSimple::CTraceFilterSimple"
+			{
+				"library"	"server"
+				"linux"		"@_ZN18CTraceFilterSimpleC2EPK13IHandleEntityiPFbPS0_iE"
+				"windows"	"\x55\x8B\xEC\x8B\x55\x2A\x8B\xC1\x8B\x4D\x2A\x89\x48\x2A\x8B\x4D\x2A\xC7\x00\x2A\x2A\x2A\x2A\x89\x50\x2A\x89\x48\x2A\x5D"
+				/** 55 8B EC 8B 55 ? 8B C1 8B 4D ? 89 48 ? 8B 4D ? C7 00 ? ? ? ? 89 50 ? 89 48 ? 5D */
+			}
+
+			"CEntityFactory<CInsectSwarm>::Create"
+			{
+				"library"	"server"
+				"windows"	"\x55\x8B\xEC\x56\x68\xA8\x0B\x00\x00"
+				/** 55 8B EC 56 68 A8 0B 00 00 */
+			}
+
+			"CInsectSwarm::GetFlameLifetime"
+			{
+				"library"	"server"
+				"linux"		"@_ZNK12CInsectSwarm16GetFlameLifetimeEv"
+				/** no unique signature in windows */
+			}
+
+			"CBaseServer::CBaseServer"
+			{
+				"library"	"engine"
+				"windows"	"\x53\x56\x8B\xF1\x57\x8D\x8E\x2A\x2A\x2A\x2A\xC7\x06\x2A\x2A\x2A\x2A\xE8\x2A\x2A\x2A\x2A\x33\xDB"
+				/** 53 56 8B F1 57 8D 8E ? ? ? ? C7 06 ? ? ? ? E8 ? ? ? ? 33 DB */
+			}
+
+			"ammoDef"
+			{
+				"library"	"server"
+				"linux"		"@_ZL7ammoDef"
+			}
+
+			"CTerrorAmmoDefSystem::Init"
+			{
+				"library"	"server"
+				"windows"	"\xD9\x05\x2A\x2A\x2A\x2A\x6A\x0E\x6A\x0A\x6A\x00\x51\xD9\x2A\x2A\x68\x2A\x2A\x2A\x2A\x6A\x00\x6A\x00\x6A\x01\x6A\x02\x68\x2A\x2A\x2A\x2A\xB9\x2A\x2A\x2A\x2A\xE8\x2A\x2A\x2A\x2A\xD9\x05"
+				/** d9 05 ? ? ? ? 6a 0e 6a 0a 6a 00 51 d9 ? ? 68 ? ? ? ? 6a 00 6a 00 6a 01 6a 02 68 ? ? ? ? b9 ? ? ? ? e8 ? ? ? ? d9 05 */
+			}
+
+			/**********************
+			 * Functions, SDKCalls
+			 ********************/
+
+			"Intensity::Reset"
+			{
+				"library"	"server"
+				"linux"		"@_ZN9Intensity5ResetEv"
+				"windows"	"\x55\x8B\x2A\x51\x0F\x2A\x2A\x56\x8D\x2A\x2A\xF3\x2A\x2A\x2A\xF3"
+				/*	instructions from left4dhooks
+				* 1. Search "ClientSettings" for "CTerrorPlayer::CTerrorPlayer" function
+				* 2. Match to Linux, target call is below a "memset" instruction
+				*/
+			}
+
+			"Intensity::Increase"
+			{
+				"library"	"server"
+				"linux"		"@_ZN9Intensity8IncreaseENS_13IntensityTypeE"
+				"windows"	"\x55\x8B\xEC\x8B\x45\x08\x0F\x57\xC9\xF3\x0F\x10\x15\x2A\x2A\x2A\x2A"
+				/** search PlayerIncapacitated, cross reference with linux to find the Intensity::Increase call */
+			}
+
+			"CDirectorScriptedEventManager::OnMapInvokedPanicEventNonVirtual"
+			{
+				"library"	"server"
+				"linux"		"@_ZN29CDirectorScriptedEventManager32OnMapInvokedPanicEventNonVirtualEP11CBasePlayer20panic_event_reason_t"
+				"windows"	"\x55\x8B\xEC\x8B\x45\x0C\x53\x56\x57\x8B\xF1\x83\xF8\x03"
+			}
+
+			"CDirectorScriptedEventManager::StartPanicEvent"
+			{
+				"library"	"server"
+				"linux"		"@_ZN29CDirectorScriptedEventManager15StartPanicEventEiP11CBasePlayer"
+				"windows"	"\x55\x8B\xEC\xA1\x2A\x2A\x2A\x2A\xF3\x0F\x10\x80\x3C\x04\x00\x00"
+			}
+
+			"CDirectorScriptedEventManager::IsACrecendoEvent"
+			{
+				"library"	"server"
+				"linux"		"@_ZNK29CDirectorScriptedEventManager16IsACrecendoEventEv"
+				/** called in CDirectorScriptedEventManager::StartPanicEvent */
+			}
+
+			"CDirector::GetScriptValueInt"
+			{
+				"library"	"server"
+				"linux"		"@_ZN9CDirector14GetScriptValueEPKci"
+				"windows"	"\x55\x8B\xEC\x8B\x81\xB8\x04\x00\x00\x83\xEC\x10\x83\xF8\xFF\x74\x2A\x8B\x0D\x2A\x2A\x2A\x2A\x85\xC9\x74\x2A\x56\x33\xD2\x8D\x75\xF0\x56\x8B\x75\x08\x66\x89\x55\xF8\x66\x89\x55\xFA\x89\x55\xF0\x8B\x11\x56\x50\x8B\x82\x94\x00\x00\x00\xFF\xD0\x5E\x84\xC0\x74\x2A\x8D\x4D\x0C\x51\x8D\x4D\xF0\xE8\x2A\x2A\x2A\x2A\x84\xC0\x75\x2A\x8B\x0D\x2A\x2A\x2A\x2A\x8B\x11\x8B\x92\x9C\x00\x00\x00\x8D\x45\xF0\x50\xFF\xD2\xF6\x45\xFA\x01\x74\x2A\xA1\x2A\x2A\x2A\x2A\x8B\x08\x8B\x11\x8B\x45\xF0\x8B\x52\x14\x50\xFF\xD2\x8B\x45\x0C"
+				/** search "AllowCrescendoEvents" */
+			}
+
+			"CDirector::GetScriptValueFloat"
+			{
+				"library"	"server"
+				"linux"		"@_ZN9CDirector14GetScriptValueEPKcf"
+				"windows"	"\x55\x8B\xEC\x8B\x81\x2A\x2A\x2A\x2A\x83\xEC\x10\x83\xF8\xFF\x74\x2A\x8B\x0D\x2A\x2A\x2A\x2A\x85\xC9\x74\x2A\x56\x33\xD2\x8D\x75\x2A\x56\x8B\x75\x2A\x66\x89\x55\x2A\x66\x89\x55\x2A\x89\x55\x2A\x8B\x11\x56\x50\x8B\x82\x2A\x2A\x2A\x2A\xFF\xD0\x5E\x84\xC0\x74\x2A\x8D\x4D\x2A\x51\x8D\x4D\x2A\xE8\x2A\x2A\x2A\x2A\x84\xC0\x75\x2A\x8B\x0D\x2A\x2A\x2A\x2A\x8B\x11\x8B\x92\x2A\x2A\x2A\x2A\x8D\x45\x2A\x50\xFF\xD2\xF6\x45\x2A\x01\x74\x2A\xA1\x2A\x2A\x2A\x2A\x8B\x08\x8B\x11\x8B\x45\x2A\x8B\x52\x2A\x50\xFF\xD2\xD9\x45\x2A"
+				/** 55 8B EC 8B 81 ? ? ? ? 83 EC 10 83 F8 FF 74 ? 8B 0D ? ? ? ? 85 C9 74 ? 56 33 D2 8D 75 ? 56 8B 75 ? 66 89 55 ? 66 89 55 ? 89 55 ? 8B 11 56 50 8B 82 ? ? ? ? FF D0 5E 84 C0 74 ? 8D 4D ? 51 8D 4D ? E8 ? ? ? ? 84 C0 75 ? 8B 0D ? ? ? ? 8B 11 8B 92 ? ? ? ? 8D 45 ? 50 FF D2 F6 45 ? 01 74 ? A1 ? ? ? ? 8B 08 8B 11 8B 45 ? 8B 52 ? 50 FF D2 D9 45 ?
+				 * called in CDirector::OnMobRushStart
+				*/
+			}
+
+			"CDirector::GetMapArcValue"
+			{
+				"library"	"server"
+				"linux"		"@_ZNK9CDirector14GetMapArcValueEv"
+				"windows"	"\x56\x8B\xB1\x20\x04\x00\x00"
+				/* 	final condition in the checks in CDirector::StartPanicEvent related to changing waves argument if it's 0
+					search %3.2f: "Director::StartPanicEvent: Staring 1 wave panic event\n" */
+			}
+
+			"CDirector::PostRunScript"
+			{
+				"library"	"server"
+				"linux"		"@_ZN9CDirector13PostRunScriptEv"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x14\x53\x56\x8B\xD9\x57\x8D\x8B\xB8\x04\x00\x00"
+				/** search "GetDirectorOptions" */
+			}
+
+			"CDirector::BeginLocalScript"
+			{
+				"library"	"server"
+				"linux"		"@_ZN9CDirector16BeginLocalScriptEPKc"
+				"windows"	"\x55\x8B\xEC\x56\x8B\xF1\xE8\x2A\x2A\x2A\x2A\x8B\x45\x08\x6A\x00\x6A\x02"
+				/** calls 2 functions, each with a unique string: "Failed to correctly clean up local script" and
+				 * "CDirector::RunScript, %s, level: %d\n"
+				 */
+			}
+
+			"CDirector::EndLocalScript"
+			{
+				"library"	"server"
+				"linux"		"@_ZN9CDirector14EndLocalScriptEv"
+				"windows"	"\x56\x8B\xF1\x83\xBE\xA0\x04\x00\x00\xFF"
+				/** search "Failed to correctly clean up local script" */
+			}
+
+			"CDirector::OnMobRushStart"
+			{
+				"library"	"server"
+				"linux"		"@_ZN9CDirector14OnMobRushStartEv"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x08\xA1\x2A\x2A\x2A\x2A\xD9\x40\x2A\x56\x57\x51"
+				/** search "MobMinSize" */
+			}
+
+			"CL4DGameStats::Event_PanicEventOver"
+			{
+				"library"	"server"
+				"linux"		"@_ZN13CL4DGameStats20Event_PanicEventOverEv"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x24\x33\xC0\x89\x45\x2A\x89\x45\x2A\x89\x45\x2A\x89\x45\x2A\x89\x45\x2A\xB8\x02\x00\x00\x00"
+				/** search "STAGE_WAIT_FOR_COMBAT_TO_END -> STAGE_DONE\n", it's called right next to the DevMsg with that string */
+			}
+
+			"CDirectorScriptedEventManager::OnPanicEventFinished"
+			{
+				"library"	"server"
+				"linux"		"@_ZN29CDirectorScriptedEventManager20OnPanicEventFinishedEv"
+				"windows"	"\x8B\x01\x83\xF8\x02\x74\x2A"
+				/** search "STAGE_WAIT_FOR_COMBAT_TO_END -> STAGE_DONE\n", it's called right next to the DevMsg with that string */
+			}
+
+			"CFinaleTrigger::StartFinale"
+			{
+				"library"	"server"
+				"linux"		"@_ZN14CFinaleTrigger11StartFinaleEP13CTerrorPlayer"
+				"windows"	"\x55\x8B\xEC\x81\xEC\x10\x01\x00\x00\xA1\x2A\x2A\x2A\x2A\x33\xC5\x89\x45\x2A\x56\x57\x8B\x7D\x2A\x8B\xF1"
+				/** search "finale_radio_start" */
+			}
+
+			"ZombieManager::GetRandomPZSpawnPosition"
+			{
+				"library"	"server"
+				"linux"		"@_ZNK13ZombieManager24GetRandomPZSpawnPositionE15ZombieClassTypeiP13CTerrorPlayerP6Vector"
+				"windows"	"\x55\x8B\x2A\x83\x2A\x2A\x53\x57\x8B\x2A\x2A\x8B\x2A\x89\x2A\x2A\x85\x2A\x75\x2A\x5F\x32"
+				/** 55 8B ? 83 ? ? 53 57 8B ? ? 8B ? 89 ? ? 85 ? 75 ? 5F 32 */
+				/* Search "ZombieManager::GetRandomPZSpawnPosition" */
+			}
+
+			"CUtlVector<NavArea>::InsertBefore"
+			{
+				"library"	"server"
+				"linux"		"@_ZN10CUtlVectorIP8CNavArea10CUtlMemoryIS1_iEE12InsertBeforeEiRKS1_"
+			}
+
+			"ZombieManager::CollectSpawnAreas"
+			{
+				"library"	"server"
+				"linux"		"@_ZNK13ZombieManager17CollectSpawnAreasENS_15MobLocationTypeE15ZombieClassType"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x48\xA1\x2A\x2A\x2A\x2A\x53\x56\x57\x33\xFF\x89\x7D\xEC\x89\x7D\xF0\x8B\xF1\x39\x78\x08\x74\x2A\x8B\x40\x08\x68\x2A\x2A\x2A\x2A\x8B\x50\x50\x68\x2A\x2A\x2A\x2A\x68\x2A\x2A\x2A\x2A\x68\x2A\x2A\x2A\x2A\x68\x1A\x07\x00\x00"
+				/* 55 8B EC 83 EC 48 A1 ? ? ? ? 53 56 57 33 FF 89 7D EC 89 7D F0 8B F1 39 78 08 74 ? 8B 40 08 68 ? ? ? ? 8B 50 50 68 ? ? ? ? 68 ? ? ? ? 68 ? ? ? ? 68 1A 07 00 00 */
+				/* search "ZombieManager::CollectSpawnAreas" string */
+			}
+
+			"CDirector::ResetMobTimer"
+			{
+				"library"	"server"
+				"linux"		"@_ZN9CDirector13ResetMobTimerEv"
+				"windows"	"\x55\x8B\xEC\x51\x56\x57\x8D\xB9\x2A\x2A\x2A\x2A\x8B\xCF\xE8\x2A\x2A\x2A\x2A\xD9"
+				/* 55 8B EC 51 56 57 8D B9 ? ? ? ? 8B CF E8 ? ? ? ? D9 */
+			}
+
+			"CDirector::ResetSpecialTimers"
+			{
+				"library"	"server"
+				"linux"		"@_ZN9CDirector18ResetSpecialTimersEv"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x0C\x53\x56\x57\x89\x4D\xFC"
+				/* 55 8B EC 83 EC 0C 53 56 57 89 4D FC */
+				/* Search "Reset all special timers", and it'll be an xref to the function description, find it here */
+			}
+
+			"CNavArea::GetZDeltaAtEdgeToArea"
+			{
+				"library"	"server"
+				"linux"		"@_ZNK8CNavArea21GetZDeltaAtEdgeToAreaERKS_"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x1C\x56\x8B\xF1\x8B\x4D\x2A"
+				/** 55 8B EC 83 EC 1C 56 8B F1 8B 4D ? */
+				/** search "Error: Nav areas are too far apart vertically to connect! Max climb distance is 180!".
+				 * it's called in this function twice, to compare between 2 nav areas in both directions and then
+				 * checks their returned values by 180 */
+			}
+
+			"CNavArea::IsConnected"
+			{
+				"library"	"server"
+				"linux"		"@_ZNK8CNavArea11IsConnectedEPKS_10NavDirType"
+				"windows"	"\x55\x8B\xEC\x51\x53\x56\x8B\x75\x2A\x8B\xD9\x89\x5D\x2A\x3B\xF3"
+			}
+
+			"CNavMesh::GetNearestNavArea_Pos"
+			{
+				"library"	"server"
+				"linux"		"@_ZNK8CNavMesh17GetNearestNavAreaERK6Vectorbfbbb"
+				"windows"	"\x55\x8B\xEC\x81\xEC\xEC\x00\x00\x00\xA1\x2A\x2A\x2A\x2A\x33\xC5\x89\x45\x2A\x56\x8B\xF1"
+				/** 55 8b ec 81 ec ec 00 00 00 a1 ? ? ? ? 33 c5 89 45 ? 56 8b f1 */
+			}
+
+			"CNavMesh::GetNavArea_Entity"
+			{
+				"library"	"server"
+				"linux"		"@_ZNK8CNavMesh10GetNavAreaEP11CBaseEntityif"
+				"windows"	"\x55\x8B\xEC\x81\xEC\x84\x00\x00\x00\xA1\x2A\x2A\x2A\x2A\x33\xC5\x89\x45\x2A\x53\x56\x8B\xF1"
+			}
+
+			"CNavMesh::GetNavArea_Pos"
+			{
+				"library"	"server"
+				"linux"		"@_ZNK8CNavMesh10GetNavAreaERK6Vectorf"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x18\x83\x79\x2A\x00"
+				/** 55 8B EC 83 EC 18 83 79 ? 00 */
+			}
+
+			"CBaseEntity::CalcAbsolutePosition"
+			{
+				"library"	"server"
+				"linux"		"@_ZN11CBaseEntity20CalcAbsolutePositionEv"
+				"windows"	"\x53\x8B\xDC\x83\xEC\x08\x83\xE4\xF0\x83\xC4\x04\x55\x8B\x6B\x2A\x89\x6C\x24\x2A\x8B\xEC\x83\xEC\x78\xA1\x2A\x2A\x2A\x2A\x33\xC5\x89\x45\x2A\x56"
+				/** 53 8B DC 83 EC 08 83 E4 F0 83 C4 04 55 8B 6B ? 89 6C 24 ? 8B EC 83 EC 78 A1 ? ? ? ? 33 C5 89 45 ? 56 */
+			}
+
+			"CNavArea::GetZ"
+			{
+				"library"	"server"
+				"linux"		"@_ZNK8CNavArea4GetZEff"
+				"windows"	"\x55\x8B\xEC\x51\xF3\x0F\x10\x49\x2A\x0F\x57\xD2"
+				/** 55 8B EC 51 F3 0F 10 49 ? 0F 57 D2 */
+			}
+
+			"ZombieManager::CanZombieSpawnHere"
+			{
+				"library"	"server"
+				"linux"		"@_ZNK13ZombieManager18CanZombieSpawnHereERK6VectorP13TerrorNavArea15ZombieClassTypebP20CBaseCombatCharacter"
+				"windows"	"\x55\x8B\xEC\x81\xEC\x90\x00\x00\x00\xA1\x2A\x2A\x2A\x2A\x33\xC5\x89\x45\x2A\x8B\x45\x2A\x8B\x0D\x2A\x2A\x2A\x2A\x53\x8B\x5D\x2A"
+				/** 55 8B EC 81 EC 90 00 00 00 A1 ? ? ? ? 33 C5 89 45 ? 8B 45 ? 8B 0D ? ? ? ? 53 8B 5D ? */
+				/** called in GetRandomPZSpawnPosition */
+			}
+
+			"IsVisibleToPlayer"
+			{
+				"library"	"server"
+				"linux"		"@_Z17IsVisibleToPlayerRK6VectorP11CBasePlayeriifPK11CBaseEntityPP13TerrorNavAreaPb"
+				"windows"	"\x55\x8B\xEC\x81\xEC\x88\x00\x00\x00\xA1\x2A\x2A\x2A\x2A\x33\xC5\x89\x45\x2A\x8B\x45\x2A\x8B\x4D\x2A"
+				/** 55 8B EC 81 EC 88 00 00 00 A1 ? ? ? ? 33 C5 89 45 ? 8B 45 ? 8B 4D ? */
+			}
+
+			"TerrorNavArea::GetNextEscapeStep"
+			{
+				"library"	"server"
+				"linux"		"@_ZNK13TerrorNavArea17GetNextEscapeStepEP15NavTraverseType"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x48\xF3\x0F\x10\x05\x2A\x2A\x2A\x2A"
+				/** 55 8B EC 83 EC 48 F3 0F 10 05 ? ? ? ? */
+			}
+
+			"CDirector::IsInTransition"
+			{
+				"library"	"server"
+				"linux"		"@_ZNK9CDirector14IsInTransitionEv"
+				"windows"	"\x80\x3D\x2A\x2A\x2A\x2A\x00\x75\x2A\x80\xB9\x2A\x2A\x2A\x2A\x00"
+				/** 80 3D ? ? ? ? 00 75 ? 80 B9 ? ? ? ? 00 */
+			}
+
+			"CNavArea::IsBlocked"
+			{
+				"library"	"server"
+				"linux"		"@_ZNK8CNavArea9IsBlockedEib"
+				"windows"	"\x55\x8B\xEC\x80\x7D\x2A\x00\x74\x2A\x8B\x41\x2A"
+				/** 55 8B EC 80 7D ? 00 74 ? 8B 41 ? */
+			}
+
+			"CZombieBorder::IsBehindZombieBorder"
+			{
+				"library"	"server"
+				"linux"		"@_ZN13CZombieBorder20IsBehindZombieBorderERK6Vector"
+				"windows"	"\x55\x8B\xEC\x51\x8B\x15\x2A\x2A\x2A\x2A\x53\x56\x57\x33\xFF"
+				/** 55 8B EC 51 8B 15 ? ? ? ? 53 56 57 33 FF */
+			}
+
+			"CDirector::ShouldLockTempo"
+			{
+				"library"	"server"
+				"linux"		"@_ZN9CDirector15ShouldLockTempoEv"
+				"windows"	"\x56\x8B\xF1\x8B\x86\x2A\x2A\x2A\x2A\x83\x38\x05"
+				/** 56 8B F1 8B 86 ? ? ? ? 83 38 05 */
+			}
+
+			"TerrorNavMesh::RemoveWanderersInActiveAreaSet"
+			{
+				"library"	"server"
+				"linux"		"@_ZN13TerrorNavMesh30RemoveWanderersInActiveAreaSetEv"
+				/** no unique signature in windows */
+			}
+
+			"CDirector::UpdateTempo"
+			{
+				"library"	"server"
+				"linux"		"@_ZN9CDirector11UpdateTempoEv"
+				"windows"	"\x55\x8B\xEC\x51\x56\x8B\xF1\x8B\x06\x8B\x50\x2A\xFF\xD2\x84\xC0"
+				/** 55 8B EC 51 56 8B F1 8B 06 8B 50 ? FF D2 84 C0 */
+			}
+
+			"CDirectorTacticalServices::GetHighestFlowSurvivor"
+			{
+				"library"	"server"
+				"linux"		"@_ZNK25CDirectorTacticalServices22GetHighestFlowSurvivorEN13TerrorNavArea8FlowTypeE"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x18\xF3\x0F\x10\x05\x2A\x2A\x2A\x2A\x33\xC0"
+				/** 55 8B EC 83 EC 18 F3 0F 10 05 ? ? ? ? 33 C0 */
+			}
+
+			"CL4DGameStats::Event_DirectorRelaxed"
+			{
+				"library"	"server"
+				"linux"		"@_ZN13CL4DGameStats21Event_DirectorRelaxedEv"
+				/** no unique signature in windows */
+			}
+
+			"CTerrorPlayer::GoAwayFromKeyboard"
+			{
+				"library"	"server"
+				"linux"		"@_ZN13CTerrorPlayer18GoAwayFromKeyboardEv"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x08\x53\x56\x57\x8B\xF1\x8B\x06\x8B\x90\x2A\x2A\x2A\x2A\x8B\x9E"
+				/** 55 8B EC 83 EC 08 53 56 57 8B F1 8B 06 8B 90 ? ? ? ? 8B 9E */
+			}
+
+			"CSpitterProjectile::Create"
+			{
+				"library"	"server"
+				"linux"		"@_ZN18CSpitterProjectile6CreateERK6VectorRK6QAngleS2_S2_P20CBaseCombatCharacter"
+				"windows"	"\x55\x8B\xEC\x8B\x45\x2A\x8B\x4D\x2A\x53\x8B\x5D\x2A\x56\x57\x50\x51\x53\x68\x2A\x2A\x2A\x2A\xE8\x2A\x2A\x2A\x2A\x8B\x7D\x2A\xD9\x47\x2A\x83\xEC\x20\xDD\x5C\x24\x2A\x8B\xF0\xD9\x47\x2A\xDD\x5C\x24\x2A\xD9\x07\xDD\x5C\x24\x2A\xD9\x43\x2A\xDD\x5C\x24\x2A\xD9\x43\x2A\xDD\x5C\x24\x2A\xD9\x03\xDD\x1C\x24\x68\x2A\x2A\x2A\x2A\xE8\x2A\x2A\x2A\x2A\xD9\x05\x2A\x2A\x2A\x2A\x83\xC4\x30\x8B\xCE\xD9\x1C\x24\xE8\x2A\x2A\x2A\x2A\x57\x8B\xCE\xE8\x2A\x2A\x2A\x2A\x57\x8B\xCE\xE8\x2A\x2A\x2A\x2A\x8B\x7D"
+				/** 55 8B EC 8B 45 ? 8B 4D ? 53 8B 5D ? 56 57 50 51 53 68 ? ? ? ? E8 ? ? ? ? 8B 7D ? D9 47 ? 83 EC 20 DD 5C 24 ? 8B F0 D9 47 ? DD 5C 24 ? D9 07 DD 5C 24 ? D9 43 ? DD 5C 24 ? D9 43 ? DD 5C 24 ? D9 03 DD 1C 24 68 ? ? ? ? E8 ? ? ? ? D9 05 ? ? ? ? 83 C4 30 8B CE D9 1C 24 E8 ? ? ? ? 57 8B CE E8 ? ? ? ? 57 8B CE E8 ? ? ? ? 8B 7D */
+			}
+
+			"CInferno::CreateFire"
+			{
+				"library"	"server"
+				"linux"		"@_ZN8CInferno10CreateFireERK6VectorS2_PNS_8FireInfoEi"
+				"windows"	"\x55\x8B\xEC\x81\xEC\x9C\x01\x00\x00\xA1\x2A\x2A\x2A\x2A\x33\xC5\x89\x45\x2A\x8B\x45"
+				/** 55 8B EC 81 EC 9C 01 00 00 A1 ? ? ? ? 33 C5 89 45 ? 8B 45 */
+			}
+
+			"CBasePlayer::SetPunchAngle"
+			{
+				"library"	"server"
+				"linux"		"@_ZN11CBasePlayer13SetPunchAngleERK6QAngle"
+				"windows"	"\x55\x8B\xEC\x51\x53\x8B\x5D\x2A\xF3\x0F\x10\x03"
+				/** 55 8B EC 51 53 8B 5D ? F3 0F 10 03 */
+			}
+
+			"CTerrorGun::DoViewPunch"
+			{
+				"library"	"server"
+				"linux"		"@_ZN10CTerrorGun11DoViewPunchEP13CTerrorPlayer"
+				"windows"	"\x53\x8B\xDC\x83\xEC\x08\x83\xE4\xF0\x83\xC4\x04\x55\x8B\x6B\x2A\x89\x6C\x24\x2A\x8B\xEC\x83\xEC\x38\x56\x57\xE8"
+				/** 53 8B DC 83 EC 08 83 E4 F0 83 C4 04 55 8B 6B ? 89 6C 24 ? 8B EC 83 EC 38 56 57 E8 */
+			}
+
+			"CBaseServer::ProcessConnectionlessPacket"
+			{
+				"library"	"engine"
+				"linux"		"@_ZN11CBaseServer27ProcessConnectionlessPacketEP11netpacket_s"
+				"windows"	"\x55\x8B\xEC\x81\xEC\x58\x0A\x00\x00\xA1\x2A\x2A\x2A\x2A\x33\xC5\x89\x45\x2A\x8B\x45"
+				/** 55 8B EC 81 EC 58 0A 00 00 A1 ? ? ? ? 33 C5 89 45 ? 8B 45 */
+			}
+
+			"CBaseServer::SetReservationCookie"
+			{
+				"library"	"engine"
+				"linux"		"@_ZN11CBaseServer20SetReservationCookieEyPKcz"
+				"windows"	"\x55\x8B\xEC\x81\xEC\x08\x01\x00\x00\xA1\x2A\x2A\x2A\x2A\x33\xC5\x89\x45\x2A\x53\x8B\x5D\x2A\x56\x8B\x75"
+				/** 55 8B EC 81 EC 08 01 00 00 A1 ? ? ? ? 33 C5 89 45 ? 53 8B 5D ? 56 8B 75 */
+			}
+
+			"CCSPlayer::ShowMOTD"
+			{
+				"library"	"server"
+				"linux"		"@_ZN9CCSPlayer8ShowMOTDEv"
+				"windows"	"\x57\x8B\xF9\x8B\x07\x8B\x90\x2A\x2A\x2A\x2A\xFF\xD2\x84\xC0\x0F\x85\x2A\x2A\x2A\x2A\x8B\x0D\x2A\x2A\x2A\x2A\x85\xC9"
+				/** 57 8B F9 8B 07 8B 90 ? ? ? ? FF D2 84 C0 0F 85 ? ? ? ? 8B 0D ? ? ? ? 85 C9 */
+			}
+
+			"CTerrorPlayer::ShowHostDetails"
+			{
+				"library"	"server"
+				"linux"		"@_ZN13CTerrorPlayer15ShowHostDetailsEv"
+				"windows"	"\x57\x8B\xF9\x8B\x07\x8B\x90\x2A\x2A\x2A\x2A\xFF\xD2\x84\xC0\x0F\x85\x2A\x2A\x2A\x2A\x8B\x0D\x2A\x2A\x2A\x2A\x8B\x01"
+				/** 57 8B F9 8B 07 8B 90 ? ? ? ? FF D2 84 C0 0F 85 ? ? ? ? 8B 0D ? ? ? ? 8B 01 */
+			}
+
+			"CBaseServer::GetFreeClientInternal"
+			{
+				"library"	"engine"
+				"linux"		"@_ZN11CBaseServer21GetFreeClientInternalER8netadr_s"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x08\x53\x56\x33\xC0\x57\x8B\xF9\x89\x45"
+				/** 55 8B EC 83 EC 08 53 56 33 C0 57 8B F9 89 45 */
+			}
+
+			"CDirector::AddSurvivorBot"
+			{
+				"library"	"server"
+				"windows"	"\x55\x8B\xEC\x8B\x89\x2A\x2A\x2A\x2A\x83\xEC\x1C"
+				/** 55 8B EC 8B 89 ? ? ? ? 83 EC 1C */
+			}
+
+			"NextBotCreatePlayerBot<SurvivorBot>"
+			{
+				"library"	"server"
+				"linux"		"@_Z22NextBotCreatePlayerBotI11SurvivorBotEPT_PKc"
+				/** no unique windows signature */
+			}
+
+			"CTerrorGameRules::FastGetSurvivorSet"
+			{
+				"library"	"server"
+				"linux"		"@_ZN16CTerrorGameRules18FastGetSurvivorSetEv"
+				"windows"	"\xA1\x2A\x2A\x2A\x2A\x85\xC0\x75\x2A\xE8"
+				/** A1 ? ? ? ? 85 C0 75 ? E8 */
+			}
+		}
+	}
+}

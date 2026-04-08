@@ -1,11 +1,26 @@
+# Description
 Change the title as seen in this screenshot
 ![motd_title](image/motd_title.png)
 
-## RANT
-i originally went into this with the goal of modifying the text that appears above/below the hostfile banner. It would be so cool to remove that text and have just the banner itself. Manually invoke it to display, have it display a different image depending on what a plugin decides. Wouldn't that be so cool? Like have a notification system for things like "tank has spawned" etc but done in a much more visually pleasing way, not requiring the clients install any mods.
+## Soft requirements
+- [hxstocks](../hxlib/scripting/include/hxstocks.inc) (to compile)
 
-But unfortunately, the only text that can be modified is the title of the motd. I feel like i've exhausted every possibility, so the original thing i wanted to make isn't possible unless i want the notification banner to always be cluttered with irrelevant text (also wtf even is half the text for? worldwide rank? number of players served? where is it even pulling numbers for these from?).
+# Usage
+there's a convar called `motd_title_type`. its value determines where the plugin gets the final title from. possible types:
+- **0**: vanilla (disables plugin)
+- **1**: convar (reads title from `motd_title` convar)
+- **2**: translation (reads title from sourcemod/translations/motd_title.phrases.txt)
 
-Being able to modify the motd title is at least *something*, so i might as well make it into a plugin so that i don't feel like i wasted my time.
+edit the convar values and translation file to your liking
 
-If someone reading this has found a way to achieve my original goal, please please [contact me](https://steamcommunity.com/id/neburai/) about it
+# Changelog
+## v2.0
+- rewritten with new method. uses usermessage hook to intercept, reformat, and resend the user message responsible for triggering the panel on the client
+- new option to read title from a sourcemod translation file
+- less prone to bugs and more compatible with other plugins.
+
+## v1.1
+- fixes bug where motd auto-opened when it shouldn't have
+
+## v1.0
+- original release

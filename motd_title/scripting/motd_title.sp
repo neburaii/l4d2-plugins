@@ -1,137 +1,218 @@
 #pragma newdecls required
 #pragma semicolon 1
 
-#define GAMEDATA "motd_title.games"
+#include <sourcemod>
+#include <hxstocks>
+
+#define CVAR_FLAGS			FCVAR_NOTIFY
+#define MAX_MOTD_TITLE_LEN	192
 
 public Plugin myinfo =
 {
 	name = "MOTD Title",
 	author = "Neburai",
 	description = "Provides ConVar for modifying the \"Message of the day\" title",
-	version = "1.1",
-	url = "https://github.com/neburaii/l4d2-plugins/motd_title"
+	version = "2.0",
+	url = "https://github.com/neburaii/l4d2-plugins/tree/main/motd_title"
 };
 
-#include <dhooks>
+enum MOTDTitle
+{
+	MOTDTitle_Vanilla = 0,
+	MOTDTitle_ConVar,
+	MOTDTitle_Translation
+};
 
-Handle g_hSDKShowMOTD;
-DynamicDetour g_hDetourKeyValueSetString, g_hDetourShowMOTD;
-DynamicHook g_hHookSendUserMessage;
-bool g_bIsMOTD, g_bFromServer;
+/** convars */
+ConVar		g_hConVarMOTDTitleType;
+ConVar		g_hConVarMOTDTitle;
 
-ConVar g_cMOTDTitle;
-char g_sCVMOTDTitle[256];
+MOTDTitle	g_MOTDTitleType;
+char 		g_sMOTDTitle[MAX_MOTD_TITLE_LEN];
+
+bool		g_bSendNewMsg;
 
 public void OnPluginStart()
 {
-	char sPath[PLATFORM_MAX_PATH];
-	BuildPath(Path_SM, sPath, sizeof(sPath), "gamedata/%s.txt", GAMEDATA);
-	if(FileExists(sPath) == false) SetFailState("\n==========\nMissing required file: \"%s\".==========", sPath);
+	g_hConVarMOTDTitleType = CreateConVar(
+		"motd_title_type", "1",
+		"source of the title string. 0 = vanilla | 1 = convar | 2 = SM translation (sourcemod/translations/motd_title.phrases.txt)",
+		CVAR_FLAGS);
 
-	GameData hGameData = new GameData(GAMEDATA);
-	if(hGameData == null) SetFailState("Failed to load \"%s.txt\" gamedata.", GAMEDATA);
+	g_hConVarMOTDTitle = CreateConVar(
+		"motd_title", "non-translated title",
+	 	"title text that displays above motd html. only used if motd_title_type is set to 1",
+		CVAR_FLAGS);
 
-	g_hDetourKeyValueSetString = DynamicDetour.FromConf(hGameData, "HX::KeyValues::SetString");
-	if(!g_hDetourKeyValueSetString) SetFailState("could not create HX::KeyValues::SetString detour");
-	g_hDetourKeyValueSetString.Enable(Hook_Pre, DTR_KeyValueSetString);
+	g_hConVarMOTDTitleType.AddChangeHook(ConVarChanged_Read);
+	g_hConVarMOTDTitle.AddChangeHook(ConVarChanged_Read);
+	ReadConVars();
 
-	g_hDetourShowMOTD = DynamicDetour.FromConf(hGameData, "HX::CCSPlayer::ShowMOTD");
-	if(!g_hDetourShowMOTD) SetFailState("could not create HX::CCSPlayer::ShowMOTD detour");
-	g_hDetourShowMOTD.Enable(Hook_Pre, DTR_ShowMOTD_Pre);
-	g_hDetourShowMOTD.Enable(Hook_Post, DTR_ShowMOTD_Post);
+	LoadTranslations("motd_title.phrases");
 
-	StartPrepSDKCall(SDKCall_Player);
-	if(!PrepSDKCall_SetFromConf(hGameData, SDKConf_Signature, "CCSPlayer::ShowMOTD"))
-		SetFailState("could not load CCSPlayer::ShowMOTD signature!!");
-	PrepSDKCall_SetReturnInfo(SDKType_PlainOldData, SDKPass_Plain);
-	g_hSDKShowMOTD = EndPrepSDKCall();
-	if(g_hSDKShowMOTD == null)
-		SetFailState("could not create CCSPlayer::ShowMOTD SDKCall handle!");
-
-	g_hHookSendUserMessage = DynamicHook.FromConf(hGameData, "HX::SendUserMessage");
-	if(g_hHookSendUserMessage == null) SetFailState("could not create HX::SendUserMessage dhook");
-
-	delete hGameData;
-
-	HookUserMessage(GetUserMessageId("VGUIMenu"), umHook, true);
-
-	// Setup convars
-	g_cMOTDTitle = CreateConVar("motd_title", "Message of the day", "title text that displays above motd html", FCVAR_NOTIFY);
-	g_cMOTDTitle.AddChangeHook(updateConVar);
-	g_cMOTDTitle.GetString(g_sCVMOTDTitle, sizeof(g_sCVMOTDTitle));
+	HookUserMessage(GetUserMessageId("VGUIMenu"), MsgHook_VGUIMenu, true, MsgPostHook_VGUIMenu);
 }
 
-public void OnClientPutInServer(int iClient)
+/**********
+ * ConVars
+ *********/
+
+void ConVarChanged_Read(ConVar hConVar, const char[] sOldValue, const char[] sNewValue)
 {
-	g_hHookSendUserMessage.HookEntity(Hook_Pre, iClient, DHOOK_SendUserMessage_Pre);
-	g_hHookSendUserMessage.HookEntity(Hook_Post, iClient, DHOOK_SendUserMessage_Post);
+	ReadConVars();
 }
 
-void updateConVar(ConVar cConvar, const char[] sOldValue, const char[] sNewValue)
+void ReadConVars()
 {
-	g_cMOTDTitle.GetString(g_sCVMOTDTitle, sizeof(g_sCVMOTDTitle));
+	g_MOTDTitleType = view_as<MOTDTitle>(g_hConVarMOTDTitleType.IntValue);
+	g_hConVarMOTDTitle.GetString(g_sMOTDTitle, sizeof(g_sMOTDTitle));
 }
 
-MRESReturn DHOOK_SendUserMessage_Pre(int pThis, DHookParam hParams)
-{
-	g_bFromServer = true;
-	return MRES_Ignored;
-}
+/*************************
+ * record/send motd buffer
+ ************************/
 
-MRESReturn DHOOK_SendUserMessage_Post(int pThis, DHookParam hParams)
+MOTDBuffer g_motd;
+enum struct MOTDBuffer
 {
-	g_bFromServer = false;
-	return MRES_Ignored;
-}
+	int flags;
+	int players[MAXPLAYERS_L4D2];
+	int playersNum;
 
-MRESReturn DTR_ShowMOTD_Pre(DHookReturn hReturn, DHookParam hParams)
-{
-	g_bIsMOTD = true;
-	return MRES_Ignored;
-}
+	char buffer[256];
+	int bufferLen;
 
-MRESReturn DTR_ShowMOTD_Post(DHookReturn hReturn, DHookParam hParams)
-{
-	g_bIsMOTD = false;
-	return MRES_Ignored;
-}
-
-Action umHook(UserMsg umID, BfRead bfMsg, const int[] iPlayers, int iTotalPlayers, bool bReliable, bool bInit)
-{
-	static char sMsg[32];
-
-	// we need MOTD to display via CCSPlayer::ShowMOTD so that the KeyValues data containing our title change is passed
-	if(!g_bFromServer)
+	void Record(BfRead hBuffer, const int[] iPlayers, int iPlayersNum, bool bReliable, bool bInit, char sLine[MAX_MOTD_TITLE_LEN])
 	{
-		bfMsg.ReadString(sMsg, sizeof(sMsg));
-		if(strcmp(sMsg, "info") == 0)
+		this.bufferLen = 0;
+
+		bool bTitleFound;
+		int iTotalKVIndex;
+
+		this.AppendString("info");
+		this.AppendByte(hBuffer.ReadByte()); 					// for formatting
+		iTotalKVIndex = this.AppendByte(hBuffer.ReadByte());	// total kayvalue pairs
+
+		/** the remainder of the buffer are keyvalue pairs. it alternates, starting with a key, then a value */
+		bool bSkipKV;
+		for (bool bKey = true; hBuffer.BytesLeft; bKey = !bKey)
 		{
-			if(iTotalPlayers > 0)
+			hBuffer.ReadString(sLine, sizeof(sLine), true);
+
+			if (bSkipKV)
 			{
-				for(int i = 0; i < iTotalPlayers; i++)
+				/** bKey being true here means we're at the key of the pair after the key that set bSkipKV to true */
+				if (bKey) bSkipKV = false;
+				else continue;
+			}
+
+			if (bKey && strcmp(sLine, "title") == 0)
+			{
+				bSkipKV = true;
+				bTitleFound = true;
+				continue;
+			}
+
+			this.AppendString(sLine);
+		}
+
+		/** title key without value. value gets appended in post hook */
+		this.AppendString("title");
+
+		if (!bTitleFound)
+			this.buffer[iTotalKVIndex] = view_as<int>(this.buffer[iTotalKVIndex]) + 1;
+
+		this.flags = USERMSG_BLOCKHOOKS;
+		if (bReliable) this.flags |= USERMSG_RELIABLE;
+		if (bInit) this.flags |= USERMSG_INITMSG;
+
+		this.playersNum = iPlayersNum;
+
+		for (int i = 0; i < iPlayersNum; i++)
+		{
+			this.players[i] = iPlayers[i];
+		}
+	}
+
+	void Send()
+	{
+		switch (g_MOTDTitleType)
+		{
+			case MOTDTitle_ConVar:
+				this.SendUserMessage(this.players, this.playersNum, g_sMOTDTitle);
+
+			case MOTDTitle_Translation:
+			{
+				static char sTranslatedTitle[MAX_MOTD_TITLE_LEN];
+				int iSinglePlayer[1];
+
+				for (int p = 0; p < this.playersNum; p++)
 				{
-					SDKCall(g_hSDKShowMOTD, iPlayers[i]);
+					iSinglePlayer[0] = this.players[p];
+					FormatEx(sTranslatedTitle, sizeof(sTranslatedTitle), "%t", "#MOTD_Title", p);
+					this.SendUserMessage(iSinglePlayer, 1, sTranslatedTitle);
 				}
 			}
-			return Plugin_Handled;
 		}
 	}
 
-	return Plugin_Continue;
+	/**********
+	 * helpers
+	 **********/
+
+	void AppendString(const char[] sString)
+	{
+		for (int i = 0;; i++)
+		{
+			this.buffer[this.bufferLen++] = sString[i];
+			if (sString[i] == '\0') break;
+		}
+	}
+
+	int AppendByte(int iByte)
+	{
+		this.buffer[this.bufferLen++] = iByte;
+		return this.bufferLen - 1;
+	}
+
+	void SendUserMessage(const int[] iPlayers, int iPlayersNum, const char[] sTitle)
+	{
+		BfWrite hBuffer = view_as<BfWrite>(StartMessage("VGUIMenu", iPlayers, iPlayersNum, this.flags));
+
+		for (int i = 0; i < this.bufferLen; i++)
+			hBuffer.WriteByte(this.buffer[i]);
+
+		hBuffer.WriteString(sTitle);
+
+		EndMessage();
+	}
 }
 
-MRESReturn DTR_KeyValueSetString(DHookReturn hReturn, DHookParam hParams)
-{
-	if(g_bIsMOTD)
-	{
-		static char sKey[8];
-		hParams.GetString(1, sKey, sizeof(sKey));
-		if(strcmp(sKey, "title") == 0)
-		{
-			hParams.SetString(2, g_sCVMOTDTitle);
-			return MRES_ChangedHandled;
-		}
-	}
+/**************
+ * UserMessage
+ *************/
 
-	return MRES_Ignored;
+Action MsgHook_VGUIMenu(UserMsg msg_id, BfRead hBuffer, const int[] iPlayers, int iPlayersNum, bool bReliable, bool bInit)
+{
+	static char sLine[MAX_MOTD_TITLE_LEN];
+
+	if (g_MOTDTitleType == MOTDTitle_Vanilla)
+		return Plugin_Continue;
+
+	hBuffer.ReadString(sLine, sizeof(sLine), true);
+	if (strcmp(sLine, "info") != 0)
+		return Plugin_Continue;
+
+	g_motd.Record(hBuffer, iPlayers, iPlayersNum, bReliable, bInit, sLine);
+	g_bSendNewMsg = true;
+
+	return Plugin_Handled;
+}
+
+void MsgPostHook_VGUIMenu(UserMsg msg_id, bool bSent)
+{
+	if (!g_bSendNewMsg) return;
+	g_bSendNewMsg = false;
+
+	g_motd.Send();
 }

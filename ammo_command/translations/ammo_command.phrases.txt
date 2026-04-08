@@ -1,0 +1,22 @@
+"Phrases"
+{
+	"#tag_cmd_ammo"
+	{
+		"en" "{default}[{olive}/ammo{default}]"
+	}
+
+	"#reply_fail"
+	{
+		"en" "{green}N/A"
+	}
+
+	"#reply_success"
+	{
+		// 1 - remaining ammo
+		// 2 - total ammo
+		// 3 - percentage
+		"#format" "{1:i},{2:i},{3:i}"
+
+		"en" "{lightgreen}{1} {default}/ {olive}{2} {default}({lightgreen}{3}%%{default})"
+	}
+}
