@@ -29,6 +29,7 @@ enum
 	Forward_OnShowMOTD,							Forward_OnShowMOTD_Post,
 	Forward_OnShowHostBanner,					Forward_OnShowHostBanner_Post,
 	Forward_OnGetFreeClient,					Forward_OnGetFreeClient_Post,
+	Forward_OnVocalize,							Forward_OnVocalize_Post,
 
 	Forward_MAX
 };
@@ -273,6 +274,15 @@ GlobalForward InitGlobalForward(int forwardIndex, char name[MAX_FWD_LEN])
 		case Forward_OnGetFreeClient_Post:
 		{	name = "OnGetFreeClient_Post"; return CreateGlobalForward(name,
 				ET_Ignore, Param_Cell, Param_Cell, Param_Cell, Param_Cell, Param_Cell);
+		}
+
+		case Forward_OnVocalize:
+		{	name = "OnVocalize"; return CreateGlobalForward(name,
+				ET_Event, Param_Cell, Param_String, Param_CellByRef, Param_CellByRef);
+		}
+		case Forward_OnVocalize_Post:
+		{	name = "OnVocalize_Post"; return CreateGlobalForward(name,
+				ET_Ignore, Param_Cell, Param_String, Param_Cell, Param_Cell, Param_Cell);
 		}
 	}
 

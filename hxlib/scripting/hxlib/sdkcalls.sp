@@ -53,6 +53,7 @@ Handle g_hSDK_WeaponSwitch;
 Handle g_hSDK_MaxCarry;
 Handle g_hSDK_GetMaxClip1;
 Handle g_hSDK_IsAlive;
+Handle g_hSDK_Vocalize;
 
 void InitSDKCalls()
 {
@@ -325,6 +326,13 @@ void InitSDKCalls()
 	prep.Start(SDKCall_Entity, SDKConf_Virtual, "IsAlive");
 	prep.Return(SDKType_Bool, SDKPass_Plain);
 	prep.End(g_hSDK_IsAlive);
+
+	/** Native_Vocalize */
+	prep.Start(SDKCall_Player, SDKConf_Signature, "CTerrorPlayer::Vocalize");
+	prep.Param(SDKType_String, SDKPass_Pointer);
+	prep.Param(SDKType_Float, SDKPass_Plain);
+	prep.Param(SDKType_Float, SDKPass_Plain);
+	prep.End(g_hSDK_Vocalize);
 
 	/** Native_AddSurvivorBot */
 	switch (g_OS)

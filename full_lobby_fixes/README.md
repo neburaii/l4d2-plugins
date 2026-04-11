@@ -16,7 +16,7 @@ these issues happen because they all involve creating a new bot client, but with
 
 ## Hard requirements
 - [hxlib](../hxlib)
-- [left4dhooks] (https://forums.alliedmods.net/showthread.php?t=321696)
+- [left4dhooks](https://forums.alliedmods.net/showthread.php?t=321696)
 
 # Changelog
 ## v1.0

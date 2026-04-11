@@ -1,0 +1,1291 @@
+/**
+ * if sounds are expected to overlap, the incoming sound can only play if
+ * its priority is >= the priority of the sound it's expected to replace.
+ *
+ * you can configure the priorities of any sound in this file. each sound
+ * is defined as a section, where the name is its file path relative to
+ * the sounds directory. slashes in file paths must be forward slashes (/).
+ * any alphabetical characters must be lowercase.
+ *
+ * there are 2 keyvalues:
+ * - "duration"
+ * - "priority"
+ *
+ * Duration:
+ * the sounds don't exist in the dedicated server installation. so determining
+ * the length of sound files isn't possible. even if you add the files, the code
+ * for determining file lengths is compiled out in the dedicated server build.
+ * this means you have to explicitly define the sound duration with this keyvalue.
+ *
+ * this quirk can be leveraged though. for example, if you only want the first
+ * half of a sound to hold priority, then you can just define its duration to be
+ * half of what it actually is.
+ *
+ * Priority:
+ * "priority" keyvalue is for the priority mechanic described above. higher numbers
+ * mean that sound can't be interrupted by those with lower numbers. undefined
+ * sounds have 0 priority.
+ */
+
+
+/**
+ * the default configuration will make important sound cues from special
+ * infected prioritized.
+ *
+ * take the charger for example:
+ * we make his ability cue sounds top priority, as it's quite common
+ * for them to get interrupted by something like "spot prey".
+ *
+ * the goal is to make important sound cues go uninterrupted.
+ */
+
+"common/null.wav"
+{
+	"duration"	"0.0"
+	"priority"	"100"
+}
+
+/***********
+ * SI Spawn
+ ***********/
+/** smoker */
+"player/smoker/voice/alert/smoker_alert_01.wav"
+{
+	"duration"	"2.235"
+	"priority"	"1"
+}
+"player/smoker/voice/alert/smoker_alert_02.wav"
+{
+	"duration"	"1.988"
+	"priority"	"1"
+}
+"player/smoker/voice/alert/smoker_alert_03.wav"
+{
+	"duration"	"2.049"
+	"priority"	"1"
+}
+"player/smoker/voice/alert/smoker_alert_04.wav"
+{
+	"duration"	"2.509"
+	"priority"	"1"
+}
+"player/smoker/voice/alert/smoker_alert_05.wav"
+{
+	"duration"	"2.252"
+	"priority"	"1"
+}
+"player/smoker/voice/alert/smoker_alert_06.wav"
+{
+	"duration"	"1.635"
+	"priority"	"1"
+}
+
+/** boomer */
+"player/boomer/voice/alert/female_boomer_alert_04.wav"
+{
+	"duration"	"1.158"
+	"priority"	"1"
+}
+"player/boomer/voice/alert/female_boomer_alert_05.wav"
+{
+	"duration"	"1.664"
+	"priority"	"1"
+}
+"player/boomer/voice/alert/female_boomer_alert_07.wav"
+{
+	"duration"	"2.535"
+	"priority"	"1"
+}
+"player/boomer/voice/alert/female_boomer_alert_10.wav"
+{
+	"duration"	"1.312"
+	"priority"	"1"
+}
+"player/boomer/voice/alert/female_boomer_alert_11.wav"
+{
+	"duration"	"1.331"
+	"priority"	"1"
+}
+"player/boomer/voice/alert/female_boomer_alert_12.wav"
+{
+	"duration"	"1.61"
+	"priority"	"1"
+}
+"player/boomer/voice/alert/female_boomer_alert_13.wav"
+{
+	"duration"	"1.218"
+	"priority"	"1"
+}
+"player/boomer/voice/alert/female_boomer_alert_14.wav"
+{
+	"duration"	"2.538"
+	"priority"	"1"
+}
+"player/boomer/voice/alert/female_boomer_alert_15.wav"
+{
+	"duration"	"2.994"
+	"priority"	"1"
+}
+"player/boomer/voice/alert/male_boomer_alert_04.wav"
+{
+	"duration"	"1.133"
+	"priority"	"1"
+}
+"player/boomer/voice/alert/male_boomer_alert_05.wav"
+{
+	"duration"	"2.869"
+	"priority"	"1"
+}
+"player/boomer/voice/alert/male_boomer_alert_07.wav"
+{
+	"duration"	"0.784"
+	"priority"	"1"
+}
+"player/boomer/voice/alert/male_boomer_alert_10.wav"
+{
+	"duration"	"1.428"
+	"priority"	"1"
+}
+"player/boomer/voice/alert/male_boomer_alert_11.wav"
+{
+	"duration"	"1.717"
+	"priority"	"1"
+}
+"player/boomer/voice/alert/male_boomer_alert_12.wav"
+{
+	"duration"	"1.639"
+	"priority"	"1"
+}
+"player/boomer/voice/alert/male_boomer_alert_13.wav"
+{
+	"duration"	"1.218"
+	"priority"	"1"
+}
+"player/boomer/voice/alert/male_boomer_alert_14.wav"
+{
+	"duration"	"2.538"
+	"priority"	"1"
+}
+"player/boomer/voice/alert/male_boomer_alert_15.wav"
+{
+	"duration"	"2.994"
+	"priority"	"1"
+}
+
+/** hunter */
+"player/hunter/voice/alert/hunter_alert_01.wav"
+{
+	"duration"	"1.048"
+	"priority"	"1"
+}
+"player/hunter/voice/alert/hunter_alert_02.wav"
+{
+	"duration"	"1.613"
+	"priority"	"1"
+}
+"player/hunter/voice/alert/hunter_alert_03.wav"
+{
+	"duration"	"2.23"
+	"priority"	"1"
+}
+"player/hunter/voice/alert/hunter_alert_04.wav"
+{
+	"duration"	"1.704"
+	"priority"	"1"
+}
+"player/hunter/voice/alert/hunter_alert_05.wav"
+{
+	"duration"	"1.703"
+	"priority"	"1"
+}
+
+/** spitter */
+"player/spitter/voice/alert/spitter_alert_01.wav"
+{
+	"duration"	"1.654"
+	"priority"	"1"
+}
+"player/spitter/voice/alert/spitter_alert_02.wav"
+{
+	"duration"	"2.514"
+	"priority"	"1"
+}
+
+/** jockey */
+"player/jockey/voice/alert/jockey_02.wav"
+{
+	"duration"	"2.156"
+	"priority"	"1"
+}
+"player/jockey/voice/alert/jockey_04.wav"
+{
+	"duration"	"2.113"
+	"priority"	"1"
+}
+
+/** charger */
+"player/charger/voice/alert/charger_alert_01.wav"
+{
+	"duration"	"2.964"
+	"priority"	"1"
+}
+"player/charger/voice/alert/charger_alert_02.wav"
+{
+	"duration"	"1.835"
+	"priority"	"1"
+}
+
+/**************
+ * SI warnings
+ *************/
+
+/** smoker gets LOS with target */
+"player/smoker/voice/idle/smoker_spotprey_01.wav"
+{
+	"duration"	"1.03"
+	"priority"	"1"
+}
+"player/smoker/voice/idle/smoker_spotprey_02.wav"
+{
+	"duration"	"0.891"
+	"priority"	"1"
+}
+"player/smoker/voice/idle/smoker_spotprey_07.wav"
+{
+	"duration"	"1.459"
+	"priority"	"1"
+}
+"player/smoker/voice/idle/smoker_spotprey_08.wav"
+{
+	"duration"	"1.785"
+	"priority"	"1"
+}
+"player/smoker/voice/idle/smoker_spotprey_09.wav"
+{
+	"duration"	"1.808"
+	"priority"	"1"
+}
+"player/smoker/voice/idle/smoker_spotprey_10.wav"
+{
+	"duration"	"0.901"
+	"priority"	"1"
+}
+"player/smoker/voice/idle/smoker_spotprey_11.wav"
+{
+	"duration"	"1.328"
+	"priority"	"1"
+}
+"player/smoker/voice/idle/smoker_spotprey_12.wav"
+{
+	"duration"	"1.049"
+	"priority"	"1"
+}
+"player/smoker/voice/idle/smoker_spotprey_13.wav"
+{
+	"duration"	"1.707"
+	"priority"	"1"
+}
+"player/smoker/voice/idle/smoker_spotprey_14.wav"
+{
+	"duration"	"1.494"
+	"priority"	"1"
+}
+
+/** boomer gets LOS with its target */
+"player/boomer/voice/attack/female_boomer_spotprey_05.wav"
+{
+	"duration"	"1.601"
+	"priority"	"1"
+}
+"player/boomer/voice/attack/female_boomer_spotprey_07.wav"
+{
+	"duration"	"0.997"
+	"priority"	"1"
+}
+"player/boomer/voice/attack/female_boomer_spotprey_09.wav"
+{
+	"duration"	"1.572"
+	"priority"	"1"
+}
+"player/boomer/voice/attack/female_boomer_spotprey_10.wav"
+{
+	"duration"	"1.744"
+	"priority"	"1"
+}
+"player/boomer/voice/attack/female_boomer_spotprey_11.wav"
+{
+	"duration"	"1.555"
+	"priority"	"1"
+}
+"player/boomer/voice/attack/female_boomer_spotprey_12.wav"
+{
+	"duration"	"1.214"
+	"priority"	"1"
+}
+"player/boomer/voice/attack/male_boomer_spotprey_05.wav"
+{
+	"duration"	"0.921"
+	"priority"	"1"
+}
+"player/boomer/voice/attack/male_boomer_spotprey_07.wav"
+{
+	"duration"	"1.521"
+	"priority"	"1"
+}
+"player/boomer/voice/attack/male_boomer_spotprey_09.wav"
+{
+	"duration"	"1.496"
+	"priority"	"1"
+}
+"player/boomer/voice/attack/male_boomer_spotprey_10.wav"
+{
+	"duration"	"1.408"
+	"priority"	"1"
+}
+"player/boomer/voice/attack/male_boomer_spotprey_11.wav"
+{
+	"duration"	"1.555"
+	"priority"	"1"
+}
+"player/boomer/voice/attack/male_boomer_spotprey_12.wav"
+{
+	"duration"	"1.214"
+	"priority"	"1"
+}
+
+/** spitter got LOS of their target */
+"player/spitter/voice/idle/spitter_spotprey_01.wav"
+{
+	"duration"	"0.761"
+	"priority"	"1"
+}
+"player/spitter/voice/idle/spitter_spotprey_02.wav"
+{
+	"duration"	"1.141"
+	"priority"	"1"
+}
+"player/spitter/voice/idle/spitter_spotprey_03.wav"
+{
+	"duration"	"0.978"
+	"priority"	"1"
+}
+"player/spitter/voice/idle/spitter_spotprey_04.wav"
+{
+	"duration"	"1.019"
+	"priority"	"1"
+}
+"player/spitter/voice/idle/spitter_spotprey_05.wav"
+{
+	"duration"	"1.316"
+	"priority"	"1"
+}
+"player/spitter/voice/idle/spitter_spotprey_06.wav"
+{
+	"duration"	"1.125"
+	"priority"	"1"
+}
+
+/** unused. */
+"player/jockey/voice/idle/jockey_spotprey_01.wav"
+{
+	"duration"	"1.455"
+	"priority"	"1"
+}
+"player/jockey/voice/idle/jockey_spotprey_02.wav"
+{
+	"duration"	"1.195"
+	"priority"	"1"
+}
+"player/jockey/voice/warn/jockey_06.wav"
+{
+	"duration"	"1.455"
+	"priority"	"1"
+}
+"player/jockey/voice/warn/jockey_08.wav"
+{
+	"duration"	"1.195"
+	"priority"	"1"
+}
+
+/** charger got LOS of their target */
+"player/charger/voice/idle/charger_spotprey_01.wav"
+{
+	"duration"	"1.986"
+	"priority"	"1"
+}
+"player/charger/voice/idle/charger_spotprey_02.wav"
+{
+	"duration"	"2.078"
+	"priority"	"1"
+}
+"player/charger/voice/idle/charger_spotprey_03.wav"
+{
+	"duration"	"1.857"
+	"priority"	"1"
+}
+
+/******************
+ * SI ability cues
+ *****************/
+
+/**
+ * note on smoker ability:
+ * tongue sounds use SNDCHAN_WEAPON, which isn't congested
+ * with unimportant sounds. no need to set high priority on it.
+ */
+
+/** smoker announcing ability */
+"player/smoker/voice/warn/smoker_warn_01.wav"
+{
+	"duration"	"1.37"
+	"priority"	"3"
+}
+"player/smoker/voice/warn/smoker_warn_03.wav"
+{
+	"duration"	"1.335"
+	"priority"	"3"
+}
+"player/smoker/voice/warn/smoker_warn_04.wav"
+{
+	"duration"	"2.688"
+	"priority"	"3"
+}
+"player/smoker/voice/warn/smoker_warn_05.wav"
+{
+	"duration"	"2.667"
+	"priority"	"3"
+}
+"player/smoker/voice/warn/smoker_warn_06.wav"
+{
+	"duration"	"2.741"
+	"priority"	"3"
+}
+
+/** boomer about to vomit */
+"player/boomer/voice/warn/female_boomer_warning_01.wav"
+{
+	"duration"	"0.871"
+	"priority"	"3"
+}
+"player/boomer/voice/warn/female_boomer_warning_12.wav"
+{
+	"duration"	"0.773"
+	"priority"	"3"
+}
+"player/boomer/voice/warn/female_boomer_warning_13.wav"
+{
+	"duration"	"0.795"
+	"priority"	"3"
+}
+"player/boomer/voice/warn/female_boomer_warning_14.wav"
+{
+	"duration"	"1.104"
+	"priority"	"3"
+}
+"player/boomer/voice/warn/female_boomer_warning_15.wav"
+{
+	"duration"	"0.929"
+	"priority"	"3"
+}
+"player/boomer/voice/warn/female_boomer_warning_16.wav"
+{
+	"duration"	"1.458"
+	"priority"	"3"
+}
+"player/boomer/voice/warn/female_boomer_warning_17.wav"
+{
+	"duration"	"1.353"
+	"priority"	"3"
+}
+"player/boomer/voice/warn/male_boomer_warning_01.wav"
+{
+	"duration"	"0.824"
+	"priority"	"3"
+}
+"player/boomer/voice/warn/male_boomer_warning_12.wav"
+{
+	"duration"	"1.303"
+	"priority"	"3"
+}
+"player/boomer/voice/warn/male_boomer_warning_13.wav"
+{
+	"duration"	"1.308"
+	"priority"	"3"
+}
+"player/boomer/voice/warn/male_boomer_warning_14.wav"
+{
+	"duration"	"1.481"
+	"priority"	"3"
+}
+"player/boomer/voice/warn/male_boomer_warning_15.wav"
+{
+	"duration"	"1.445"
+	"priority"	"3"
+}
+"player/boomer/voice/warn/male_boomer_warning_16.wav"
+{
+	"duration"	"1.63"
+	"priority"	"3"
+}
+"player/boomer/voice/warn/male_boomer_warning_17.wav"
+{
+	"duration"	"1.353"
+	"priority"	"3"
+}
+
+/** boomer vomitting */
+"player/boomer/voice/vomit/female_boomer_vomit_01.wav"
+{
+	"duration"	"1.982"
+	"priority"	"3"
+}
+"player/boomer/voice/vomit/female_boomer_vomit_02.wav"
+{
+	"duration"	"1.821"
+	"priority"	"3"
+}
+"player/boomer/voice/vomit/female_boomer_vomit_03.wav"
+{
+	"duration"	"1.912"
+	"priority"	"3"
+}
+"player/boomer/voice/vomit/female_boomer_vomit_04.wav"
+{
+	"duration"	"1.877"
+	"priority"	"3"
+}
+"player/boomer/voice/vomit/female_boomer_vomit_09.wav"
+{
+	"duration"	"1.138"
+	"priority"	"3"
+}
+"player/boomer/voice/vomit/female_boomer_vomit_11.wav"
+{
+	"duration"	"3.134"
+	"priority"	"3"
+}
+"player/boomer/voice/vomit/female_boomer_vomit_12.wav"
+{
+	"duration"	"2.226"
+	"priority"	"3"
+}
+"player/boomer/voice/vomit/male_boomer_vomit_01.wav"
+{
+	"duration"	"1.351"
+	"priority"	"3"
+}
+"player/boomer/voice/vomit/male_boomer_vomit_02.wav"
+{
+	"duration"	"1.672"
+	"priority"	"3"
+}
+"player/boomer/voice/vomit/male_boomer_vomit_03.wav"
+{
+	"duration"	"2.53"
+	"priority"	"3"
+}
+"player/boomer/voice/vomit/male_boomer_vomit_04.wav"
+{
+	"duration"	"2.63"
+	"priority"	"3"
+}
+"player/boomer/voice/vomit/male_boomer_vomit_09.wav"
+{
+	"duration"	"3.225"
+	"priority"	"3"
+}
+"player/boomer/voice/vomit/male_boomer_vomit_11.wav"
+{
+	"duration"	"3.134"
+	"priority"	"3"
+}
+"player/boomer/voice/vomit/male_boomer_vomit_12.wav"
+{
+	"duration"	"2.226"
+	"priority"	"3"
+}
+
+/** boomer vomit disrupted */
+"player/boomer/voice/vomit/female_boomer_disruptvomit_01.wav"
+{
+	"duration"	"0.653"
+	"priority"	"3"
+}
+"player/boomer/voice/vomit/female_boomer_disruptvomit_03.wav"
+{
+	"duration"	"0.836"
+	"priority"	"3"
+}
+"player/boomer/voice/vomit/female_boomer_disruptvomit_05.wav"
+{
+	"duration"	"0.576"
+	"priority"	"3"
+}
+"player/boomer/voice/vomit/female_boomer_disruptvomit_06.wav"
+{
+	"duration"	"0.85"
+	"priority"	"3"
+}
+"player/boomer/voice/vomit/female_boomer_disruptvomit_07.wav"
+{
+	"duration"	"0.617"
+	"priority"	"3"
+}
+"player/boomer/voice/vomit/female_boomer_disruptvomit_09.wav"
+{
+	"duration"	"0.634"
+	"priority"	"3"
+}
+"player/boomer/voice/vomit/male_boomer_disruptvomit_01.wav"
+{
+	"duration"	"0.714"
+	"priority"	"3"
+}
+"player/boomer/voice/vomit/male_boomer_disruptvomit_03.wav"
+{
+	"duration"	"0.746"
+	"priority"	"3"
+}
+"player/boomer/voice/vomit/male_boomer_disruptvomit_05.wav"
+{
+	"duration"	"0.616"
+	"priority"	"3"
+}
+"player/boomer/voice/vomit/male_boomer_disruptvomit_06.wav"
+{
+	"duration"	"0.85"
+	"priority"	"3"
+}
+"player/boomer/voice/vomit/male_boomer_disruptvomit_07.wav"
+{
+	"duration"	"0.617"
+	"priority"	"3"
+}
+"player/boomer/voice/vomit/male_boomer_disruptvomit_09.wav"
+{
+	"duration"	"0.634"
+	"priority"	"3"
+}
+
+/** boomer falling from above */
+"player/boomer/fall/boomer_dive_01.wav"
+{
+	"duration"	"2.449"
+	"priority"	"2"
+}
+
+/**
+ * hunter sounds when he crouches before lunge aren't
+ * in voice channel. it's not contesting with anything
+ * unimportant. no priority needed.
+ */
+
+/** hunter announcing he will leap */
+"player/hunter/voice/warn/hunter_warn_10.wav"
+{
+	"duration"	"1.648"
+	"priority"	"3"
+}
+"player/hunter/voice/warn/hunter_warn_14.wav"
+{
+	"duration"	"1.335"
+	"priority"	"3"
+}
+"player/hunter/voice/warn/hunter_warn_16.wav"
+{
+	"duration"	"1.919"
+	"priority"	"3"
+}
+"player/hunter/voice/warn/hunter_warn_17.wav"
+{
+	"duration"	"2.109"
+	"priority"	"3"
+}
+"player/hunter/voice/warn/hunter_warn_18.wav"
+{
+	"duration"	"2.425"
+	"priority"	"3"
+}
+
+/** hunter leaping */
+"player/hunter/voice/attack/hunter_attackmix_01.wav"
+{
+	"duration"	"3.238"
+	"priority"	"3"
+}
+"player/hunter/voice/attack/hunter_attackmix_02.wav"
+{
+	"duration"	"3.238"
+	"priority"	"3"
+}
+"player/hunter/voice/attack/hunter_attackmix_03.wav"
+{
+	"duration"	"3.238"
+	"priority"	"3"
+}
+
+/** hunter "retreat" jump */
+"player/hunter/voice/attack/hunter_pounce_01.wav"
+{
+	"duration"	"1.484"
+	"priority"	"3"
+}
+"player/hunter/voice/attack/hunter_pounce_02.wav"
+{
+	"duration"	"1.419"
+	"priority"	"3"
+}
+"player/hunter/voice/attack/hunter_pounce_04.wav"
+{
+	"duration"	"1.089"
+	"priority"	"3"
+}
+"player/hunter/voice/attack/hunter_pounce_05.wav"
+{
+	"duration"	"0.771"
+	"priority"	"3"
+}
+"player/hunter/voice/attack/hunter_pounce_06.wav"
+{
+	"duration"	"1.461"
+	"priority"	"3"
+}
+"player/hunter/voice/attack/hunter_pounce_07.wav"
+{
+	"duration"	"0.87"
+	"priority"	"3"
+}
+"player/hunter/voice/attack/hunter_pounce_09.wav"
+{
+	"duration"	"0.794"
+	"priority"	"3"
+}
+"player/hunter/voice/attack/hunter_pounce_10.wav"
+{
+	"duration"	"0.904"
+	"priority"	"3"
+}
+"player/hunter/voice/attack/hunter_pounce_11.wav"
+{
+	"duration"	"1.108"
+	"priority"	"3"
+}
+"player/hunter/voice/attack/hunter_pounce_12.wav"
+{
+	"duration"	"1.24"
+	"priority"	"3"
+}
+"player/hunter/voice/attack/hunter_pounce_13.wav"
+{
+	"duration"	"0.833"
+	"priority"	"3"
+}
+
+/** hunter responds to his lunge being deadstopped */
+"player/hunter/voice/miss/hunter_pouncecancel_01.wav"
+{
+	"duration"	"0.666"
+	"priority"	"3"
+}
+"player/hunter/voice/miss/hunter_pouncecancel_02.wav"
+{
+	"duration"	"0.84"
+	"priority"	"3"
+}
+"player/hunter/voice/miss/hunter_pouncecancel_03.wav"
+{
+	"duration"	"0.751"
+	"priority"	"3"
+}
+"player/hunter/voice/miss/hunter_pouncecancel_04.wav"
+{
+	"duration"	"0.823"
+	"priority"	"3"
+}
+
+/** spit shot */
+"player/spitter/voice/warn/spitter_spit_01.wav"
+{
+	"duration"	"1.165"
+	"priority"	"3"
+}
+"player/spitter/voice/warn/spitter_spit_02.wav"
+{
+	"duration"	"1.246"
+	"priority"	"3"
+}
+
+/** charge begins */
+"player/charger/voice/attack/charger_charge_01.wav"
+{
+	"duration"	"2.493"
+	"priority"	"3"
+}
+"player/charger/voice/attack/charger_charge_02.wav"
+{
+	"duration"	"2.642"
+	"priority"	"3"
+}
+
+/** charge ends */
+"player/charger/voice/attack/charger_pummel01.wav"
+{
+	"duration"	"0.896"
+	"priority"	"3"
+}
+"player/charger/voice/attack/charger_pummel02.wav"
+{
+	"duration"	"0.901"
+	"priority"	"3"
+}
+"player/charger/voice/attack/charger_pummel03.wav"
+{
+	"duration"	"0.806"
+	"priority"	"3"
+}
+"player/charger/voice/attack/charger_pummel04.wav"
+{
+	"duration"	"0.983"
+	"priority"	"3"
+}
+"player/charger/voice/pain/charger_stagger01.wav"
+{
+	"duration"	"0.802"
+	"priority"	"3"
+}
+"player/charger/voice/pain/charger_stagger02.wav"
+{
+	"duration"	"0.889"
+	"priority"	"3"
+}
+"player/charger/loud_chargerimpact_01.wav"
+{
+	"duration"	"1.185"
+	"priority"	"3"
+}
+"player/charger/loud_chargerimpact_02.wav"
+{
+	"duration"	"1.308"
+	"priority"	"3"
+}
+"player/charger/loud_chargerimpact_03.wav"
+{
+	"duration"	"1.08"
+	"priority"	"3"
+}
+"player/charger/loud_chargerimpact_04.wav"
+{
+	"duration"	"1.044"
+	"priority"	"3"
+}
+
+/** tank rock prepare */
+"player/tank/attack/rip_up_rock_1.wav"
+{
+	"duration"	"1.95"
+	"priority"	"3"
+}
+
+/** tank failed to prepare rock throw */
+"player/tank/voice/growl/tank_fail_01.wav"
+{
+	"duration"	"1.581"
+	"priority"	"3"
+}
+"player/tank/voice/growl/tank_fail_02.wav"
+{
+	"duration"	"1.564"
+	"priority"	"3"
+}
+"player/tank/voice/growl/tank_fail_03.wav"
+{
+	"duration"	"1.112"
+	"priority"	"3"
+}
+"player/tank/voice/growl/tank_fail_04.wav"
+{
+	"duration"	"1.919"
+	"priority"	"3"
+}
+"player/tank/voice/growl/tank_fail_05.wav"
+{
+	"duration"	"1.38"
+	"priority"	"3"
+}
+
+/** tank rock throw */
+"player/tank/voice/yell/tank_throw_01.wav"
+{
+	"duration"	"1.878"
+	"priority"	"3"
+}
+"player/tank/voice/yell/tank_throw_02.wav"
+{
+	"duration"	"1.883"
+	"priority"	"3"
+}
+"player/tank/voice/yell/tank_throw_03.wav"
+{
+	"duration"	"2.241"
+	"priority"	"3"
+}
+"player/tank/voice/yell/tank_throw_04.wav"
+{
+	"duration"	"1.875"
+	"priority"	"3"
+}
+"player/tank/voice/yell/tank_throw_05.wav"
+{
+	"duration"	"1.702"
+	"priority"	"3"
+}
+"player/tank/voice/yell/tank_throw_06.wav"
+{
+	"duration"	"1.754"
+	"priority"	"3"
+}
+"player/tank/voice/yell/tank_throw_09.wav"
+{
+	"duration"	"1.869"
+	"priority"	"3"
+}
+"player/tank/voice/yell/tank_throw_10.wav"
+{
+	"duration"	"2.042"
+	"priority"	"3"
+}
+"player/tank/voice/yell/tank_throw_11.wav"
+{
+	"duration"	"2.132"
+	"priority"	"3"
+}
+
+/** tank punching */
+"player/tank/voice/attack/tank_attack_01.wav"
+{
+	"duration"	"1.377"
+	"priority"	"1"
+}
+"player/tank/voice/attack/tank_attack_02.wav"
+{
+	"duration"	"1.36"
+	"priority"	"1"
+}
+"player/tank/voice/attack/tank_attack_03.wav"
+{
+	"duration"	"1.357"
+	"priority"	"1"
+}
+"player/tank/voice/attack/tank_attack_04.wav"
+{
+	"duration"	"1.191"
+	"priority"	"1"
+}
+"player/tank/voice/attack/tank_attack_05.wav"
+{
+	"duration"	"1.6"
+	"priority"	"1"
+}
+"player/tank/voice/attack/tank_attack_06.wav"
+{
+	"duration"	"1.159"
+	"priority"	"1"
+}
+"player/tank/voice/attack/tank_attack_07.wav"
+{
+	"duration"	"1.911"
+	"priority"	"1"
+}
+"player/tank/voice/attack/tank_attack_08.wav"
+{
+	"duration"	"1.628"
+	"priority"	"1"
+}
+"player/tank/voice/attack/tank_attack_09.wav"
+{
+	"duration"	"1.544"
+	"priority"	"1"
+}
+"player/tank/voice/attack/tank_attack_10.wav"
+{
+	"duration"	"1.912"
+	"priority"	"1"
+}
+
+/*****************
+ * SI death sounds
+ *****************/
+
+/** smoker */
+"player/smoker/voice/death/smoker_death_01.wav"
+{
+	"duration"	"1.201"
+	"priority"	"4"
+}
+"player/smoker/voice/death/smoker_death_02.wav"
+{
+	"duration"	"1.989"
+	"priority"	"4"
+}
+"player/smoker/voice/death/smoker_death_03.wav"
+{
+	"duration"	"1.775"
+	"priority"	"4"
+}
+"player/smoker/voice/death/smoker_death_04.wav"
+{
+	"duration"	"1.383"
+	"priority"	"4"
+}
+"player/smoker/voice/death/smoker_death_05.wav"
+{
+	"duration"	"1.708"
+	"priority"	"4"
+}
+"player/smoker/voice/death/smoker_death_06.wav"
+{
+	"duration"	"1.823"
+	"priority"	"4"
+}
+"player/smoker/death/smoker_explode_01.wav"
+{
+	"duration"	"2.521"
+	"priority"	"4"
+}
+"player/smoker/death/smoker_explode_02.wav"
+{
+	"duration"	"2.521"
+	"priority"	"4"
+}
+"player/smoker/death/smoker_explode_03.wav"
+{
+	"duration"	"2.521"
+	"priority"	"4"
+}
+"player/smoker/death/smoker_explode_04.wav"
+{
+	"duration"	"2.521"
+	"priority"	"4"
+}
+
+/** boomer */
+"player/boomer/explode/explo_medium_09.wav"
+{
+	"duration"	"1.898"
+	"priority"	"4"
+}
+"player/boomer/explode/explo_medium_10.wav"
+{
+	"duration"	"1.707"
+	"priority"	"4"
+}
+"player/boomer/explode/explo_medium_14.wav"
+{
+	"duration"	"2.751"
+	"priority"	"4"
+}
+
+/** hunter */
+"player/hunter/voice/death/hunter_death_02.wav"
+{
+	"duration"	"0.93"
+	"priority"	"4"
+}
+"player/hunter/voice/death/hunter_death_04.wav"
+{
+	"duration"	"0.732"
+	"priority"	"4"
+}
+"player/hunter/voice/death/hunter_death_06.wav"
+{
+	"duration"	"0.485"
+	"priority"	"4"
+}
+"player/hunter/voice/death/hunter_death_07.wav"
+{
+	"duration"	"0.722"
+	"priority"	"4"
+}
+"player/hunter/voice/death/hunter_death_08.wav"
+{
+	"duration"	"0.742"
+	"priority"	"4"
+}
+
+/** spitter */
+"player/spitter/voice/die/spitter_death_01.wav"
+{
+	"duration"	"1.452"
+	"priority"	"4"
+}
+"player/spitter/voice/die/spitter_death_02.wav"
+{
+	"duration"	"1.416"
+	"priority"	"4"
+}
+
+/** jockey */
+"player/jockey/voice/death/jockey_death01.wav"
+{
+	"duration"	"1.788"
+	"priority"	"4"
+}
+"player/jockey/voice/death/jockey_death02.wav"
+{
+	"duration"	"1.674"
+	"priority"	"4"
+}
+"player/jockey/voice/death/jockey_death03.wav"
+{
+	"duration"	"2.274"
+	"priority"	"4"
+}
+"player/jockey/voice/death/jockey_death04.wav"
+{
+	"duration"	"1.895"
+	"priority"	"4"
+}
+"player/jockey/voice/death/jockey_death05.wav"
+{
+	"duration"	"1.807"
+	"priority"	"4"
+}
+"player/jockey/voice/death/jockey_death06.wav"
+{
+	"duration"	"2.053"
+	"priority"	"4"
+}
+
+/** charger */
+"player/charger/voice/die/charger_die_01.wav"
+{
+	"duration"	"2.387"
+	"priority"	"4"
+}
+"player/charger/voice/die/charger_die_02.wav"
+{
+	"duration"	"1.221"
+	"priority"	"4"
+}
+"player/charger/voice/die/charger_die_03.wav"
+{
+	"duration"	"1.392"
+	"priority"	"4"
+}
+
+/** tank */
+"player/tank/voice/die/tank_death_01.wav"
+{
+	"duration"	"3.08"
+	"priority"	"4"
+}
+"player/tank/voice/die/tank_death_02.wav"
+{
+	"duration"	"2.754"
+	"priority"	"4"
+}
+"player/tank/voice/die/tank_death_03.wav"
+{
+	"duration"	"2.846"
+	"priority"	"4"
+}
+"player/tank/voice/die/tank_death_04.wav"
+{
+	"duration"	"2.182"
+	"priority"	"4"
+}
+"player/tank/voice/die/tank_death_05.wav"
+{
+	"duration"	"5.071"
+	"priority"	"4"
+}
+"player/tank/voice/die/tank_death_06.wav"
+{
+	"duration"	"2.424"
+	"priority"	"4"
+}
+"player/tank/voice/die/tank_death_07.wav"
+{
+	"duration"	"3.078"
+	"priority"	"4"
+}
+
+/*******
+ * Misc
+ ********/
+
+/** generic impact from high fall */
+"player/pz/fall/bodyfall_largecreature.wav"
+{
+	"duration"	"0.925"
+	"priority"	"1"
+}
+
+/** tank climbing (voice chan) */
+"player/tank/voice/growl/tank_climb_01.wav"
+{
+	"duration"	"1.832"
+	"priority"	"2"
+}
+"player/tank/voice/growl/tank_climb_02.wav"
+{
+	"duration"	"2.772"
+	"priority"	"2"
+}
+"player/tank/voice/growl/tank_climb_03.wav"
+{
+	"duration"	"1.907"
+	"priority"	"2"
+}
+"player/tank/voice/growl/tank_climb_04.wav"
+{
+	"duration"	"1.095"
+	"priority"	"2"
+}
+"player/tank/voice/growl/tank_climb_05.wav"
+{
+	"duration"	"3.519"
+	"priority"	"2"
+}
+
+/** take set on fire */
+"player/tank/voice/pain/tank_fire_01.wav"
+{
+	"duration"	"2.255"
+	"priority"	"1"
+}
+"player/tank/voice/pain/tank_fire_02.wav"
+{
+	"duration"	"1.807"
+	"priority"	"1"
+}
+"player/tank/voice/pain/tank_fire_03.wav"
+{
+	"duration"	"1.568"
+	"priority"	"1"
+}
+"player/tank/voice/pain/tank_fire_04.wav"
+{
+	"duration"	"2.089"
+	"priority"	"1"
+}
+"player/tank/voice/pain/tank_fire_05.wav"
+{
+	"duration"	"2.099"
+	"priority"	"1"
+}
+"player/tank/voice/pain/tank_fire_06.wav"
+{
+	"duration"	"3.192"
+	"priority"	"1"
+}
+"player/tank/voice/pain/tank_fire_07.wav"
+{
+	"duration"	"1.887"
+	"priority"	"1"
+}
+"player/tank/voice/pain/tank_fire_08.wav"
+{
+	"duration"	"3.332"
+	"priority"	"1"
+}

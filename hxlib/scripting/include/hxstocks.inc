@@ -29,25 +29,6 @@ enum
 	Team_Actors		= 4		// used by non-playable survivors, like the l4d1 survivors in the passing
 };
 
-enum ZombieClass
-{
-	ZClass_Null		= -1,
-
-	ZClass_Common	= 0,
-
-	ZClass_Smoker	= 1,
-	ZClass_Boomer	= 2,
-	ZClass_Hunter	= 3,
-	ZClass_Spitter	= 4,
-	ZClass_Jockey	= 5,
-	ZClass_Charger	= 6,
-
-	ZClass_Witch	= 7,
-	ZClass_Tank		= 8,
-
-	ZClass_Survivor	= 9
-};
-
 enum AmmoType
 {
 	Ammo_None = 0,
@@ -74,6 +55,25 @@ enum AmmoType
 	Ammo_CarriedItem,
 
 	Ammo_MAX
+};
+
+enum ZombieClass
+{
+	ZClass_Null		= -1,
+
+	ZClass_Common	= 0,
+
+	ZClass_Smoker	= 1,
+	ZClass_Boomer	= 2,
+	ZClass_Hunter	= 3,
+	ZClass_Spitter	= 4,
+	ZClass_Jockey	= 5,
+	ZClass_Charger	= 6,
+
+	ZClass_Witch	= 7,
+	ZClass_Tank		= 8,
+
+	ZClass_Survivor	= 9
 };
 
 #define ZCLASS_SI_MIN	ZClass_Smoker
@@ -638,4 +638,9 @@ stock int GetObserverTarget(int client)
 stock bool IsPlayerIncapacitated(int client)
 {
 	return GetEntProp(client, Prop_Send, "m_isIncapacitated");
+}
+
+stock bool IsHunterLunging(int client)
+{
+	return GetEntProp(client, Prop_Send, "m_isAttemptingToPounce", 1);
 }

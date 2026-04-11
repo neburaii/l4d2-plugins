@@ -191,6 +191,7 @@ void RegisterNatives()
 	CreateNative("GetMaxMagazineAmmo", Native_GetWeaponMaxClip);
 	CreateNative("IsEntityAlive", Native_IsEntityAlive);
 	CreateNative("GetLastHitGroup", Native_GetLastHitGroup);
+	CreateNative("Vocalize", Native_Vocalize);
 }
 
 /******************
@@ -1045,6 +1046,19 @@ public any Native_GetServerOS(Handle hPlugin, int iNumParams)
 	{
 		Address ent = GetEntityAddress(GetNativeCell(1));
 		return LoadFromAddress(ent + view_as<Address>(g_iOffset_LastHitGroup), NumberType_Int32);
+	}
+
+	public void Native_Vocalize(Handle hPlugin, int iNumParams)
+	{
+		int iLen = GetNativeStringLengthFull(2);
+		char[] sGameSound = new char[iLen];
+
+		int iClient = GetNativeCell(1);
+		GetNativeString(2, sGameSound, iLen);
+		float fCooldown = GetNativeCell(3);
+		float fDurationAI = GetNativeCell(4);
+
+		SDKCall(g_hSDK_Vocalize, iClient, sGameSound, fCooldown, fDurationAI);
 	}
 
 /** Variant methodmap */

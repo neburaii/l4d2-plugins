@@ -106,6 +106,10 @@ void InitDetours()
 	CreateDetour("HX::CBaseServer::GetFreeClientInternal",
 		Detour_GetFreeClientInternal_Pre, Detour_GetFreeClientInternal_Post,
 		{Forward_OnGetFreeClient, Forward_OnGetFreeClient_Post, -1});
+
+	CreateDetour("HX::CTerrorPlayer::Vocalize",
+		Detour_Vocalize_Pre, Detour_Vocalize_Post,
+		{Forward_OnVocalize, Forward_OnVocalize_Post, -1});
 }
 
 /************
@@ -1354,5 +1358,59 @@ void InitDetours()
 		Call_Finish();
 
 		g_bHandled_ShowHostDetails = false;
+		return MRES_Ignored;
+	}
+
+/** OnVocalize */
+	static bool g_bHandled_Vocalize;
+
+	MRESReturn Detour_Vocalize_Pre(int pThis, DHookParam hParams)
+	{
+		static char sGameSound[64];
+		hParams.GetString(1, sGameSound, sizeof(sGameSound));
+		float fCooldown = hParams.Get(2);
+		float fDurationAI = hParams.Get(3);
+
+		Call_StartForward(g_forward[Forward_OnVocalize].handle);
+		Call_PushCell(pThis);
+		Call_PushStringEx(sGameSound, sizeof(sGameSound), SM_PARAM_STRING_COPY, SM_PARAM_COPYBACK);
+		Call_PushCellRef(fCooldown);
+		Call_PushCellRef(fDurationAI);
+		Action result = Plugin_Continue;
+		Call_Finish(result);
+
+		if (result == Plugin_Handled)
+		{
+			g_bHandled_Vocalize = true;
+			return MRES_Supercede;
+		}
+
+		if (result == Plugin_Changed)
+		{
+			hParams.SetString(1, sGameSound);
+			hParams.Set(2, fCooldown);
+			hParams.Set(3, fDurationAI);
+			return MRES_ChangedHandled;
+		}
+
+		return MRES_Ignored;
+	}
+
+	MRESReturn Detour_Vocalize_Post(int pThis, DHookParam hParams)
+	{
+		static char sGameSound[64];
+		hParams.GetString(1, sGameSound, sizeof(sGameSound));
+		float fCooldown = hParams.Get(2);
+		float fDurationAI = hParams.Get(3);
+
+		Call_StartForward(g_forward[Forward_OnVocalize_Post].handle);
+		Call_PushCell(pThis);
+		Call_PushString(sGameSound);
+		Call_PushCell(fCooldown);
+		Call_PushCell(fDurationAI);
+		Call_PushCell(g_bHandled_Vocalize);
+		Call_Finish();
+
+		g_bHandled_Vocalize = false;
 		return MRES_Ignored;
 	}

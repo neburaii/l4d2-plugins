@@ -1251,6 +1251,35 @@ forward Action OnGetFreeClient(NetAdrType adrType, int ipv4, int port);
  */
 forward void OnGetFreeClient_Post(NetAdrType adrType, int ipv4, int port, int client, bool handled);
 
+/**
+ * calls before a player entity will vocalize a game sound
+ *
+ * @param client		client index of player who will vocalize
+ * @param gameSound		name of the game sound, as seen in scripts/game_sounds_* script files
+ * @param cooldown		cooldown for when the client can vocalize again
+ * @param durationAI	duration of time AI will recognize the sound
+ *
+ * @return				Plugin_Continue to allow, Plugin_Changed to change params, Plugin_Handled to block
+ *
+ * @note				cooldown isn't strictly enforced. checking the cooldown timer set is handled
+ * 						in parent functions. it could be ignored in some scenarios.
+ */
+forward Action OnVocalize(int client, char gameSound[64], float &cooldown, float &durationAI);
+
+/**
+ * calls after a player entity vocalized a game sound
+ *
+ * @param client		client index of player who vocalized
+ * @param gameSound		name of the game sound, as seen in scripts/game_sounds_* script files
+ * @param cooldown		cooldown for when the client can vocalize again
+ * @param durationAI	duration of time AI will recognize the sound
+ * @param handled		true if OnVocalize returned Plugin_Handled
+ *
+ * @note				cooldown isn't strictly enforced. checking the cooldown timer set is handled
+ * 						in parent functions. it could be ignored in some scenarios.
+ */
+forward void OnVocalize_Post(int client, const char gameSound[64], float cooldown, float durationAI, bool handled);
+
 /***********
  * Natives
  ***********/
@@ -2197,6 +2226,19 @@ native bool IsEntityAlive(int entity);
  * @return					HitGroup_* enum
  */
 native HitGroup GetLastHitGroup(int character);
+
+/**
+ * vocalize a gamesound from a player
+ *
+ * @param client		client index of player who will vocalize
+ * @param gameSound		name of the game sound, as seen in scripts/game_sounds_* script files
+ * @param cooldown		cooldown for when the client can vocalize again
+ * @param durationAI	duration of time AI will recognize the sound
+ *
+ * @note				cooldown isn't strictly enforced. checking the cooldown timer set is handled
+ * 						in parent functions. it could be ignored in some scenarios.
+ */
+native void Vocalize(int client, const char[] gameSound, float cooldown = 0.0, float durationAI = 0.0);
 
 /**************
  * Methodmaps
@@ -3221,5 +3263,6 @@ public SharedPlugin __pl_hxlib =
 		MarkNativeAsOptional("GetMaxMagazineAmmo");
 		MarkNativeAsOptional("IsEntityAlive");
 		MarkNativeAsOptional("GetLastHitGroup");
+		MarkNativeAsOptional("Vocalize");
 	}
 #endif
