@@ -15,10 +15,10 @@ i understand that these improvements may be subjective, so there is a convar for
 - `audio_feedback_hunter_honest_warn`
 
 # Changelog
-## 1.2
+### 1.1
 - moved out of `neb_consistent_ability_cue`, and into its own plugin
 - fixed bugs with how shriek sound was made consistent
 - added feature to remove deceiving warning sounds
 
-## 1.0
+### 1.0
 - intitial release
