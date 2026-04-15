@@ -1032,6 +1032,12 @@
 				"windows"	"6200"
 			}
 
+			"CTerrorPlayer::vocalizeCooldown"
+			{
+				"linux"		"12440"
+				"windows"	"12460"
+			}
+
 			/*****************
 			 * CountdownTimer
 			 ****************/

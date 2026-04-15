@@ -186,6 +186,35 @@ stock bool IsDominated(int client)
 	return false;
 }
 
+stock bool HasVictim(int client)
+{
+	int victim = -1;
+	switch (GetZombieClass(client))
+	{
+		case ZClass_Smoker:
+			victim = GetEntPropEnt(client, Prop_Send, "m_tongueVictim");
+		case ZClass_Hunter:
+			victim = GetEntPropEnt(client, Prop_Send, "m_pounceVictim");
+		case ZClass_Jockey:
+			victim = GetEntPropEnt(client, Prop_Send, "m_jockeyVictim");
+		case ZClass_Charger:
+		{
+			if ((victim = GetEntPropEnt(client, Prop_Send, "m_carryVictim")) == -1)
+				victim = GetEntPropEnt(client, Prop_Send, "m_pummelVictim");
+		}
+	}
+
+	return IsValidClient(victim);
+}
+
+/**
+ * check if entity inherits CBaseCombatCharacter
+ */
+stock bool IsCombatCharacter(int entity)
+{
+	return HasEntProp(entity, Prop_Send, "m_hMyWeapons");
+}
+
 /**
  * is this entity a common infected?
  *
@@ -643,4 +672,28 @@ stock bool IsPlayerIncapacitated(int client)
 stock bool IsHunterLunging(int client)
 {
 	return GetEntProp(client, Prop_Send, "m_isAttemptingToPounce", 1);
+}
+
+stock void GetCollisionMins(int entity, float buffer[3])
+{
+	GetEntPropVector(entity, Prop_Send, "m_Collision", buffer, 0);
+}
+
+stock void GetCollisionMaxs(int entity, float buffer[3])
+{
+	GetEntPropVector(entity, Prop_Send, "m_Collision", buffer, 1);
+}
+
+stock void GetCollisionCenter(int entity, float buffer[3])
+{
+	float mins[3];
+	float maxs[3];
+	float origin[3];
+
+	GetCollisionMins(entity, mins);
+	GetCollisionMaxs(entity, maxs);
+	GetEntityAbsOrigin(entity, origin);
+
+	for (int i = 0; i < 3; i++)
+		buffer[i] = origin[i] + ((maxs[i] + mins[i]) * 0.5);
 }

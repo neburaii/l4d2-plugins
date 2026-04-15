@@ -265,6 +265,12 @@ DirectorTempo Util_GetTempo()
 	return LoadFromAddress(g_pDirector + view_as<Address>(g_iOffset_Director_Tempo), NumberType_Int32);
 }
 
+CountdownTimer Util_GetVocalizeCooldown(int iClient)
+{
+	Address addr = GetEntityAddress(iClient);
+	return view_as<CountdownTimer>(addr + view_as<Address>(g_iOffset_VocalizeCooldown));
+}
+
 /*************************
  * Scripted Event Manager
  *************************/

@@ -2240,6 +2240,23 @@ native HitGroup GetLastHitGroup(int character);
  */
 native void Vocalize(int client, const char[] gameSound, float cooldown = 0.0, float durationAI = 0.0);
 
+/**
+ * get remaining time of a player's vocalize cooldown
+ *
+ * @param client		client index of player to check
+ *
+ * @return				time remaining. value <= 0.0 means duration elapsed
+ */
+native float GetVocalizeCooldown(int client);
+
+/**
+ * set remaining time of a player's vocalize cooldown
+ *
+ * @param client		client index of player to set for
+ * @param cooldown		duration in seconds
+ */
+native void SetVocalizeCooldown(int client, float cooldown);
+
 /**************
  * Methodmaps
  *************/
@@ -3264,5 +3281,7 @@ public SharedPlugin __pl_hxlib =
 		MarkNativeAsOptional("IsEntityAlive");
 		MarkNativeAsOptional("GetLastHitGroup");
 		MarkNativeAsOptional("Vocalize");
+		MarkNativeAsOptional("GetVocalizeCooldown");
+		MarkNativeAsOptional("SetVocalizeCooldown");
 	}
 #endif

@@ -192,6 +192,8 @@ void RegisterNatives()
 	CreateNative("IsEntityAlive", Native_IsEntityAlive);
 	CreateNative("GetLastHitGroup", Native_GetLastHitGroup);
 	CreateNative("Vocalize", Native_Vocalize);
+	CreateNative("GetVocalizeCooldown", Native_GetVocalizeCooldown);
+	CreateNative("SetVocalizeCooldown", Native_SetVocalizeCooldown);
 }
 
 /******************
@@ -1059,6 +1061,23 @@ public any Native_GetServerOS(Handle hPlugin, int iNumParams)
 		float fDurationAI = GetNativeCell(4);
 
 		SDKCall(g_hSDK_Vocalize, iClient, sGameSound, fCooldown, fDurationAI);
+	}
+
+	public any Native_GetVocalizeCooldown(Handle hPlugin, int iNumParams)
+	{
+		int iClient = GetNativeCell(1);
+		CountdownTimer cooldown = Util_GetVocalizeCooldown(iClient);
+
+		return cooldown.GetRemaining();
+	}
+
+	public void Native_SetVocalizeCooldown(Handle hPlugin, int iNumParams)
+	{
+		int iClient = GetNativeCell(1);
+		CountdownTimer cooldown = Util_GetVocalizeCooldown(iClient);
+		float fDuration = GetNativeCell(2);
+
+		cooldown.Set(fDuration);
 	}
 
 /** Variant methodmap */

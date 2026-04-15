@@ -37,6 +37,7 @@ int		g_iOffset_ClientIndex;
 int		g_iOffset_Player_TimeLastAlive;
 int		g_iOffset_Player_DetachedWeapon;
 int		g_iOffset_LastHitGroup;
+int		g_iOffset_VocalizeCooldown;
 
 /** CTraceFilterSimple */
 int		g_iOffset_TraceFilterSimple_vtable;
@@ -166,6 +167,8 @@ void InitOffsets()
 		LoadOffset("CTerrorPlayer::detachedWeapon");
 	g_iOffset_LastHitGroup =
 		LoadOffset("CBaseCombatCharacter::lastHitGroup");
+	g_iOffset_VocalizeCooldown =
+		LoadOffset("CTerrorPlayer::vocalizeCooldown");
 
 	/** CTraceFilterSimple */
 	g_iOffset_TraceFilterSimple_vtable =
