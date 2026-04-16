@@ -178,7 +178,6 @@ void Attack_OnUpdatePost(BehaviorJockey action, int iActor, float fInterval, Act
 	if ((fNow - g_fLastUpdate[iActor]) < UPDATE_INTERVAL || HasVictim(iActor))
 		return;
 
-	DebugPrint("updating");
 	g_fLastUpdate[iActor] = fNow;
 
 	int iTarget = action.GetTarget();
