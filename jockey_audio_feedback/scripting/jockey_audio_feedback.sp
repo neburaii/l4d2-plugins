@@ -181,7 +181,7 @@ void Attack_OnUpdatePost(BehaviorJockey action, int iActor, float fInterval, Act
 	g_fLastUpdate[iActor] = fNow;
 
 	int iTarget = action.GetTarget();
-	if (iTarget == INVALID_ENT_REFERENCE) return;
+	if (!IsValidEdict(iTarget)) return;
 
 	float vActorPos[3];
 	float vTargetPos[3];
