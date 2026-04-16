@@ -1,1 +1,15 @@
-when an SI spawns, they will be blocked from moving/attacking for a set amount of time (change time with the si_spawn_action_delay convar)
+# Description
+Adds a convar to delay special infected from taking any action after spawning.
+
+### ConVar
+`spawn_attack_delay`
+
+## Hard Requirements
+- [actions](https://forums.alliedmods.net/showthread.php?t=336374)
+
+# Changelog
+### 1.1
+- fix audio not playing during the delay
+
+### 1.0
+- initial release

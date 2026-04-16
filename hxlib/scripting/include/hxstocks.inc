@@ -150,21 +150,6 @@ stock bool IsValidClient(int entity)
 }
 
 /**
- * check if an entity is a non-client character (e.g common infected)
- *
- * @param entity		entity index to check
- *
- * @return				true if the entity is an NPC, false otherwise
- */
-stock bool IsNPC(int entity)
-{
-	if (entity <= MaxClients || !IsValidEdict(entity))
-		return false;
-
-	return GetEntityFlags(entity) & FL_NPC;
-}
-
-/**
  * check if a client is currently being dominated by a special infected
  *
  * @param client		client index of survivor to check
@@ -224,8 +209,16 @@ stock bool IsCombatCharacter(int entity)
  */
 stock bool IsCommonInfected(int entity)
 {
-	if (!IsNPC(entity)) return false;
+	if (!IsInfected(entity)) return false;
 	return IsEntityOfClass(entity, "infected");
+}
+
+/**
+ * check if entity inherits Infected class
+ */
+stock bool IsInfected(int entity)
+{
+	return HasEntProp(entity, Prop_Send, "m_mobRush");
 }
 
 /**
@@ -237,7 +230,7 @@ stock bool IsCommonInfected(int entity)
  */
 stock bool IsWitch(int entity)
 {
-	if (!IsNPC(entity)) return false;
+	if (!IsInfected(entity)) return false;
 	return IsEntityOfClass(entity, "witch");
 }
 
