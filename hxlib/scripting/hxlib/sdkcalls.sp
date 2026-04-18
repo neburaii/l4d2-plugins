@@ -54,10 +54,19 @@ Handle g_hSDK_MaxCarry;
 Handle g_hSDK_GetMaxClip1;
 Handle g_hSDK_IsAlive;
 Handle g_hSDK_Vocalize;
+Handle g_hSDK_SpawnTank;
+Handle g_hSDK_SpawnSpecial;
+Handle g_hSDK_SpawnWitch;
+Handle g_hSDK_NextBotUpdate;
+Handle g_hSDK_InfectedSetMobRush;
+Handle g_hSDK_GameStatsEventSpawn;
 
 void InitSDKCalls()
 {
 	SDKPrep prep;
+
+	prep.Start(SDKCall_Raw, SDKConf_Virtual, "INextBot::Update");
+	prep.End(g_hSDK_NextBotUpdate);
 
 	/** Native_SetSurvivorIntensity */
 	prep.Start(SDKCall_Raw, SDKConf_Signature, "Intensity::Reset");
@@ -333,6 +342,42 @@ void InitSDKCalls()
 	prep.Param(SDKType_Float, SDKPass_Plain);
 	prep.Param(SDKType_Float, SDKPass_Plain);
 	prep.End(g_hSDK_Vocalize);
+
+	/** Native_SpawnSpecial */
+	prep.Start(SDKCall_Raw, SDKConf_Signature, "ZombieManager::SpawnSpecial");
+	prep.Param(SDKType_PlainOldData, SDKPass_Plain);
+	prep.Param(SDKType_Vector, SDKPass_Pointer);
+	prep.Param(SDKType_Vector, SDKPass_Pointer);
+	prep.Return(SDKType_CBaseEntity, SDKPass_Pointer);
+	prep.End(g_hSDK_SpawnSpecial);
+
+	prep.Start(SDKCall_Raw, SDKConf_Signature, "ZombieManager::SpawnTank");
+	prep.Param(SDKType_Vector, SDKPass_Pointer);
+	prep.Param(SDKType_Vector, SDKPass_Pointer);
+	prep.Return(SDKType_CBaseEntity, SDKPass_Pointer);
+	prep.End(g_hSDK_SpawnTank);
+
+	prep.Start(SDKCall_Raw, SDKConf_Signature, "CL4DGameStats::Event_SpawnZombie");
+	prep.Param(SDKType_PlainOldData, SDKPass_Plain);
+	prep.Param(SDKType_PlainOldData, SDKPass_Plain);
+	prep.End(g_hSDK_GameStatsEventSpawn);
+
+	switch (g_OS)
+	{
+		case OS_Linux: prep.Start(SDKCall_Raw, SDKConf_Signature, "ZombieManager::SpawnWitch");
+		case OS_Windows: prep.Start(SDKCall_Static, SDKConf_Signature, "ZombieManager::SpawnWitch");
+	}
+	prep.Param(SDKType_Vector, SDKPass_Pointer);
+	prep.Param(SDKType_Vector, SDKPass_Pointer);
+	prep.Return(SDKType_CBaseEntity, SDKPass_Pointer);
+	prep.End(g_hSDK_SpawnWitch);
+
+	switch (g_OS)
+	{
+		case OS_Linux: prep.Start(SDKCall_Entity, SDKConf_Signature, "Infected::AttackSurvivorTeam");
+		case OS_Windows: prep.Start(SDKCall_Entity, SDKConf_Address, "CALL::Infected::AttackSurvivorTeam");
+	}
+	prep.End(g_hSDK_InfectedSetMobRush);
 
 	/** Native_AddSurvivorBot */
 	switch (g_OS)

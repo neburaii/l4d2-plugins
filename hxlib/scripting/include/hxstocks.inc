@@ -413,6 +413,16 @@ stock void SetEntityAbsOrigin(int entity, float value[3])
 	SetEntPropVector(entity, Prop_Data, "m_vecAbsOrigin", value);
 }
 
+stock void GetEntityAbsAngles(int entity, float buffer[3])
+{
+	GetEntPropVector(entity, Prop_Send, "m_angRotation", buffer);
+}
+
+stock void SetEntityAbsAngles(int entity, float value[3])
+{
+	SetEntPropVector(entity, Prop_Send, "m_angRotation", value);
+}
+
 stock void GetEntityAbsVelocity(int entity, float buffer[3])
 {
 	GetEntPropVector(entity, Prop_Data, "m_vecAbsVelocity", buffer);

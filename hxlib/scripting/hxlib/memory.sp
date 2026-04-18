@@ -4,21 +4,26 @@
 #define	CUTLVECTOR_STRUCT_SIZE			20
 #define TRACEFILTERSIMPLE_STRUCT_SIZE	16
 
-Address	g_pDirector;
-Address	g_pDirectorChallengeMode;
-Address g_pDirectorScriptedEventManager;
+Director g_director;
+ScriptedEventManager g_scriptedEventManager;
+ChallengeMode g_challengeMode;
+ZombieManager g_zombieManager;
+
+CountdownTimer g_MobTimer;
+CountdownTimer g_TempoTimer;
+CountdownTimer g_PanicDelayTimer;
+
 Address g_pDirectorTacticalServices;
 Address g_pL4DGameStats;
-Address g_pZombieManager;
 Address g_pNavMesh;
 Address g_pTheNavAreas;
 Address g_pDefaultViewVectors;
 Address g_pTraceFilterSimple_vtable;
 Address g_pAmmoDef;
 
-CountdownTimer g_MobTimer;
-CountdownTimer g_TempoTimer;
-CountdownTimer g_PanicDelayTimer;
+MemoryPatch	g_hMemPatch_SpawnSpecialsBypassLimit;
+MemoryPatch	g_hMemPatch_SpawnTankBypassLimit;
+MemoryPatch	g_hMemPatch_SpawnWitchBypassLimit;
 
 int		g_iOffset_EHandle;
 int		g_iOffset_Intensity;
@@ -38,6 +43,10 @@ int		g_iOffset_Player_TimeLastAlive;
 int		g_iOffset_Player_DetachedWeapon;
 int		g_iOffset_LastHitGroup;
 int		g_iOffset_VocalizeCooldown;
+int		g_iOffset_NextBotPointer;
+int		g_iOffset_InfectedReservedWandererFlags;
+int		g_iOffset_InfectedMobAmbient;
+int		g_iOffset_ZombieManagerCommonSpawnCount;
 
 /** CTraceFilterSimple */
 int		g_iOffset_TraceFilterSimple_vtable;
@@ -84,6 +93,7 @@ int		g_iOffset_Director_NextMobSize;
 int		g_iOffset_Director_Tempo;
 int		g_iOffset_Director_RelaxStartFlow;
 int		g_iOffset_Director_SurvivorsLeftSafeArea;
+int		g_iOffset_Director_NumReservedWanderers;
 
 /** CDirectorScriptedEventManager */
 int		g_iOffset_ScriptedEventManager_CrescendoOccured;
@@ -169,6 +179,14 @@ void InitOffsets()
 		LoadOffset("CBaseCombatCharacter::lastHitGroup");
 	g_iOffset_VocalizeCooldown =
 		LoadOffset("CTerrorPlayer::vocalizeCooldown");
+	g_iOffset_NextBotPointer =
+		LoadOffset("NextBotPointer");
+	g_iOffset_InfectedReservedWandererFlags =
+		LoadOffset("Infected::reservedWandererFlags");
+	g_iOffset_InfectedMobAmbient =
+		LoadOffset("Infected::m_mobAmbient");
+	g_iOffset_ZombieManagerCommonSpawnCount =
+		LoadOffset("ZombieManager::commonSpawnCount");
 
 	/** CTraceFilterSimple */
 	g_iOffset_TraceFilterSimple_vtable =
@@ -251,6 +269,8 @@ void InitOffsets()
 		LoadOffset("CDirector::relaxStartFlow");
 	g_iOffset_Director_SurvivorsLeftSafeArea =
 		LoadOffset("CDirector::survivorsLeftSafeArea");
+	g_iOffset_Director_NumReservedWanderers =
+		LoadOffset("CDirector::numReservedWanderers");
 
 	/** CDirectorScriptedEventManager */
 	g_iOffset_ScriptedEventManager_CrescendoOccured =
@@ -338,11 +358,11 @@ void InitOffsets()
 void InitAddresses()
 {
 	/** addresses */
-	g_pDirector =
+	g_director =
 		LoadAddress("CDirector");
 	g_pL4DGameStats =
 		LoadAddress("CL4DGameStats");
-	g_pZombieManager =
+	g_zombieManager =
 		LoadAddress("ZombieManager");
 	g_pNavMesh =
 		LoadAddress("CNavMesh");
@@ -356,16 +376,26 @@ void InitAddresses()
 		LoadAddress("CAmmoDef");
 
 	/** address + offset */
-	g_pDirectorChallengeMode =
-		LoadAddressOffset(g_pDirector, "CDirectorChallengeMode");
-	g_pDirectorScriptedEventManager =
-		LoadAddressOffset(g_pDirector, "CDirectorScriptedEventManager");
+	g_challengeMode =
+		LoadAddressOffset(g_director, "CDirectorChallengeMode");
+	g_scriptedEventManager =
+		LoadAddressOffset(g_director, "CDirectorScriptedEventManager");
 	g_pDirectorTacticalServices =
-		LoadAddressOffset(g_pDirector, "CDirectorTacticalServices");
+		LoadAddressOffset(g_director, "CDirectorTacticalServices");
 	g_MobTimer =
-		LoadAddressOffset(g_pDirector, "CDirector::mobTimer");
+		LoadAddressOffset(g_director, "CDirector::mobTimer");
 	g_TempoTimer =
-		LoadAddressOffset(g_pDirector, "CDirector::tempoTimer");
+		LoadAddressOffset(g_director, "CDirector::tempoTimer");
 	g_PanicDelayTimer =
-		LoadAddressOffset(g_pDirectorScriptedEventManager, "CDirectorScriptedEventManager::panicStageDelayTimer");
+		LoadAddressOffset(g_scriptedEventManager, "CDirectorScriptedEventManager::panicStageDelayTimer");
+}
+
+void InitMemoryPatches()
+{
+	g_hMemPatch_SpawnSpecialsBypassLimit =
+		LoadMemoryPatch("CTerrorPlayer::HandleCommand_JoinTeam::bypassLimits");
+	g_hMemPatch_SpawnTankBypassLimit =
+		LoadMemoryPatch("ZombieManager::SpawnTank::bypassLimit");
+	g_hMemPatch_SpawnWitchBypassLimit =
+		LoadMemoryPatch("ZombieManager::SpawnWitch::bypassLimit");
 }

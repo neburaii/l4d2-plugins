@@ -372,6 +372,29 @@ enum
 	SurvivorSet_L4D2 = 2
 };
 
+enum HitGroup
+{
+	HitGroup_Head = 1,
+	HitGroup_Chest = 2,
+	HitGroup_Stomach = 3,
+
+	HitGroup_LArm = 4,
+	HitGroup_RArm = 5,
+
+	HitGroup_LLeg = 6,
+	HitGroup_RLeg = 7
+};
+
+enum CommonSpawnType
+{
+	CommonSpawn_Wanderer,
+	CommonSpawn_MobRush,
+
+	/** unused. included for the sake of being complete.
+	 * see this article on ambient mob infected: https://developer.valvesoftware.com/wiki/Info_ambient_mob_start */
+	CommonSpawn_MobAmbient
+};
+
 enum WeaponID
 {
 	Weapon_None,
@@ -432,19 +455,6 @@ enum WeaponID
 	Weapon_UpgradeItem,
 
 	Weapon_MAX
-};
-
-enum HitGroup
-{
-	HitGroup_Head = 1,
-	HitGroup_Chest = 2,
-	HitGroup_Stomach = 3,
-
-	HitGroup_LArm = 4,
-	HitGroup_RArm = 5,
-
-	HitGroup_LLeg = 6,
-	HitGroup_RLeg = 7
 };
 
 stock const char g_sWeapon[WeaponID][] =
@@ -2257,6 +2267,30 @@ native float GetVocalizeCooldown(int client);
  */
 native void SetVocalizeCooldown(int client, float cooldown);
 
+/**
+ * spawn a special infected of any class at the pos/angles
+ *
+ * @param class			ZombieClass of infected to spawn
+ * @param pos			position vector
+ * @param angles		QAngles vector
+ *
+ * @return				entity index of the spawned special infected
+ */
+native int SpawnSpecial(ZombieClass class, const float pos[3], const float angles[3] = NULL_VECTOR);
+
+/**
+ * spawn a common infected
+ *
+ * @param pos			origin vector in world
+ * @param angles		QAngles vector
+ * @param type			type of common spawn, see CommonSpawn_* enums
+ *
+ * @return				entity index of the spawn common infected
+ *
+ * @note				it won't correct position if it's somewhere a common can't move
+ */
+native int SpawnCommon(const float pos[3], const float angles[3] = NULL_VECTOR, CommonSpawnType type = CommonSpawn_Wanderer);
+
 /**************
  * Methodmaps
  *************/
@@ -3283,5 +3317,7 @@ public SharedPlugin __pl_hxlib =
 		MarkNativeAsOptional("Vocalize");
 		MarkNativeAsOptional("GetVocalizeCooldown");
 		MarkNativeAsOptional("SetVocalizeCooldown");
+		MarkNativeAsOptional("SpawnSpecial");
+		MarkNativeAsOptional("SpawnCommon");
 	}
 #endif

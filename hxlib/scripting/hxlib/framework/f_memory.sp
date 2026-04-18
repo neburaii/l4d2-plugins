@@ -24,7 +24,7 @@ int LoadOffset(const char[] sKey)
  *
  * @return 			address
  */
-Address LoadAddress(const char[] sKey)
+any LoadAddress(const char[] sKey)
 {
 	Address addr = g_hGameData.GetAddress(sKey);
 	if (!addr)
@@ -49,7 +49,7 @@ Address LoadAddress(const char[] sKey)
  *
  * @return			address at addr + offset
  */
-any LoadAddressOffset(Address addr, const char[] sKey)
+any LoadAddressOffset(any addr, const char[] sKey)
 {
 	int offset = LoadOffset(sKey);
 
@@ -58,4 +58,16 @@ any LoadAddressOffset(Address addr, const char[] sKey)
 		SetFailState("[LoadAddressOffset] failed to load 0x%X + %i", addr, offset);
 
 	return result;
+}
+
+/**
+ * get a MemoryPatch handle from a "MemPatch" section from gamedata
+ *
+ * @param sKey		name of the MemPatch section in gamedata
+ *
+ * @return			MemoryPatch handle
+ */
+MemoryPatch LoadMemoryPatch(const char[] sKey)
+{
+	return MemoryPatch.CreateFromConf(g_hGameData, sKey);
 }

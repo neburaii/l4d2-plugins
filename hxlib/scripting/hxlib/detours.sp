@@ -214,16 +214,16 @@ void InitDetours()
 		bool bCrescendo = false;
 		int iWaves = hParams.Get(1);
 
-		if (!Util_HasCrescendoOccurred()
+		if (!g_scriptedEventManager.crescendoOccurred
 			&& Util_AreSurvivorsInBattlefieldOrFinale() == true
-			&& (!Util_AllowChallengeModeScriptVariables() || Util_GetScriptValueInt("AllowCrescendoEvents", 1)))
+			&& (!g_challengeMode.scriptVarsEnabled || g_director.GetScriptValueInt("AllowCrescendoEvents", 1)))
 				bCrescendo = true;
 
 		if (iWaves == 0)
 		{
 			bDefaultWaves = true;
 
-			if (bCrescendo && Util_GetMapArcValue() > 1)
+			if (bCrescendo && g_director.GetMapArcValue() > 1)
 				iWaves = 2;
 			else
 				iWaves = 1;
@@ -406,12 +406,9 @@ void InitDetours()
 		int iActivator = -1;
 		if (!hParams.IsNull(1)) iActivator = hParams.Get(1);
 
-		FinaleType type = LoadFromAddress(g_pDirectorScriptedEventManager +
-			view_as<Address>(g_iOffset_ScriptedEventManager_FinaleType), NumberType_Int32);
-
 		Call_StartForward(g_forward[Forward_OnStartFinale_Post].handle);
 		Call_PushCell(iActivator);
-		Call_PushCell(type);
+		Call_PushCell(g_scriptedEventManager.finaleType);
 		Call_PushCell(g_bHandled_StartFinale);
 		Call_Finish();
 
@@ -786,7 +783,7 @@ void InitDetours()
 
 	MRESReturn Detour_UpdateTempo_Pre()
 	{
-		g_iUpdateTempo_OldValue = Util_GetTempo();
+		g_iUpdateTempo_OldValue = g_director.tempo;
 
 		Call_StartForward(g_forward[Forward_OnUpdateTempo].handle);
 		Call_PushCell(g_iUpdateTempo_OldValue);
@@ -804,7 +801,7 @@ void InitDetours()
 
 	MRESReturn Detour_UpdateTempo_Post()
 	{
-		DirectorTempo newValue = Util_GetTempo();
+		DirectorTempo newValue = g_director.tempo;
 
 		Call_StartForward(g_forward[Forward_OnUpdateTempo_Post].handle);
 		Call_PushCell(g_iUpdateTempo_OldValue);

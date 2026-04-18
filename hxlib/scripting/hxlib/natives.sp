@@ -194,6 +194,8 @@ void RegisterNatives()
 	CreateNative("Vocalize", Native_Vocalize);
 	CreateNative("GetVocalizeCooldown", Native_GetVocalizeCooldown);
 	CreateNative("SetVocalizeCooldown", Native_SetVocalizeCooldown);
+	CreateNative("SpawnSpecial", Native_SpawnSpecial);
+	CreateNative("SpawnCommon", Native_SpawnCommon);
 }
 
 /******************
@@ -323,62 +325,60 @@ public any Native_GetServerOS(Handle hPlugin, int iNumParams)
 
 	public any Native_GetPanicStage(Handle hPlugin, int iNumParams)
 	{
-		return LoadFromAddress(g_pDirectorScriptedEventManager + view_as<Address>(g_iOffset_ScriptedEventManager_PanicStage), NumberType_Int32);
+		return g_scriptedEventManager.panicStage;
 	}
 
 	public any Native_IsPanic(Handle hPlugin, int iNumParams)
 	{
-		return LoadFromAddress(g_pDirectorScriptedEventManager + view_as<Address>(g_iOffset_ScriptedEventManager_PanicStage), NumberType_Int32)
-			!= PanicStage_Done;
+		return g_scriptedEventManager.panicStage != PanicStage_Done;
 	}
 
 	public any Native_GetFinaleStage(Handle hPlugin, int iNumParams)
 	{
-		return LoadFromAddress(g_pDirectorScriptedEventManager + view_as<Address>(g_iOffset_ScriptedEventManager_FinaleStage), NumberType_Int32);
+		return g_scriptedEventManager.finaleStage;
 	}
 
 	public any Native_GetFinaleType(Handle hPlugin, int iNumParams)
 	{
-		return LoadFromAddress(g_pDirectorScriptedEventManager + view_as<Address>(g_iOffset_ScriptedEventManager_FinaleType), NumberType_Int32);
+		return g_scriptedEventManager.finaleType;
 	}
 
 	public any Native_IsFinale(Handle hPlugin, int iNumParams)
 	{
-		return LoadFromAddress(g_pDirectorScriptedEventManager + view_as<Address>(g_iOffset_ScriptedEventManager_FinaleType), NumberType_Int32)
-			!= FinaleType_None;
+		return g_scriptedEventManager.finaleType != FinaleType_None;
 	}
 
 	public any Native_IsCrescendo(Handle hPlugin, int iNumParams)
 	{
-		return LoadFromAddress(g_pDirectorScriptedEventManager + view_as<Address>(g_iOffset_ScriptedEventManager_CrescendoOngoing), NumberType_Int8);
+		return g_scriptedEventManager.crescendoOngoing;
 	}
 
 	public void Native_SetCrescendo(Handle hPlugin, int iNumParams)
 	{
 		bool bSet = GetNativeCell(1);
-		StoreToAddress(g_pDirectorScriptedEventManager + view_as<Address>(g_iOffset_ScriptedEventManager_CrescendoOngoing), bSet, NumberType_Int8);
+		g_scriptedEventManager.crescendoOngoing = bSet;
 	}
 
 	public any Native_GetCompletedPanicWaves(Handle hPlugin, int iNumParams)
 	{
-		return LoadFromAddress(g_pDirectorScriptedEventManager + view_as<Address>(g_iOffset_ScriptedEventManager_CompletedPanicWaves), NumberType_Int32);
+		return g_scriptedEventManager.completedPanicWaves;
 	}
 
 	public void Native_SetCompletedPanicWaves(Handle hPlugin, int iNumParams)
 	{
 		int iWaves = GetNativeCell(1);
-		StoreToAddress(g_pDirectorScriptedEventManager + view_as<Address>(g_iOffset_ScriptedEventManager_CompletedPanicWaves), iWaves, NumberType_Int32);
+		g_scriptedEventManager.completedPanicWaves = iWaves;
 	}
 
 	public any Native_GetTotalPanicWaves(Handle hPlugin, int iNumParams)
 	{
-		return LoadFromAddress(g_pDirectorScriptedEventManager + view_as<Address>(g_iOffset_ScriptedEventManager_TotalPanicWaves), NumberType_Int32);
+		return g_scriptedEventManager.totalPanicWaves;
 	}
 
 	public void Native_SetTotalPanicWaves(Handle hPlugin, int iNumParams)
 	{
 		int iWaves = GetNativeCell(1);
-		StoreToAddress(g_pDirectorScriptedEventManager + view_as<Address>(g_iOffset_ScriptedEventManager_TotalPanicWaves), iWaves, NumberType_Int32);
+		g_scriptedEventManager.totalPanicWaves = iWaves;
 	}
 
 	/**
@@ -388,22 +388,13 @@ public any Native_GetServerOS(Handle hPlugin, int iNumParams)
 	 */
 	public void Native_EndPanicEvent(Handle hPlugin, int iNumParams)
 	{
-		/** ScriptedEventManager->panicStageDelay = -1.0;
-		 *  ScriptedEventManager->panicStage = PanicStage_Done;
-		 *  ScriptedEventManager->crescendoOngoing = false;
-		 */
 		g_PanicDelayTimer.timestamp = -1.0;
-		StoreToAddress(g_pDirectorScriptedEventManager +
-			view_as<Address>(g_iOffset_ScriptedEventManager_PanicStage), PanicStage_Done, NumberType_Int32);
-		StoreToAddress(g_pDirectorScriptedEventManager +
-			view_as<Address>(g_iOffset_ScriptedEventManager_CrescendoOngoing), 0, NumberType_Int8);
+		g_scriptedEventManager.panicStage = PanicStage_Done;
+		g_scriptedEventManager.crescendoOngoing = false;
 
-		/** reset mob timers */
-		SDKCall(g_hSDK_OnMobRushStart, g_pDirector);
-		/** update something in gamestats object */
+		g_director.StartMobTimer();
 		SDKCall(g_hSDK_GameStatsPanicEventOver, g_pL4DGameStats);
-		/** increment finale stage if in a finale, and broadcast panic_event_finished game event */
-		SDKCall(g_hSDK_OnPanicEventFinished, g_pDirectorScriptedEventManager);
+		g_scriptedEventManager.OnPanicEventFinished();
 	}
 
 	public any Native_GetLastKnownArea(Handle hPlugin, int iNumParams)
@@ -429,17 +420,17 @@ public any Native_GetServerOS(Handle hPlugin, int iNumParams)
 		LocationType location = GetNativeCell(1);
 		ZombieClass class = GetNativeCell(2);
 
-		return SDKCall(g_hSDK_CollectSpawnAreas, g_pZombieManager, location, class);
+		return g_zombieManager.CollectSpawnAreas(location, class);
 	}
 
 	public void Native_ResetMobTimer(Handle hPlugin, int iNumParams)
 	{
-		SDKCall(g_hSDK_ResetMobTimer, g_pDirector);
+		g_director.ResetMobTimer();
 	}
 
 	public void Native_StartMobTimer(Handle hPlugin, int iNumParams)
 	{
-		SDKCall(g_hSDK_OnMobRushStart, g_pDirector);
+		g_director.StartMobTimer();
 	}
 
 	public any Native_GetTimeUntilNextMob(Handle hPlugin, int iNumParams)
@@ -449,26 +440,25 @@ public any Native_GetServerOS(Handle hPlugin, int iNumParams)
 
 	public void Native_ResetMobRecharge(Handle hPlugin, int iNumParams)
 	{
-		float fMobMinSize = Util_GetScriptValueFloat("MobMinSize", g_fConVar_MobMinSize);
-
-		StoreToAddress(g_pDirector + view_as<Address>(g_iOffset_Director_NextMobSize), fMobMinSize, NumberType_Int32);
-		StoreToAddress(g_pDirector + view_as<Address>(g_iOffset_Director_MobRechargeProgress), 0.0, NumberType_Int32);
+		float fMobMinSize = g_director.GetScriptValueFloat("MobMinSize", g_fConVar_MobMinSize);
+		g_director.mobRechargeSize = fMobMinSize;
+		g_director.mobRechargeScaler = 0.0;
 	}
 
 	public any Native_GetMobRechargeSize(Handle hPlugin, int iNumParams)
 	{
-		return LoadFromAddress(g_pDirector + view_as<Address>(g_iOffset_Director_NextMobSize), NumberType_Int32);
+		return g_director.mobRechargeSize;
 	}
 
 	public void Native_SetMobRechargeSize(Handle hPlugin, int iNumParams)
 	{
 		float fSet = GetNativeCell(1);
-		StoreToAddress(g_pDirector + view_as<Address>(g_iOffset_Director_NextMobSize), fSet, NumberType_Int32);
+		g_director.mobRechargeSize = fSet;
 	}
 
 	public void Native_ResetSpecialTimers(Handle hPlugin, int iNumParams)
 	{
-		SDKCall(g_hSDK_ResetSpecialTimers, g_pDirector);
+		g_director.ResetSpecialTimers();
 	}
 
 	public void Native_BeginLocalScript(Handle hPlugin, int iNumParams)
@@ -477,12 +467,12 @@ public any Native_GetServerOS(Handle hPlugin, int iNumParams)
 		char[] sScript = new char[iLen];
 		GetNativeString(1, sScript, iLen);
 
-		SDKCall(g_hSDK_BeginLocalScript, g_pDirector, sScript);
+		g_director.BeginLocalScript(sScript);
 	}
 
 	public void Native_EndLocalScript(Handle hPlugin, int iNumParams)
 	{
-		SDKCall(g_hSDK_EndLocalScript, g_pDirector);
+		g_director.EndLocalScript();
 	}
 
 	public any Native_GetRandomPZSpawnPosition(Handle hPlugin, int iNumParams)
@@ -492,10 +482,10 @@ public any Native_GetServerOS(Handle hPlugin, int iNumParams)
 		int iGhost = GetNativeCell(4);
 		float vPos[3];
 
-		int result = SDKCall(g_hSDK_GetRandomPZSpawnPosition, g_pZombieManager, class, iTries, iGhost, vPos);
+		bool bResult = g_zombieManager.GetRandomPZSpawnPosition(class, iTries, iGhost, vPos);
 		SetNativeArray(3, vPos, sizeof(vPos));
 
-		return view_as<bool>(result);
+		return bResult;
 	}
 
 	public any Native_GetEntityTeam(Handle hPlugin, int iNumParams)
@@ -608,17 +598,17 @@ public any Native_GetServerOS(Handle hPlugin, int iNumParams)
 
 	public any Native_IsInTransition(Handle hPlugin, int iNumParams)
 	{
-		return SDKCall(g_hSDK_IsInTransition, g_pDirector);
+		return g_director.IsInTransition();
 	}
 
 	public any Native_HasAnySurvivorLeftSafeArea(Handle hPlugin, int iNumParams)
 	{
-		return Util_HasAnySurvivorLeftSafeArea();
+		return g_director.hasAnySurvivorLeftSafeArea;
 	}
 
 	public any Native_AreChallengeModeScriptVariablesAllowed(Handle hPlugin, int iNumParams)
 	{
-		return Util_AllowChallengeModeScriptVariables();
+		return g_challengeMode.scriptVarsEnabled;
 	}
 
 	public any Native_IsBehindZombieBorder(Handle hPlugin, int iNumParams)
@@ -636,13 +626,7 @@ public any Native_GetServerOS(Handle hPlugin, int iNumParams)
 		ZombieClass class = GetNativeCell(3);
 		int iGhost = GetNativeCell(4);
 
-		switch (g_OS)
-		{
-			case OS_Linux: return SDKCall(g_hSDK_CanZombieSpawnHere, g_pZombieManager, vPos, nav, class, false, iGhost);
-			case OS_Windows: return SDKCall(g_hSDK_CanZombieSpawnHere, vPos, nav, class, false, iGhost);
-		}
-
-		return false;
+		return g_zombieManager.CanZombieSpawnHere(vPos, nav, class, iGhost);
 	}
 
 	public any Native_CanZombieSpawnHereEx(Handle hPlugin, int iNumParams)
@@ -706,24 +690,23 @@ public any Native_GetServerOS(Handle hPlugin, int iNumParams)
 
 	public any Native_HasCrescendoOccurred(Handle hPlugin, int iNumParams)
 	{
-		return Util_HasCrescendoOccurred();
+		return g_scriptedEventManager.crescendoOccurred;
 	}
 
 	public void Native_SetCrescendoOccurred(Handle hPlugin, int iNumParams)
 	{
 		bool bValue = GetNativeCell(1);
-		StoreToAddress(g_pDirectorScriptedEventManager + view_as<Address>(
-			g_iOffset_ScriptedEventManager_CrescendoOccured), bValue, NumberType_Int8);
+		g_scriptedEventManager.crescendoOccurred = bValue;
 	}
 
 	public any Native_ShouldLockTempo(Handle hPlugin, int iNumParams)
 	{
-		return SDKCall(g_hSDK_ShouldLockTempo, g_pDirector);
+		return g_director.ShouldLockTempo();
 	}
 
 	public any Native_GetTempo(Handle hPlugin, int iNumParams)
 	{
-		return Util_GetTempo();
+		return g_director.tempo;
 	}
 
 	public void Native_SetTempo(Handle hPlugin, int iNumParams)
@@ -731,8 +714,7 @@ public any Native_GetServerOS(Handle hPlugin, int iNumParams)
 		DirectorTempo tempo = GetNativeCell(1);
 		bool bDoAll = GetNativeCell(2);
 
-		StoreToAddress(g_pDirector + view_as<Address>(
-			g_iOffset_Director_Tempo), tempo, NumberType_Int32);
+		g_director.tempo = tempo;
 
 		/** set additional data as if tempo was naturally changed in CDirector::UpdateTempo */
 		if (bDoAll)
@@ -741,17 +723,17 @@ public any Native_GetServerOS(Handle hPlugin, int iNumParams)
 			{
 				case Tempo_BuildUp:
 				{
-					float fMinInterval = Util_GetScriptValueFloat("BuildUpMinInterval", g_fConVar_DirectorBuildUpMinInterval);
-					Util_SetTempoRemainingTime(fMinInterval);
+					float fMinInterval = g_director.GetScriptValueFloat("BuildUpMinInterval", g_fConVar_DirectorBuildUpMinInterval);
+					g_TempoTimer.Set(fMinInterval);
 				}
 
 				case Tempo_SustainPeak:
 				{
-					float fMin = Util_GetScriptValueFloat("SustainPeakMinTime", g_fConVar_DirectorSustainPeakMinTime);
-					float fMax = Util_GetScriptValueFloat("SustainPeakMaxTime", g_fConVar_DirectorSustainPeakMaxTime);
+					float fMin = g_director.GetScriptValueFloat("SustainPeakMinTime", g_fConVar_DirectorSustainPeakMinTime);
+					float fMax = g_director.GetScriptValueFloat("SustainPeakMaxTime", g_fConVar_DirectorSustainPeakMaxTime);
 
 					float fSet = GetRandomFloat(fMin, fMax);
-					Util_SetTempoRemainingTime(fSet);
+					g_TempoTimer.Set(fSet);
 
 					/** clear population density from all nav areas in survivor active sets.
 					 * triggers OnSustainPeakPopulationClear forward
@@ -761,18 +743,18 @@ public any Native_GetServerOS(Handle hPlugin, int iNumParams)
 
 				case Tempo_PeakFade:
 				{
-					Util_SetRelaxStartFlow();
+					g_director.RenewRelaxStartFlow();
 				}
 
 				case Tempo_Relax:
 				{
-					float fMin = Util_GetScriptValueFloat("RelaxMinInterval", g_fConVar_DirectorRelaxMinInterval);
-					float fMax = Util_GetScriptValueFloat("RelaxMaxInterval", g_fConVar_DirectorRelaxMaxInterval);
+					float fMin = g_director.GetScriptValueFloat("RelaxMinInterval", g_fConVar_DirectorRelaxMinInterval);
+					float fMax = g_director.GetScriptValueFloat("RelaxMaxInterval", g_fConVar_DirectorRelaxMaxInterval);
 
 					float fSet = GetRandomFloat(fMin, fMax);
-					Util_SetTempoRemainingTime(fSet);
+					g_TempoTimer.Set(fSet);
 
-					Util_SetRelaxStartFlow();
+					g_director.RenewRelaxStartFlow();
 
 					SDKCall(g_hSDK_GameStatsDirectorRelaxed, g_pL4DGameStats);
 				}
@@ -782,15 +764,13 @@ public any Native_GetServerOS(Handle hPlugin, int iNumParams)
 
 	public any Native_GetTempoFlowStamp(Handle hPlugin, int iNumParams)
 	{
-		return LoadFromAddress(g_pDirector + view_as<Address>(g_iOffset_Director_RelaxStartFlow), NumberType_Int32);
+		return g_director.relaxStartFlow;
 	}
 
 	public void Native_SetTempoFlowStamp(Handle hPlugin, int iNumParams)
 	{
 		float fValue = GetNativeCell(1);
-
-		StoreToAddress(g_pDirector + view_as<Address>(g_iOffset_Director_RelaxStartFlow),
-			fValue, NumberType_Int32);
+		g_director.relaxStartFlow = fValue;
 	}
 
 	public any Native_GetTempoRemainingTime(Handle hPlugin, int iNumParams)
@@ -801,8 +781,7 @@ public any Native_GetServerOS(Handle hPlugin, int iNumParams)
 	public void Native_SetTempoRemainingTime(Handle hPlugin, int iNumParams)
 	{
 		float fSet = GetNativeCell(1);
-
-		Util_SetTempoRemainingTime(fSet);
+		g_TempoTimer.Set(fSet);
 	}
 
 	public any Native_GetHighestFlowSurvivor(Handle hPlugin, int iNumParams)
@@ -1078,6 +1057,103 @@ public any Native_GetServerOS(Handle hPlugin, int iNumParams)
 		float fDuration = GetNativeCell(2);
 
 		cooldown.Set(fDuration);
+	}
+
+	public any Native_SpawnSpecial(Handle hPlugin, int iNumParams)
+	{
+		float vPos[3];
+		float vAngles[3];
+		int iEntity;
+
+		ZombieClass class = GetNativeCell(1);
+		GetNativeArray(2, vPos, sizeof(vPos));
+		if (!IsNativeParamNullVector(3))
+			GetNativeArray(3, vAngles, sizeof(vAngles));
+
+		switch (class)
+		{
+			case ZClass_Null, ZClass_Common, ZClass_Survivor:
+			{
+				ThrowNativeError(SP_ERROR_INSTRUCTION_PARAM,
+					"%i isn't a valid special infected ZombieClass", class);
+				return INVALID_ENT_REFERENCE;
+			}
+
+			case ZClass_Witch:
+			{
+				g_hMemPatch_SpawnWitchBypassLimit.Enable();
+
+				iEntity = g_zombieManager.SpawnWitch(vPos, vAngles);
+
+				g_hMemPatch_SpawnWitchBypassLimit.Disable();
+			}
+
+			case ZClass_Tank:
+			{
+				g_hMemPatch_SpawnSpecialsBypassLimit.Enable();
+				g_hMemPatch_SpawnTankBypassLimit.Enable();
+
+				iEntity = g_zombieManager.SpawnTank(vPos, vAngles);
+
+				g_hMemPatch_SpawnTankBypassLimit.Disable();
+				g_hMemPatch_SpawnSpecialsBypassLimit.Disable();
+			}
+
+			default:
+			{
+				g_hMemPatch_SpawnSpecialsBypassLimit.Enable();
+
+				iEntity = g_zombieManager.SpawnSpecial(class, vPos, vAngles);
+
+				g_hMemPatch_SpawnSpecialsBypassLimit.Disable();
+			}
+		}
+
+		return iEntity;
+	}
+
+	public any Native_SpawnCommon(Handle hPlugin, int iNumParams)
+	{
+		float vPos[3];
+		float vAngles[3];
+		CommonSpawnType type = GetNativeCell(3);
+
+		GetNativeArray(1, vPos, sizeof(vPos));
+		if (!IsNativeParamNullVector(2))
+			GetNativeArray(2, vAngles, sizeof(vAngles));
+
+		int iEntity = CreateEntityByName("infected");
+		if (iEntity == -1) return INVALID_ENT_REFERENCE;
+
+		TeleportEntity(iEntity, vPos, vAngles);
+		DispatchSpawn(iEntity);
+
+		NextBot nb = Util_GetNextBotFromEntity(iEntity);
+		nb.Update();
+
+		switch (type)
+		{
+			case CommonSpawn_Wanderer:
+			{
+				int iCurrentReserved = g_director.numReservedWanderers;
+				int iMaxReserved = g_director.GetScriptValueInt("NumReservedWanderers", g_iConVar_NumReservedWanderers);
+
+				if (iCurrentReserved >= iMaxReserved)
+					Util_SetReservedWandererStatus(iEntity, false);
+				else Util_SetReservedWandererStatus(iEntity, true);
+			}
+
+			case CommonSpawn_MobRush:
+				SDKCall(g_hSDK_InfectedSetMobRush, iEntity);
+
+			case CommonSpawn_MobAmbient:
+				SetEntData(iEntity, g_iOffset_InfectedMobAmbient, 1, 1);
+		}
+
+		g_zombieManager.commonSpawnCount++;
+		SDKCall(g_hSDK_GameStatsEventSpawn, g_pL4DGameStats, 0, 1);
+
+		return iEntity;
 	}
 
 /** Variant methodmap */

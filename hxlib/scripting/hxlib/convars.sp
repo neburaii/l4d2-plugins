@@ -11,6 +11,7 @@ ConVar	g_hConVar_DirectorSustainPeakMinTime;
 ConVar	g_hConVar_DirectorSustainPeakMaxTime;
 ConVar	g_hConVar_DirectorRelaxMinInterval;
 ConVar	g_hConVar_DirectorRelaxMaxInterval;
+ConVar	g_hConVar_NumReservedWanderers;
 
 float	g_fConVar_MobMinSize;
 float	g_fConVar_NavFlowMaxSurvivorClimbHeight;
@@ -21,6 +22,8 @@ float	g_fConVar_DirectorSustainPeakMinTime;
 float	g_fConVar_DirectorSustainPeakMaxTime;
 float	g_fConVar_DirectorRelaxMinInterval;
 float	g_fConVar_DirectorRelaxMaxInterval;
+
+int		g_iConVar_NumReservedWanderers;
 
 void InitConVars()
 {
@@ -60,6 +63,10 @@ void InitConVars()
 		"director_relax_max_interval");
 	g_hConVar_DirectorRelaxMaxInterval.AddChangeHook(ConVarChanged_Update);
 
+	g_hConVar_NumReservedWanderers = FindConVar(
+		"director_num_reserved_wanderers");
+	g_hConVar_NumReservedWanderers.AddChangeHook(ConVarChanged_Update);
+
 	ReadConVars();
 }
 
@@ -79,4 +86,6 @@ void ReadConVars()
 	g_fConVar_DirectorSustainPeakMaxTime = g_hConVar_DirectorSustainPeakMaxTime.FloatValue;
 	g_fConVar_DirectorRelaxMinInterval = g_hConVar_DirectorRelaxMinInterval.FloatValue;
 	g_fConVar_DirectorRelaxMaxInterval = g_hConVar_DirectorRelaxMaxInterval.FloatValue;
+
+	g_iConVar_NumReservedWanderers = g_hConVar_NumReservedWanderers.IntValue;
 }

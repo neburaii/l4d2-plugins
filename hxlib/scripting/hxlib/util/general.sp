@@ -14,6 +14,92 @@ char g_sSurvivorCharacterNames[][] =
 	"Francis"
 };
 
+NextBot Util_GetNextBotFromEntity(int iEntity)
+{
+	return view_as<NextBot>(
+		GetEntityAddress(iEntity) + view_as<Address>(g_iOffset_NextBotPointer));
+}
+
+methodmap NextBot < Address
+{
+	public void Update()
+	{
+		SDKCall(g_hSDK_NextBotUpdate, this);
+	}
+}
+
+methodmap ZombieManager < Address
+{
+	property int commonSpawnCount
+	{
+		public get()
+		{
+			return LoadFromAddress(this + view_as<Address>(
+				g_iOffset_ZombieManagerCommonSpawnCount), NumberType_Int32);
+		}
+		public set(int value)
+		{
+			StoreToAddress(this + view_as<Address>(
+				g_iOffset_ZombieManagerCommonSpawnCount), value, NumberType_Int32);
+		}
+	}
+
+	public Address CollectSpawnAreas(LocationType location, ZombieClass class)
+	{
+		return SDKCall(g_hSDK_CollectSpawnAreas, this, location, class);
+	}
+
+	public bool GetRandomPZSpawnPosition(ZombieClass class, int tries, int ghost, float buffer[3])
+	{
+		return SDKCall(g_hSDK_GetRandomPZSpawnPosition, this, class, tries, ghost, buffer);
+	}
+
+	public bool CanZombieSpawnHere(const float pos[3], Address nav, ZombieClass class, int ghost)
+	{
+		if (g_OS == OS_Linux)
+			return SDKCall(g_hSDK_CanZombieSpawnHere, this, pos, nav, class, false, ghost);
+		else return SDKCall(g_hSDK_CanZombieSpawnHere, pos, nav, class, false, ghost);
+	}
+
+	public int SpawnWitch(const float pos[3], const float angles[3])
+	{
+		if (g_OS == OS_Linux)
+			return SDKCall(g_hSDK_SpawnWitch, this, pos, angles);
+		else return SDKCall(g_hSDK_SpawnWitch, pos, angles);
+	}
+
+	public int SpawnTank(const float pos[3], const float angles[3])
+	{
+		return SDKCall(g_hSDK_SpawnTank, this, pos, angles);
+	}
+
+	public int SpawnSpecial(ZombieClass class, const float pos[3], const float angles[3])
+	{
+		return SDKCall(g_hSDK_SpawnSpecial, this, class, pos, angles);
+	}
+}
+
+void Util_SetReservedWandererStatus(int iInfected, bool bStatus)
+{
+	int iValue = GetEntData(iInfected, g_iOffset_InfectedReservedWandererFlags);
+	bool bCurrentStatus = view_as<bool>(iValue & (1 << 0));
+	if (bCurrentStatus == bStatus)
+		return;
+
+	if (bStatus)
+	{
+		iValue |= (1 << 0);
+		g_director.numReservedWanderers++;
+	}
+	else
+	{
+		iValue &= ~(1 << 0);
+		g_director.numReservedWanderers--;
+	}
+
+	SetEntData(iInfected, g_iOffset_InfectedReservedWandererFlags, iValue);
+}
+
 /**
  * Check for survivors in panic event or finale areas
  *
@@ -37,26 +123,6 @@ bool Util_AreSurvivorsInBattlefieldOrFinale()
 	}
 
 	return false;
-}
-
-bool Util_AllowChallengeModeScriptVariables()
-{
-	return view_as<bool>(LoadFromAddress(g_pDirectorChallengeMode + view_as<Address>(g_iOffset_DirectorChallengeModeAllowVars), NumberType_Int8));
-}
-
-int Util_GetScriptValueInt(const char[] sScriptVar, int iDefault)
-{
-	return view_as<int>(SDKCall(g_hSDK_GetScriptValueInt, g_pDirector, sScriptVar, iDefault));
-}
-
-float Util_GetScriptValueFloat(const char[] sScriptVar, float fDefault)
-{
-	return view_as<float>(SDKCall(g_hSDK_GetScriptValueFloat, g_pDirector, sScriptVar, fDefault));
-}
-
-int Util_GetMapArcValue()
-{
-	return view_as<int>(SDKCall(g_hSDK_GetMapArcValue, g_pDirector));
 }
 
 int Util_GetEntityTeam(int iEntity)
@@ -103,11 +169,6 @@ void Util_GetSurvivorCharacterName(int iCharacter, char[] sBuffer, int iBufferLe
 	}
 }
 
-bool Util_HasAnySurvivorLeftSafeArea()
-{
-	return LoadFromAddress(g_pDirector + view_as<Address>(g_iOffset_Director_SurvivorsLeftSafeArea), NumberType_Int8);
-}
-
 bool Util_IsVisibleToTeam(int iTeam, const float vPos[3], float fRange = 0.0, Address nav = Address_Null, int iFlags = Visibility_AnyFOV, bool bAllowNoNav = true)
 {
 	bool bHaveNav = (iFlags & Visibility_IgnoreObscured) || (nav == Address_Null && bAllowNoNav);
@@ -147,7 +208,7 @@ bool Util_CanZombieSpawnHere(float vPos[3], float vHullMin[3], float vHullMax[3]
 {
 	float vBuffer[3];
 
-	if (SDKCall(g_hSDK_IsInTransition, g_pDirector))
+	if (g_director.IsInTransition())
 		return false;
 
 	/** nav area checks */
@@ -159,11 +220,11 @@ bool Util_CanZombieSpawnHere(float vPos[3], float vHullMin[3], float vHullMax[3]
 		return false;
 
 	if (iSpawnAttributes & NavSpawn_Checkpoint
-		&& Util_HasAnySurvivorLeftSafeArea())
+		&& g_director.hasAnySurvivorLeftSafeArea)
 		return false;
 
 	if (iSpawnAttributes & NavSpawn_PlayerStart
-		&& (!Util_AllowChallengeModeScriptVariables() || !Util_GetScriptValueInt("cm_TankRun", 0)))
+		&& (!g_challengeMode.scriptVarsEnabled || !g_director.GetScriptValueInt("cm_TankRun", 0)))
 		return false;
 
 	if (SDKCall(g_hSDK_NavArea_IsBlocked, nav, Team_Infected, false))
@@ -224,18 +285,6 @@ bool Util_CanZombieSpawnHere(float vPos[3], float vHullMin[3], float vHullMax[3]
 	return true;
 }
 
-void Util_SetRelaxStartFlow()
-{
-	float fFlow;
-	int iHighestPlayer = Util_GetHighestFlowSurvivor(FlowType_Progress);
-
-	if (!iHighestPlayer) fFlow = NULL_FLOW;
-	else fFlow = Util_GetPlayerFlow(iHighestPlayer, FlowType_Progress);
-
-	StoreToAddress(g_pDirector + view_as<Address>(g_iOffset_Director_RelaxStartFlow),
-		fFlow, NumberType_Int32);
-}
-
 int Util_GetHighestFlowSurvivor(FlowType type)
 {
 	switch (g_OS)
@@ -255,30 +304,10 @@ float Util_GetPlayerFlow(int iPlayer, FlowType type)
 	return NULL_FLOW;
 }
 
-void Util_SetTempoRemainingTime(float fSet)
-{
-	g_TempoTimer.Set(fSet);
-}
-
-DirectorTempo Util_GetTempo()
-{
-	return LoadFromAddress(g_pDirector + view_as<Address>(g_iOffset_Director_Tempo), NumberType_Int32);
-}
-
 CountdownTimer Util_GetVocalizeCooldown(int iClient)
 {
 	Address addr = GetEntityAddress(iClient);
 	return view_as<CountdownTimer>(addr + view_as<Address>(g_iOffset_VocalizeCooldown));
-}
-
-/*************************
- * Scripted Event Manager
- *************************/
-
-bool Util_HasCrescendoOccurred()
-{
-	return LoadFromAddress(g_pDirectorScriptedEventManager + view_as<Address>(
-		g_iOffset_ScriptedEventManager_CrescendoOccured), NumberType_Int8);
 }
 
 /******************
@@ -364,8 +393,6 @@ int Util_GetEntityFromAddress(Address entity)
 {
 	return LoadEntityFromHandleAddress(entity + view_as<Address>(g_iOffset_EHandle));
 }
-
-methodmap Address {}
 
 methodmap CUtlVector < Address
 {
