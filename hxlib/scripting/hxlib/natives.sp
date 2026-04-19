@@ -196,6 +196,8 @@ void RegisterNatives()
 	CreateNative("SetVocalizeCooldown", Native_SetVocalizeCooldown);
 	CreateNative("SpawnSpecial", Native_SpawnSpecial);
 	CreateNative("SpawnCommon", Native_SpawnCommon);
+	CreateNative("GetScriptValueFloat", Native_GetScriptValueFloat);
+	CreateNative("GetScriptValueInt", Native_GetScriptValueInt);
 }
 
 /******************
@@ -592,8 +594,9 @@ public any Native_GetServerOS(Handle hPlugin, int iNumParams)
 		Address nav = GetNativeCell(4);
 		int iFlags = GetNativeCell(5);
 		bool bAllowNoNav = GetNativeCell(6);
+		bool bHumansOnly = GetNativeCell(7);
 
-		return Util_IsVisibleToTeam(iTeam, vPos, fRange, nav, iFlags, bAllowNoNav);
+		return Util_IsVisibleToTeam(iTeam, vPos, fRange, nav, iFlags, bAllowNoNav, bHumansOnly);
 	}
 
 	public any Native_IsInTransition(Handle hPlugin, int iNumParams)
@@ -1154,6 +1157,26 @@ public any Native_GetServerOS(Handle hPlugin, int iNumParams)
 		SDKCall(g_hSDK_GameStatsEventSpawn, g_pL4DGameStats, 0, 1);
 
 		return iEntity;
+	}
+
+	public any Native_GetScriptValueInt(Handle hPlugin, int iNumParams)
+	{
+		int iLen = GetNativeStringLengthFull(1);
+		char[] sScriptVar = new char[iLen];
+		GetNativeString(1, sScriptVar, iLen);
+		int iDefaultVal = GetNativeCell(2);
+
+		return g_director.GetScriptValueInt(sScriptVar, iDefaultVal);
+	}
+
+	public any Native_GetScriptValueFloat(Handle hPlugin, int iNumParams)
+	{
+		int iLen = GetNativeStringLengthFull(1);
+		char[] sScriptVar = new char[iLen];
+		GetNativeString(1, sScriptVar, iLen);
+		float fDefaultVal = GetNativeCell(2);
+
+		return g_director.GetScriptValueFloat(sScriptVar, fDefaultVal);
 	}
 
 /** Variant methodmap */

@@ -30,7 +30,14 @@ Many of the plugins in this repository require this.
 ## [hxstocks.inc](./scripting/include/hxstocks.inc)
 None of the stocks in this file require anything from the main [hxlib.inc](./scripting/include/hxlib.inc) file. It's here because idk where else to put it. It's just a random assortment of stocks, where their functions are things I found myself copy-pasting across plugins. Dumping them all into this file was the easiest solution. As such, several of my plugins will require this file to compile. hxlib itself references some of these stocks, and so will also need it to compile.
 
+## Requirements
+- [sourcescramble](https://github.com/nosoop/SMExt-SourceScramble)
+
 # Changelog
+### 1.4
+- added `GetScriptValueInt` and `GetScriptValueFloat` natives
+- added `bool humansOnly` param to `IsVisibleToTeam`
+
 ### 1.3
 - added `SpawnCommon` and `SpawnSpecial` natives
 

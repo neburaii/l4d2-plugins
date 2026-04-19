@@ -1856,6 +1856,7 @@ native bool IsVisibleToClient(int client, const float pos[3], float range = 0.0,
  * @param allowNoNav	if nav param is Address_Null, then this param determines if we should get a nav from the pos
  * 						using GetNearestNavArea (100.0 range, GetNavFlag_RequireGround). set to true to disable this
  * 						behaviour.
+ * @param humansOnly	only check visibility for the humans of this team
  *
  * @return				true if pos is visible to any client on the team, false otherwise
  *
@@ -1866,7 +1867,7 @@ native bool IsVisibleToClient(int client, const float pos[3], float range = 0.0,
  * 						then the OBSCURED flag is ignored always.
  * @note				positions hidden by the client's fog will never be considered visible to that client
  */
-native bool IsVisibleToTeam(int team, const float pos[3], float range = 0.0, NavArea nav = NavArea_Null, int flags = Visibility_AnyFOV, bool allowNoNav = true);
+native bool IsVisibleToTeam(int team, const float pos[3], float range = 0.0, NavArea nav = NavArea_Null, int flags = Visibility_AnyFOV, bool allowNoNav = true, bool humansOnly = false);
 
 /**
  * is the server transitioning maps? this returns true both when the server itself is still
@@ -2290,6 +2291,26 @@ native int SpawnSpecial(ZombieClass class, const float pos[3], const float angle
  * @note				it won't correct position if it's somewhere a common can't move
  */
 native int SpawnCommon(const float pos[3], const float angles[3] = NULL_VECTOR, CommonSpawnType type = CommonSpawn_Wanderer);
+
+/**
+ * get int value of director script variable
+ *
+ * @param scriptVar		name of variable
+ * @param defaultVal	default value if nothing was found for that variable
+ *
+ * @return				int value
+ */
+native int GetScriptValueInt(const char[] scriptVar, int defaultVal);
+
+/**
+ * get float value of director script variable
+ *
+ * @param scriptVar		name of variable
+ * @param defaultVal	default value if nothing was found for that variable
+ *
+ * @return				float value
+ */
+native float GetScriptValueFloat(const char[] scriptVar, float defaultVal);
 
 /**************
  * Methodmaps
@@ -3319,5 +3340,7 @@ public SharedPlugin __pl_hxlib =
 		MarkNativeAsOptional("SetVocalizeCooldown");
 		MarkNativeAsOptional("SpawnSpecial");
 		MarkNativeAsOptional("SpawnCommon");
+		MarkNativeAsOptional("GetScriptValueInt");
+		MarkNativeAsOptional("GetScriptValueFloat");
 	}
 #endif

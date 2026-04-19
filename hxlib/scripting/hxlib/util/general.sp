@@ -169,12 +169,13 @@ void Util_GetSurvivorCharacterName(int iCharacter, char[] sBuffer, int iBufferLe
 	}
 }
 
-bool Util_IsVisibleToTeam(int iTeam, const float vPos[3], float fRange = 0.0, Address nav = Address_Null, int iFlags = Visibility_AnyFOV, bool bAllowNoNav = true)
+bool Util_IsVisibleToTeam(int iTeam, const float vPos[3], float fRange = 0.0, Address nav = Address_Null, int iFlags = Visibility_AnyFOV, bool bAllowNoNav = true, bool bHumansOnly = false)
 {
 	bool bHaveNav = (iFlags & Visibility_IgnoreObscured) || (nav == Address_Null && bAllowNoNav);
 	for (int i = 1; i <= MaxClients; i++)
 	{
 		if (!IsClientConnected(i)) continue;
+		if (bHumansOnly && IsFakeClient(i)) continue;
 		if (GetClientTeam(i) != iTeam) continue;
 		if (iTeam > 1 && !IsPlayerAlive(i)) continue;
 
