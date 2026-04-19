@@ -1,4 +1,21 @@
-despawn SI who haven't moved in X seconds
+# Description
+plugin to add more scenarios that can despawn infected. currently it only supports stuck scenarios.
 
-it's very basic right now. I have plans in the future to improve upon the vanilla range-based despawn system, making the range shorter/longer depending on the flow-based direction the SI is from survivors.
-I also want to experiment with alternative solutions to SI getting stuck, potentially helping them get unstuck. The only quirk i don't like about the current method is that they can despawn right in front of you. But making it check LOS means players can purposefully maintain LOS to cheese spawn limits, the exact cheese this plugin is meant to combat. So although it's a bit aggressive in its method, it does achieve what it's meant to achieve.
+**stuck**
+if infected are stuck for the time set consecutively, then they will despawn
+
+### ConVar
+- `despawn_max_stuck_time` - time they must be stuck for to despawn
+
+## Hard requirements
+- [hxlib](../hxlib/README.md)
+- [actions](https://forums.alliedmods.net/showthread.php?t=336374)
+
+# Changelog
+### 1.1
+- more accurate stuck detection
+- all infected are now supported
+- despawns from plugin now require no human survivors to have LOS of them
+
+### 1.0
+- initial release
