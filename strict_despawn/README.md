@@ -12,6 +12,9 @@ if infected are stuck for the time set consecutively, then they will despawn
 - [actions](https://forums.alliedmods.net/showthread.php?t=336374)
 
 # Changelog
+### 1.2
+- fixed timer related error
+
 ### 1.1
 - more accurate stuck detection
 - all infected are now supported

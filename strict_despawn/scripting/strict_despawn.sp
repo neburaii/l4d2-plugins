@@ -12,7 +12,7 @@ public Plugin myinfo =
 	name = "Despawner",
 	author = "Neburai",
 	description = "despawn stuck infected",
-	version = "1.1",
+	version = "1.2",
 	url = "https://github.com/neburaii/l4d2-plugins/tree/main/strict_despawn"
 };
 
@@ -50,14 +50,7 @@ enum struct Despawner
 		else this.candidates.PushArray(data);
 
 		if (!this.updater)
-			this.updater = CreateTimer(0.5, Timer_DespawnerUpdate, _, TIMER_REPEAT);
-	}
-
-	void RemoveCandidate(int iCandidate)
-	{
-		this.candidates.Erase(iCandidate);
-		if (this.candidates.Length <= 0 && this.updater)
-			delete this.updater;
+			this.updater = CreateTimer(0.5, Timer_DespawnerUpdate);
 	}
 
 	int GetCandidate(int iEntRef, CandidateData data)
@@ -99,7 +92,7 @@ enum struct Despawner
 
 			if (iEntIndex == INVALID_ENT_REFERENCE)
 			{
-				this.RemoveCandidate(i);
+				this.candidates.Erase(i);
 				continue;
 			}
 
@@ -112,13 +105,16 @@ enum struct Despawner
 				if (!IsVisibleToTeam(Team_Survivor, vPos, fDespawnRange, _, 0, false, true))
 				{
 					RemoveEntity(iEntIndex);
-					this.RemoveCandidate(i);
+					this.candidates.Erase(i);
 					continue;
 				}
 			}
 
 			i++;
 		}
+
+		if (this.candidates.Length > 0)
+			this.updater = CreateTimer(0.5, Timer_DespawnerUpdate);
 	}
 }
 
@@ -150,7 +146,7 @@ public void OnPluginStart()
 	g_hConVar_ZombieDiscardRangeDefault.AddChangeHook(ConVarChanged_Update);
 
 	g_hConVar_MaxStuckTime = CreateConVar(
-		"despawn_max_stuck_time", "15.0",
+		"despawn_max_stuck_time", "10.0",
 		"time in seconds an infected must be stuck to be a candidate \
 		for being despawned. -1.0 to disable stuck despawns",
 		CVAR_FLAGS, true, -1.0);
@@ -185,6 +181,7 @@ void ReadConVars()
 
 void Timer_DespawnerUpdate(Handle hTimer)
 {
+	g_despawner.updater = null;
 	g_despawner.Update();
 }
 
