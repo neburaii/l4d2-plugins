@@ -1,1 +1,0 @@
-provides convars to control survivor's speed under a variety of circumstances. By default, all values are vanilla making the mod do nothing out of the box. I personally use this in my servers to increase water speed to 135
