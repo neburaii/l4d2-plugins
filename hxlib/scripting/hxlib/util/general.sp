@@ -79,6 +79,26 @@ methodmap ZombieManager < Address
 	}
 }
 
+methodmap GameRules < Address
+{
+	property Address address
+	{
+		public get()
+		{
+			return LoadFromAddress(this, NumberType_Int32);
+		}
+	}
+
+	property bool waterSlowsMovement
+	{
+		public get()
+		{
+			return LoadFromAddress(this.address + view_as<Address>(
+				g_iOffset_GameRules_WaterSlowsMovement), NumberType_Int8);
+		}
+	}
+}
+
 void Util_SetReservedWandererStatus(int iInfected, bool bStatus)
 {
 	int iValue = GetEntData(iInfected, g_iOffset_InfectedReservedWandererFlags);

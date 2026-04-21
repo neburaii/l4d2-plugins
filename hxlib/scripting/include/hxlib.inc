@@ -2312,6 +2312,22 @@ native int GetScriptValueInt(const char[] scriptVar, int defaultVal);
  */
 native float GetScriptValueFloat(const char[] scriptVar, float defaultVal);
 
+/**
+ * get WaterSlowsMovement game rule
+ *
+ * @return				true if water slows movement, false otherwise
+ */
+native bool DoesWaterSlowMovement();
+
+/**
+ * get client's current FOV
+ *
+ * @param				client index
+ *
+ * @return				fov
+ */
+native int GetFOV(int client);
+
 /**************
  * Methodmaps
  *************/
@@ -3342,5 +3358,7 @@ public SharedPlugin __pl_hxlib =
 		MarkNativeAsOptional("SpawnCommon");
 		MarkNativeAsOptional("GetScriptValueInt");
 		MarkNativeAsOptional("GetScriptValueFloat");
+		MarkNativeAsOptional("DoesWaterSlowMovement");
+		MarkNativeAsOptional("GetFOV");
 	}
 #endif

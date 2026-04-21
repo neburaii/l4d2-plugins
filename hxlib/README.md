@@ -34,6 +34,11 @@ None of the stocks in this file require anything from the main [hxlib.inc](./scr
 - [sourcescramble](https://github.com/nosoop/SMExt-SourceScramble)
 
 # Changelog
+this mostly focuses on core hxlib. hxstocks updates go mostly undocumented.
+
+### 1.5
+- added `DoesWaterSlowMovement` and `GetFOV` natives
+
 ### 1.4
 - added `GetScriptValueInt` and `GetScriptValueFloat` natives
 - added `bool humansOnly` param to `IsVisibleToTeam`

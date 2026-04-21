@@ -57,6 +57,17 @@ enum AmmoType
 	Ammo_MAX
 };
 
+/** there are likely l4d2 specific flags missing from this */
+enum PlayerPhysFlag
+{
+	PFlag_DirOverride				= (1 << 0),		// override the player's directional control (trains, physics gun, etc.)
+	PFlag_Ducking					= (1 << 1),		// In the process of ducking, but totally squatted yet
+	PFlag_Using						= (1 << 2),		// Using a continuous entity
+	PFlag_Observer					= (1 << 3),		// player is locked in stationary cam mode. Spectators can move, observers can't.
+	PFlag_VPhysicsMotionController	= (1 << 4),		// player is physically attached to a motion controller
+	PFlag_GamePhysicsRotPush 		= (1 << 5)		// game physics did a rotating push that we may want to override with vphysics
+};
+
 enum ZombieClass
 {
 	ZClass_Null		= -1,
@@ -169,6 +180,31 @@ stock bool IsDominated(int client)
 			return true;
 
 	return false;
+}
+
+stock bool IsSmoked(int client)
+{
+	return IsValidClient(GetEntPropEnt(client, Prop_Send, "m_tongueOwner"));
+}
+
+stock bool IsPounced(int client)
+{
+	return IsValidClient(GetEntPropEnt(client, Prop_Send, "m_pounceAttacker"));
+}
+
+stock bool IsJockeyed(int client)
+{
+	return IsValidClient(GetEntPropEnt(client, Prop_Send, "m_jockeyAttacker"));
+}
+
+stock bool IsChargerCarried(int client)
+{
+	return IsValidClient(GetEntPropEnt(client, Prop_Send, "m_carryAttacker"));
+}
+
+stock bool IsChargerPummeled(int client)
+{
+	return IsValidClient(GetEntPropEnt(client, Prop_Send, "m_pummelAttacker"));
 }
 
 stock bool HasVictim(int client)
@@ -699,4 +735,30 @@ stock void GetCollisionCenter(int entity, float buffer[3])
 
 	for (int i = 0; i < 3; i++)
 		buffer[i] = origin[i] + ((maxs[i] + mins[i]) * 0.5);
+}
+
+stock bool IsPlayerGhost(int client)
+{
+	return GetEntProp(client, Prop_Send, "m_isGhost", 1);
+}
+
+stock PlayerPhysFlag GetPhysicsFlags(int client)
+{
+	return view_as<PlayerPhysFlag>(GetEntProp(client, Prop_Data, "m_afPhysicsFlags"));
+}
+
+stock bool IsPlayerInWater(int client)
+{
+	return GetEntProp(client, Prop_Send, "m_nWaterLevel", 1);
+}
+
+stock bool AdrenalineActive(int client)
+{
+	return GetEntProp(client, Prop_Send, "m_bAdrenalineActive", 1);
+}
+
+stock int GetDefaultFOV(int client)
+{
+	int fov = GetEntProp(client, Prop_Send, "m_iDefaultFOV");
+	return fov ? fov : 90;
 }

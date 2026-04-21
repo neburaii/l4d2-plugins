@@ -8,6 +8,7 @@ Director g_director;
 ScriptedEventManager g_scriptedEventManager;
 ChallengeMode g_challengeMode;
 ZombieManager g_zombieManager;
+GameRules g_gameRules;
 
 CountdownTimer g_MobTimer;
 CountdownTimer g_TempoTimer;
@@ -47,6 +48,7 @@ int		g_iOffset_NextBotPointer;
 int		g_iOffset_InfectedReservedWandererFlags;
 int		g_iOffset_InfectedMobAmbient;
 int		g_iOffset_ZombieManagerCommonSpawnCount;
+int		g_iOffset_GameRules_WaterSlowsMovement;
 
 /** CTraceFilterSimple */
 int		g_iOffset_TraceFilterSimple_vtable;
@@ -187,6 +189,8 @@ void InitOffsets()
 		LoadOffset("Infected::m_mobAmbient");
 	g_iOffset_ZombieManagerCommonSpawnCount =
 		LoadOffset("ZombieManager::commonSpawnCount");
+	g_iOffset_GameRules_WaterSlowsMovement =
+		LoadOffset("CTerrorGameRules::waterSlowsMovement");
 
 	/** CTraceFilterSimple */
 	g_iOffset_TraceFilterSimple_vtable =
@@ -374,6 +378,8 @@ void InitAddresses()
 		LoadAddress("CTraceFilterSimple_vtable");
 	g_pAmmoDef =
 		LoadAddress("CAmmoDef");
+	g_gameRules =
+		LoadAddress("CGameRules");
 
 	/** address + offset */
 	g_challengeMode =

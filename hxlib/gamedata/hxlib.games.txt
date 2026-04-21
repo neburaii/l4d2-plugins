@@ -691,6 +691,19 @@
 				}
 			}
 
+			"CGameRules"
+			{
+				"linux"
+				{
+					"signature"	"g_pGameRules"
+				}
+				"windows"
+				{
+					"signature"	"InitGameRules"
+					"read"		"5"
+				}
+			}
+
 			/********************************************************************************
 			 * FUNCTIONS FROM CALL INSTRUCTION
 			 *
@@ -1075,6 +1088,12 @@
 			{
 				"linux"		"632"
 				"windows"	"632"
+			}
+
+			"CTerrorGameRules::waterSlowsMovement"
+			{
+				"linux"		"1173"
+				"windows"	"1177"
 			}
 
 			/*****************
@@ -1772,6 +1791,19 @@
 				/** 53 8B DC 83 EC 08 83 E4 F0 83 C4 04 55 8B 6B ? 89 6C 24 ? 8B EC 81 EC 08 01 00 00 A1 ? ? ? ? 33 C5 89 45 ? 80 79 ? 00 */
 			}
 
+			"g_pGameRules"
+			{
+				"library"	"server"
+				"linux"		"@g_pGameRules"
+			}
+
+			"InitGameRules"
+			{
+				"library"	"server"
+				"windows"	"\x55\x8B\xEC\x8B\x0D\x2A\x2A\x2A\x2A\x85\xC9\x74\x2A\x8B\x01\x8B\x50"
+				/** 55 8B EC 8B 0D ? ? ? ? 85 C9 74 ? 8B 01 8B 50 */
+			}
+
 			/**********************
 			 * Functions, SDKCalls
 			 ********************/
@@ -2242,6 +2274,14 @@
 				"linux"		"@_ZN13CL4DGameStats17Event_SpawnZombieE15ZombieClassTypei"
 				"windows"	"\x55\x8B\xEC\x8B\x45\x2A\x83\xF8\x09\x7D"
 				/** 55 8B EC 8B 45 ? 83 F8 09 7D */
+			}
+
+			"CBasePlayer::GetFOV"
+			{
+				"library"	"server"
+				"linux"		"@_ZN11CBasePlayer6GetFOVEv"
+				"windows"	"\x56\x8B\xF1\x8B\x06\x8B\x90\x2A\x2A\x2A\x2A\x57\xFF\xD2\x8B\xCE\x85\xC0"
+				/** 56 8B F1 8B 06 8B 90 ? ? ? ? 57 FF D2 8B CE 85 C0 */
 			}
 		}
 	}

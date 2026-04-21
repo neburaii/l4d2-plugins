@@ -60,6 +60,7 @@ Handle g_hSDK_SpawnWitch;
 Handle g_hSDK_NextBotUpdate;
 Handle g_hSDK_InfectedSetMobRush;
 Handle g_hSDK_GameStatsEventSpawn;
+Handle g_hSDK_GetFOV;
 
 void InitSDKCalls()
 {
@@ -342,6 +343,11 @@ void InitSDKCalls()
 	prep.Param(SDKType_Float, SDKPass_Plain);
 	prep.Param(SDKType_Float, SDKPass_Plain);
 	prep.End(g_hSDK_Vocalize);
+
+	/** Native_GetFOV */
+	prep.Start(SDKCall_Player, SDKConf_Signature, "CBasePlayer::GetFOV");
+	prep.Return(SDKType_PlainOldData, SDKPass_Plain);
+	prep.End(g_hSDK_GetFOV);
 
 	/** Native_SpawnSpecial */
 	prep.Start(SDKCall_Raw, SDKConf_Signature, "ZombieManager::SpawnSpecial");

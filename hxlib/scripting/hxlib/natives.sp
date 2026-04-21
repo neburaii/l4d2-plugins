@@ -198,6 +198,8 @@ void RegisterNatives()
 	CreateNative("SpawnCommon", Native_SpawnCommon);
 	CreateNative("GetScriptValueFloat", Native_GetScriptValueFloat);
 	CreateNative("GetScriptValueInt", Native_GetScriptValueInt);
+	CreateNative("DoesWaterSlowMovement", Native_DoesWaterSlowMovement);
+	CreateNative("GetFOV", Native_GetFOV);
 }
 
 /******************
@@ -1177,6 +1179,17 @@ public any Native_GetServerOS(Handle hPlugin, int iNumParams)
 		float fDefaultVal = GetNativeCell(2);
 
 		return g_director.GetScriptValueFloat(sScriptVar, fDefaultVal);
+	}
+
+	public any Native_DoesWaterSlowMovement(Handle hPlugin, int iNumParams)
+	{
+		return g_gameRules.waterSlowsMovement;
+	}
+
+	public any Native_GetFOV(Handle hPlugin, int iNumParams)
+	{
+		int iClient = GetNativeCell(1);
+		return SDKCall(g_hSDK_GetFOV, iClient);
 	}
 
 /** Variant methodmap */
