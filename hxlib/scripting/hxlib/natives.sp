@@ -104,6 +104,26 @@ void RegisterNatives()
 	CreateNative("Flame.GetOrigin", Native_Flame_GetOrigin);
 	CreateNative("Flame.GetDirection", Native_Flame_GetDirection);
 
+	CreateNative("InternalKeyValues.InternalKeyValues", Native_InternalKeyValues_New);
+	CreateNative("InternalKeyValues.DeleteThis", Native_InternalKeyValues_DeleteThis);
+	CreateNative("InternalKeyValues.address.get", Native_InternalKeyValues_address_get);
+	CreateNative("InternalKeyValues.GetInt", Native_InternalKeyValues_GetInt);
+	CreateNative("InternalKeyValues.SetInt", Native_InternalKeyValues_SetInt);
+	CreateNative("InternalKeyValues.GetFloat", Native_InternalKeyValues_GetFloat);
+	CreateNative("InternalKeyValues.SetFloat", Native_InternalKeyValues_SetFloat);
+	CreateNative("InternalKeyValues.GetVector", Native_InternalKeyValues_GetVector);
+	CreateNative("InternalKeyValues.SetVector", Native_InternalKeyValues_SetVector);
+	CreateNative("InternalKeyValues.GetString", Native_InternalKeyValues_GetString);
+	CreateNative("InternalKeyValues.SetString", Native_InternalKeyValues_SetString);
+	CreateNative("InternalKeyValues.GetName", Native_InternalKeyValues_GetName);
+	CreateNative("InternalKeyValues.SetName", Native_InternalKeyValues_SetName);
+	CreateNative("InternalKeyValues.GetFirstSubKey", Native_InternalKeyValues_GetFirstSubKey);
+	CreateNative("InternalKeyValues.GetNextKey", Native_InternalKeyValues_GetNextKey);
+	CreateNative("InternalKeyValues.FindKey", Native_InternalKeyValues_FindKey);
+	CreateNative("InternalKeyValues.CreateKey", Native_InternalKeyValues_CreateKey);
+	CreateNative("InternalKeyValues.RemoveSubKey", Native_InternalKeyValues_RemoveSubKey);
+	CreateNative("InternalKeyValues.SaveToFile", Native_InternalKeyValues_SaveToFile);
+
 	CreateNative("HXLibRescanForwards", Native_HXLibRescanForwards);
 	CreateNative("GetServerOS", Native_GetServerOS);
 	CreateNative("SetSurvivorIntensity", Native_SetSurvivorIntensity);
@@ -200,6 +220,10 @@ void RegisterNatives()
 	CreateNative("GetScriptValueInt", Native_GetScriptValueInt);
 	CreateNative("DoesWaterSlowMovement", Native_DoesWaterSlowMovement);
 	CreateNative("GetFOV", Native_GetFOV);
+	CreateNative("GetSavedPlayer", Native_GetSavedPlayer);
+	CreateNative("GetSavedPlayerCount", Native_GetSavedPlayerCount);
+	CreateNative("GetSavedSurvivorBot", Native_GetSavedSurvivorBot);
+	CreateNative("GetSavedSurvivorBotCount", Native_GetSavedSurvivorBotCount);
 }
 
 /******************
@@ -1190,6 +1214,308 @@ public any Native_GetServerOS(Handle hPlugin, int iNumParams)
 	{
 		int iClient = GetNativeCell(1);
 		return SDKCall(g_hSDK_GetFOV, iClient);
+	}
+
+	public any Native_GetSavedPlayer(Handle hPlugin, int iNumParams)
+	{
+		int iIndex = GetNativeCell(1);
+		return g_pSavedPlayers.Get(iIndex);
+	}
+
+	public any Native_GetSavedPlayerCount(Handle hPlugin, int iNumParams)
+	{
+		return g_pSavedPlayers.count;
+	}
+
+	public any Native_GetSavedSurvivorBot(Handle hPlugin, int iNumParams)
+	{
+		int iIndex = GetNativeCell(1);
+		return g_pSavedSurvivorBots.Get(iIndex);
+	}
+
+	public any Native_GetSavedSurvivorBotCount(Handle hPlugin, int iNumParams)
+	{
+		return g_pSavedSurvivorBots.count;
+	}
+
+/** InternalKeyValues methodmap */
+	public any Native_InternalKeyValues_New(Handle hPlugin, int iNumParams)
+	{
+		int iLen = GetNativeStringLengthFull(1);
+		char[] sName = new char[iLen];
+		GetNativeString(1, sName, iLen);
+
+		Address kv = SDKCall(g_hSDK_KeyValues_new, KEYVALUES_SIZE);
+		SDKCall(g_hSDK_KeyValues_KeyValues, kv, sName, Address_Null, false);
+		return kv;
+	}
+
+	public void Native_InternalKeyValues_DeleteThis(Handle hPlugin, int iNumParams)
+	{
+		Address kv = GetNativeCell(1);
+		SDKCall(g_hSDK_KeyValues_DeleteThis, kv);
+	}
+
+	public any Native_InternalKeyValues_address_get(Handle hPlugin, int iNumParams)
+	{
+		Address kv = GetNativeCell(1);
+		return kv;
+	}
+
+	public any Native_InternalKeyValues_GetInt(Handle hPlugin, int iNumParams)
+	{
+		Address kv = GetNativeCell(1);
+		int iDefaultVal = GetNativeCell(3);
+
+		if (IsNativeParamNullString(2))
+			return SDKCall(g_hSDK_KeyValues_GetInt, kv, NULL_STRING, iDefaultVal);
+
+		int iLen = GetNativeStringLengthFull(2);
+		char[] sKey = new char[iLen];
+		GetNativeString(2, sKey, iLen);
+
+		return SDKCall(g_hSDK_KeyValues_GetInt, kv, sKey, iDefaultVal);
+	}
+
+	public void Native_InternalKeyValues_SetInt(Handle hPlugin, int iNumParams)
+	{
+		Address kv = GetNativeCell(1);
+		int iValue = GetNativeCell(3);
+
+		if (IsNativeParamNullString(2))
+		{
+			SDKCall(g_hSDK_KeyValues_SetInt, kv, NULL_STRING, iValue);
+			return;
+		}
+
+		int iLen = GetNativeStringLengthFull(2);
+		char[] sKey = new char[iLen];
+		GetNativeString(2, sKey, iLen);
+
+		SDKCall(g_hSDK_KeyValues_SetInt, kv, sKey, iValue);
+	}
+
+	public any Native_InternalKeyValues_GetFloat(Handle hPlugin, int iNumParams)
+	{
+		Address kv = GetNativeCell(1);
+		float fDefaultVal = GetNativeCell(3);
+
+		if (IsNativeParamNullString(2))
+			return SDKCall(g_hSDK_KeyValues_GetFloat, kv, NULL_STRING, fDefaultVal);
+
+		int iLen = GetNativeStringLengthFull(2);
+		char[] sKey = new char[iLen];
+		GetNativeString(2, sKey, iLen);
+
+		return SDKCall(g_hSDK_KeyValues_GetFloat, kv, sKey, fDefaultVal);
+	}
+
+	public void Native_InternalKeyValues_SetFloat(Handle hPlugin, int iNumParams)
+	{
+		Address kv = GetNativeCell(1);
+		float fValue = GetNativeCell(3);
+
+		if (IsNativeParamNullString(2))
+		{
+			SDKCall(g_hSDK_KeyValues_SetFloat, kv, NULL_STRING, fValue);
+			return;
+		}
+
+		int iLen = GetNativeStringLengthFull(2);
+		char[] sKey = new char[iLen];
+		GetNativeString(2, sKey, iLen);
+
+		SDKCall(g_hSDK_KeyValues_SetFloat, kv, sKey, fValue);
+	}
+
+	public void Native_InternalKeyValues_GetVector(Handle hPlugin, int iNumParams)
+	{
+		Address kv = GetNativeCell(1);
+
+		float vBuffer[3];
+		GetNativeArray(3, vBuffer, sizeof(vBuffer));
+		float vDefault[3];
+		GetNativeArray(4, vDefault, sizeof(vDefault));
+
+		char sValue[99];
+		FormatEx(sValue, sizeof(sValue), "%.6f %.6f %.6f", vDefault[0], vDefault[1], vDefault[2]);
+
+		if (IsNativeParamNullString(2))
+		{
+			SDKCall(g_hSDK_KeyValues_GetString, kv, sValue, sizeof(sValue), NULL_STRING, sValue);
+		}
+		else
+		{
+			int iLen = GetNativeStringLengthFull(2);
+			char[] sKey = new char[iLen];
+			GetNativeString(2, sKey, iLen);
+
+			SDKCall(g_hSDK_KeyValues_GetString, kv, sValue, sizeof(sValue), sKey, sValue);
+		}
+
+		char sNum[32];
+		int iNumWrite;
+		int iBufferWrite;
+
+		for (int i = 0; i < sizeof(sValue); i++)
+		{
+			if (!sValue[i] || IsCharSpace(sValue[i]))
+			{
+				sNum[iNumWrite] = '\0';
+				iNumWrite = 0;
+
+				vBuffer[iBufferWrite++] = StringToFloat(sNum);
+
+				if (!sValue[i]) break;
+				else continue;
+			}
+
+			sNum[iNumWrite++] = sValue[i];
+		}
+
+		SetNativeArray(3, vBuffer, sizeof(vBuffer));
+	}
+
+	public void Native_InternalKeyValues_SetVector(Handle hPlugin, int iNumParams)
+	{
+		Address kv = GetNativeCell(1);
+		float vValue[3];
+		GetNativeArray(3, vValue, sizeof(vValue));
+
+		char sValue[99];
+		FormatEx(sValue, sizeof(sValue), "%.6f %.6f %.6f", vValue[0], vValue[1], vValue[2]);
+
+		if (IsNativeParamNullString(2))
+		{
+			SDKCall(g_hSDK_KeyValues_SetString, kv, NULL_STRING, sValue);
+			return;
+		}
+
+		int iLen = GetNativeStringLengthFull(2);
+		char[] sKey = new char[iLen];
+		GetNativeString(2, sKey, iLen);
+
+		SDKCall(g_hSDK_KeyValues_SetString, kv, sKey, sValue);
+	}
+
+	public void Native_InternalKeyValues_GetString(Handle hPlugin, int iNumParams)
+	{
+		Address kv = GetNativeCell(1);
+
+		int iBufferLen = GetNativeCell(4);
+		char[] sBuffer = new char[iBufferLen];
+
+		int iDefaultLen = GetNativeStringLengthFull(5);
+		char[] sDefault = new char[iDefaultLen];
+		GetNativeString(5, sDefault, iDefaultLen);
+
+		if (IsNativeParamNullString(2))
+		{
+			SDKCall(g_hSDK_KeyValues_GetString, kv, sBuffer, iBufferLen, NULL_STRING, sDefault);
+		}
+		else
+		{
+			int iKeyLen = GetNativeStringLengthFull(2);
+			char[] sKey = new char[iKeyLen];
+			GetNativeString(2, sKey, iKeyLen);
+
+			SDKCall(g_hSDK_KeyValues_GetString, kv, sBuffer, iBufferLen, sKey, sDefault);
+		}
+
+		SetNativeString(3, sBuffer, iBufferLen);
+	}
+
+	public void Native_InternalKeyValues_SetString(Handle hPlugin, int iNumParams)
+	{
+		Address kv = GetNativeCell(1);
+
+		int iValueLen = GetNativeStringLengthFull(3);
+		char[] sValue = new char[iValueLen];
+		GetNativeString(3, sValue, iValueLen);
+
+		if (IsNativeParamNullString(2))
+		{
+			SDKCall(g_hSDK_KeyValues_SetString, kv, NULL_STRING, sValue);
+			return;
+		}
+
+		int iKeyLen = GetNativeStringLengthFull(2);
+		char[] sKey = new char[iKeyLen];
+		GetNativeString(2, sKey, iKeyLen);
+
+		SDKCall(g_hSDK_KeyValues_SetString, kv, sKey, sValue);
+	}
+
+	public void Native_InternalKeyValues_GetName(Handle hPlugin, int iNumParams)
+	{
+		Address kv = GetNativeCell(1);
+		int iLen = GetNativeCell(3);
+		char[] sBuffer = new char[iLen];
+
+		SDKCall(g_hSDK_KeyValues_GetName, kv, sBuffer, iLen);
+		SetNativeString(2, sBuffer, iLen);
+	}
+
+	public void Native_InternalKeyValues_SetName(Handle hPlugin, int iNumParams)
+	{
+		Address kv = GetNativeCell(1);
+		int iLen = GetNativeStringLengthFull(2);
+		char[] sValue = new char[iLen];
+		GetNativeString(2, sValue, iLen);
+
+		SDKCall(g_hSDK_KeyValues_SetName, kv, sValue);
+	}
+
+	/** doesn't check for null string. redundant to use this native to get this pointer */
+	public any Native_InternalKeyValues_FindKey(Handle hPlugin, int iNumParams)
+	{
+		Address kv = GetNativeCell(1);
+		bool bCreate = GetNativeCell(3);
+
+		int iLen = GetNativeStringLengthFull(2);
+		char[] sKey = new char[iLen];
+		GetNativeString(2, sKey, iLen);
+
+		return SDKCall(g_hSDK_KeyValues_FindKey, kv, sKey, bCreate);
+	}
+
+	public any Native_InternalKeyValues_GetFirstSubKey(Handle hPlugin, int iNumParams)
+	{
+		Address kv = GetNativeCell(1);
+		return SDKCall(g_hSDK_KeyValues_GetFirstSubKey, kv);
+	}
+
+	public any Native_InternalKeyValues_GetNextKey(Handle hPlugin, int iNumParams)
+	{
+		Address kv = GetNativeCell(1);
+		return SDKCall(g_hSDK_KeyValues_GetNextKey, kv);
+	}
+
+	public any Native_InternalKeyValues_CreateKey(Handle hPlugin, int iNumParams)
+	{
+		Address kv = GetNativeCell(1);
+		int iLen = GetNativeStringLengthFull(2);
+		char[] sName = new char[iLen];
+		GetNativeString(2, sName, iLen);
+
+		return SDKCall(g_hSDK_KeyValues_CreateKey, kv, sName);
+	}
+
+	public void Native_InternalKeyValues_RemoveSubKey(Handle hPlugin, int iNumParams)
+	{
+		Address thisKV = GetNativeCell(1);
+		Address subKV = GetNativeCell(2);
+		SDKCall(g_hSDK_KeyValues_RemoveSubKey, thisKV, subKV);
+	}
+
+	public any Native_InternalKeyValues_SaveToFile(Handle hPlugin, int iNumParams)
+	{
+		Address kv = GetNativeCell(1);
+		int iLen = GetNativeStringLengthFull(2);
+		char[] sPath = new char[iLen];
+		GetNativeString(2, sPath, iLen);
+
+		return SDKCall(g_hSDK_KeyValues_SaveToFile, kv, g_pBaseFileSystem, sPath, 0);
 	}
 
 /** Variant methodmap */
@@ -2240,3 +2566,17 @@ public any Native_GetServerOS(Handle hPlugin, int iNumParams)
 		SetNativeArray(2, vBuffer, sizeof(vBuffer));
 	}
 
+/** SavedPlayersList methodmap */
+	public any Native_SavedPlayersList_Get(Handle hPlugin, int iNumParams)
+	{
+		CUtlVector savedPlayers = GetNativeCell(1);
+		int iIndex = GetNativeCell(2);
+
+		return savedPlayers.Get(iIndex);
+	}
+
+	public any Native_SavedPlayersList_count_get(Handle hPlugin, int iNumParams)
+	{
+		CUtlVector savedPlayers = GetNativeCell(1);
+		return savedPlayers.count;
+	}

@@ -36,6 +36,15 @@ None of the stocks in this file require anything from the main [hxlib.inc](./scr
 # Changelog
 this mostly focuses on core hxlib. hxstocks updates go mostly undocumented.
 
+### 1.6
+- added natives to get/manipulate data for transitioning players and survivor bots:
+	- `GetSavedPlayer`
+	- `GetSavedPlayerCount`
+	- `GetSavedSurvivorBot`
+	- `GetSavedSurvivorBotCount`
+	- `SavedPlayer` methodmap
+- added `InternalKeyValues` methodmap for interfacing with KeyValues pointers
+
 ### 1.5
 - added `DoesWaterSlowMovement` and `GetFOV` natives
 

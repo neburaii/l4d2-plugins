@@ -704,6 +704,52 @@
 				}
 			}
 
+			"SavedPlayers"
+			{
+				"linux"
+				{
+					"signature"	"g_SavedPlayers"
+				}
+
+				"windows"
+				{
+					"signature"	"ResetTransitionedSurvivors"
+					"read"		"1"
+				}
+			}
+
+			"SavedSurvivorBots"
+			{
+				"linux"
+				{
+					"signature"	"g_SavedSurvivorBots"
+				}
+
+				"windows"
+				{
+					"signature"	"ResetTransitionedSurvivors"
+					"read"		"21"
+				}
+			}
+
+			"BaseFileSystem"
+			{
+				"linux"
+				{
+					"signature"	"filesystem"
+					"read"		"0"
+					"offset"	"4"
+				}
+
+				"windows"
+				{
+					"signature"	"W_Precache"
+					"read"		"18"
+					"read"		"0"
+					"offset"	"4"
+				}
+			}
+
 			/********************************************************************************
 			 * FUNCTIONS FROM CALL INSTRUCTION
 			 *
@@ -1804,6 +1850,38 @@
 				/** 55 8B EC 8B 0D ? ? ? ? 85 C9 74 ? 8B 01 8B 50 */
 			}
 
+			"g_SavedPlayers"
+			{
+				"library"	"server"
+				"linux"		"@_ZL14g_SavedPlayers"
+			}
+
+			"g_SavedSurvivorBots"
+			{
+				"library"	"server"
+				"linux"		"@_ZL19g_SavedSurvivorBots"
+			}
+
+			"ResetTransitionedSurvivors"
+			{
+				"library"	"server"
+				"windows"	"\xB9\x2A\x2A\x2A\x2A\xC7\x05\x2A\x2A\x2A\x2A\x00\x00\x00\x00\xE8\x2A\x2A\x2A\x2A\xB9\x2A\x2A\x2A\x2A\xE8\x2A\x2A\x2A\x2A\xB9"
+				/** B9 ? ? ? ? C7 05 ? ? ? ? 00 00 00 00 E8 ? ? ? ? B9 ? ? ? ? E8 ? ? ? ? B9 */
+			}
+
+			"filesystem"
+			{
+				"library"	"server"
+				"linux"		"@filesystem"
+			}
+
+			"W_Precache"
+			{
+				"library"	"server"
+				"windows"	"\x8B\x0D\x2A\x2A\x2A\x2A\x8B\x01\x8B\x90\x2A\x2A\x2A\x2A\xFF\xD2\x50\xA1"
+				/** 8B 0D ? ? ? ? 8B 01 8B 90 ? ? ? ? FF D2 50 A1 */
+			}
+
 			/**********************
 			 * Functions, SDKCalls
 			 ********************/
@@ -2282,6 +2360,142 @@
 				"linux"		"@_ZN11CBasePlayer6GetFOVEv"
 				"windows"	"\x56\x8B\xF1\x8B\x06\x8B\x90\x2A\x2A\x2A\x2A\x57\xFF\xD2\x8B\xCE\x85\xC0"
 				/** 56 8B F1 8B 06 8B 90 ? ? ? ? 57 FF D2 8B CE 85 C0 */
+			}
+
+			"KeyValues::operator.new"
+			{
+				"library"	"server"
+				"linux"		"@_ZN9KeyValuesnwEj"
+				"windows"	"\x55\x8B\xEC\xFF\x15\x2A\x2A\x2A\x2A\x8B\x4D\x2A\x8B\x10\x8B\x52\x08"
+				/** 55 8B EC FF 15 ? ? ? ? 8B 4D ? 8B 10 8B 52 08 */
+			}
+
+			"KeyValues::KeyValues"
+			{
+				"library"	"server"
+				"linux"		"@_ZN9KeyValuesC2EPKcP16IKeyValuesSystemb"
+				"windows"	"\x55\x8B\xEC\x8A\x55\x2A\x33\xC0"
+				/** 55 8B EC 8A 55 ? 33 C0 */
+			}
+
+			"KeyValues::deleteThis"
+			{
+				"library"	"server"
+				"linux"		"@_ZN9KeyValues10deleteThisEv"
+				"windows"	"\x56\x8B\xF1\x85\xF6\x74\x2A\xE8"
+				/** 56 8B F1 85 F6 74 ? E8 */
+			}
+
+			"KeyValues::GetInt"
+			{
+				"library"	"server"
+				"linux"		"@_ZN9KeyValues6GetIntEPKci"
+				"windows"	"\x55\x8B\xEC\x8B\x45\x2A\x6A\x00\x50\xE8\x2A\x2A\x2A\x2A\x85\xC0\x74\x2A\x0F\xBE\x48"
+				/** 55 8B EC 8B 45 ? 6A 00 50 E8 ? ? ? ? 85 C0 74 ? 0F BE 48 */
+			}
+
+			"KeyValues::SetInt"
+			{
+				"library"	"server"
+				"linux"		"@_ZN9KeyValues6SetIntEPKci"
+				"windows"	"\x55\x8B\xEC\x8B\x45\x2A\x6A\x01\x50\xE8\x2A\x2A\x2A\x2A\x85\xC0\x74\x2A\x8B\x4D\x2A\x89\x48\x2A\xC6\x40\x2A\x02"
+				/** 55 8B EC 8B 45 ? 6A 01 50 E8 ? ? ? ? 85 C0 74 ? 8B 4D ? 89 48 ? C6 40 ? 02 */
+			}
+
+			"KeyValues::GetFloat"
+			{
+				"library"	"server"
+				"linux"		"@_ZN9KeyValues8GetFloatEPKcf"
+				"windows"	"\x55\x8B\xEC\x8B\x45\x2A\x83\xEC\x08\x6A\x00"
+				/** 55 8B EC 8B 45 ? 83 EC 08 6A 00 */
+			}
+
+			"KeyValues::SetFloat"
+			{
+				"library"	"server"
+				"linux"		"@_ZN9KeyValues8SetFloatEPKcf"
+				"windows"	"\x55\x8B\xEC\x8B\x45\x2A\x6A\x01\x50\xE8\x2A\x2A\x2A\x2A\x85\xC0\x74\x2A\xF3\x0F\x10\x45"
+				/** 55 8B EC 8B 45 ? 6A 01 50 E8 ? ? ? ? 85 C0 74 ? F3 0F 10 45 */
+			}
+
+			"KeyValues::GetString"
+			{
+				"library"	"server"
+				"linux"		"@_ZN9KeyValues9GetStringEPKcS1_"
+				"windows"	"\x55\x8B\xEC\x81\xEC\x44\x02\x00\x00\xA1\x2A\x2A\x2A\x2A\x33\xC5\x89\x45\x2A\x53"
+				/** 55 8B EC 81 EC 44 02 00 00 A1 ? ? ? ? 33 C5 89 45 ? 53 */
+			}
+
+			"KeyValues::SetString"
+			{
+				"library"	"server"
+				"linux"		"@_ZN9KeyValues9SetStringEPKcS1_"
+				"windows"	"\x55\x8B\xEC\x8B\x45\x2A\x56\x6A\x01\x50\xE8\x2A\x2A\x2A\x2A\x8B\xF0\x85\xF6\x74\x2A\x8B\x4E\x2A\x53\x57\x51\xE8\x2A\x2A\x2A\x2A\x8B\x56\x2A\x52\xE8\x2A\x2A\x2A\x2A\x8B\x5D\x2A\x83\xC4\x08\xC7\x46\x2A\x00\x00\x00\x00\x85\xDB\x75\x2A\xBB\x2A\x2A\x2A\x2A\x53"
+				/** 55 8B EC 8B 45 ? 56 6A 01 50 E8 ? ? ? ? 8B F0 85 F6 74 ? 8B 4E ? 53 57 51 E8 ? ? ? ? 8B 56 ? 52 E8 ? ? ? ? 8B 5D ? 83 C4 08 C7 46 ? 00 00 00 00 85 DB 75 ? BB ? ? ? ? 53 */
+			}
+
+			"KeyValues::GetName"
+			{
+				"library"	"server"
+				"linux"		"@_ZNK9KeyValues7GetNameEv"
+				"windows"	"\x56\x8B\xF1\x85\xF6\x74\x2A\x8B\x46"
+				/** 56 8B F1 85 F6 74 ? 8B 46 */
+			}
+
+			"KeyValues::SetName"
+			{
+				"library"	"server"
+				"linux"		"@_ZN9KeyValues7SetNameEPKc"
+				"windows"	"\x55\x8B\xEC\x56\x8B\xF1\x8B\x46\x2A\x85\xC0\x75\x2A\xFF\x15"
+				/** 55 8B EC 56 8B F1 8B 46 ? 85 C0 75 ? FF 15 */
+			}
+
+			"KeyValues::FindKey"
+			{
+				"library"	"server"
+				"linux"		"@_ZN9KeyValues7FindKeyEPKcb"
+				"windows"	"\x55\x8B\xEC\x81\xEC\x10\x01\x00\x00\xA1\x2A\x2A\x2A\x2A\x33\xC5\x89\x45\x2A\x8A\x45\x2A\x56\x8B\x75"
+				/** 55 8B EC 81 EC 10 01 00 00 A1 ? ? ? ? 33 C5 89 45 ? 8A 45 ? 56 8B 75 */
+			}
+
+			"KeyValues::GetFirstSubKey"
+			{
+				"library"	"server"
+				"linux"		"@_ZN9KeyValues14GetFirstSubKeyEv"
+				"windows"	"\x85\xC9\x74\x2A\x8B\x41\x20\xC3"
+				/** 85 C9 74 ? 8B 41 20 C3 */
+			}
+
+			"KeyValues::GetNextKey"
+			{
+				"library"	"server"
+				"linux"		"@_ZN9KeyValues10GetNextKeyEv"
+				"windows"	"\x85\xC9\x74\x2A\x8B\x41\x1C\xC3"
+				/** 85 C9 74 ? 8B 41 1c C3 */
+			}
+
+			"KeyValues::CreateKey"
+			{
+				"library"	"server"
+				"linux"		"@_ZN9KeyValues9CreateKeyEPKc"
+				"windows"	"\x55\x8B\xEC\x53\x56\x57\x8B\xF9\xFF\x15"
+				/** 55 8B EC 53 56 57 8B F9 FF 15 */
+			}
+
+			"KeyValues::RemoveSubKey"
+			{
+				"library"	"server"
+				"linux"		"@_ZN9KeyValues12RemoveSubKeyEPS_"
+				"windows"	"\x55\x8B\xEC\x8B\x55\x2A\x85\xD2\x74\x2A\x8B\x41"
+				/** 55 8B EC 8B 55 ? 85 D2 74 ? 8B 41 */
+			}
+
+			"KeyValues::SaveToFile"
+			{
+				"library"	"server"
+				"linux"		"@_ZN9KeyValues10SaveToFileEP15IBaseFileSystemPKcS3_"
+				"windows"	"\x55\x8B\xEC\x51\x53\x8B\x5D\x2A\x56\x8B\x75\x2A\x8B\x06"
+				/** 55 8B EC 51 53 8B 5D ? 56 8B 75 ? 8B 06 */
 			}
 		}
 	}

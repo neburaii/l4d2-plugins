@@ -61,6 +61,23 @@ Handle g_hSDK_NextBotUpdate;
 Handle g_hSDK_InfectedSetMobRush;
 Handle g_hSDK_GameStatsEventSpawn;
 Handle g_hSDK_GetFOV;
+Handle g_hSDK_KeyValues_new;
+Handle g_hSDK_KeyValues_KeyValues;
+Handle g_hSDK_KeyValues_DeleteThis;
+Handle g_hSDK_KeyValues_GetInt;
+Handle g_hSDK_KeyValues_SetInt;
+Handle g_hSDK_KeyValues_GetFloat;
+Handle g_hSDK_KeyValues_SetFloat;
+Handle g_hSDK_KeyValues_GetString;
+Handle g_hSDK_KeyValues_SetString;
+Handle g_hSDK_KeyValues_GetName;
+Handle g_hSDK_KeyValues_SetName;
+Handle g_hSDK_KeyValues_FindKey;
+Handle g_hSDK_KeyValues_GetFirstSubKey;
+Handle g_hSDK_KeyValues_GetNextKey;
+Handle g_hSDK_KeyValues_CreateKey;
+Handle g_hSDK_KeyValues_RemoveSubKey;
+Handle g_hSDK_KeyValues_SaveToFile;
 
 void InitSDKCalls()
 {
@@ -348,6 +365,107 @@ void InitSDKCalls()
 	prep.Start(SDKCall_Player, SDKConf_Signature, "CBasePlayer::GetFOV");
 	prep.Return(SDKType_PlainOldData, SDKPass_Plain);
 	prep.End(g_hSDK_GetFOV);
+
+	/** Native_InternalKeyValues_New */
+	prep.Start(SDKCall_Static, SDKConf_Signature, "KeyValues::operator.new");
+	prep.Param(SDKType_PlainOldData, SDKPass_Plain);
+	prep.Return(SDKType_PlainOldData, SDKPass_Plain);
+	prep.End(g_hSDK_KeyValues_new);
+
+	prep.Start(SDKCall_Raw, SDKConf_Signature, "KeyValues::KeyValues");
+	prep.Param(SDKType_String, SDKPass_Pointer);
+	prep.Param(SDKType_PlainOldData, SDKPass_Plain);
+	prep.Param(SDKType_Bool, SDKPass_Plain);
+	prep.End(g_hSDK_KeyValues_KeyValues);
+
+	/** Native_InternalKeyValues_Delete */
+	prep.Start(SDKCall_Raw, SDKConf_Signature, "KeyValues::deleteThis");
+	prep.End(g_hSDK_KeyValues_DeleteThis);
+
+	/** Native_InternalKeyValues_GetInt */
+	prep.Start(SDKCall_Raw, SDKConf_Signature, "KeyValues::GetInt");
+	prep.Param(SDKType_String, SDKPass_Pointer, VDECODE_FLAG_ALLOWNULL);
+	prep.Param(SDKType_PlainOldData, SDKPass_Plain);
+	prep.Return(SDKType_PlainOldData, SDKPass_Plain);
+	prep.End(g_hSDK_KeyValues_GetInt);
+
+	/** Native_InternalKeyValues_SetInt */
+	prep.Start(SDKCall_Raw, SDKConf_Signature, "KeyValues::SetInt");
+	prep.Param(SDKType_String, SDKPass_Pointer, VDECODE_FLAG_ALLOWNULL);
+	prep.Param(SDKType_PlainOldData, SDKPass_Plain);
+	prep.End(g_hSDK_KeyValues_SetInt);
+
+	/** Native_InternalKeyValues_GetFloat */
+	prep.Start(SDKCall_Raw, SDKConf_Signature, "KeyValues::GetFloat");
+	prep.Param(SDKType_String, SDKPass_Pointer, VDECODE_FLAG_ALLOWNULL);
+	prep.Param(SDKType_Float, SDKPass_Plain);
+	prep.Return(SDKType_Float, SDKPass_Plain);
+	prep.End(g_hSDK_KeyValues_GetFloat);
+
+	/** Native_InternalKeyValues_SetFloat */
+	prep.Start(SDKCall_Raw, SDKConf_Signature, "KeyValues::SetFloat");
+	prep.Param(SDKType_String, SDKPass_Pointer, VDECODE_FLAG_ALLOWNULL);
+	prep.Param(SDKType_Float, SDKPass_Plain);
+	prep.End(g_hSDK_KeyValues_SetFloat);
+
+	/** Native_InternalKeyValues_GetString */
+	prep.Start(SDKCall_Raw, SDKConf_Signature, "KeyValues::GetString");
+	prep.Param(SDKType_String, SDKPass_Pointer, VDECODE_FLAG_ALLOWNULL);
+	prep.Param(SDKType_String, SDKPass_Pointer);
+	prep.Return(SDKType_String, SDKPass_Pointer);
+	prep.End(g_hSDK_KeyValues_GetString);
+
+	/** Native_InternalKeyValues_SetString */
+	prep.Start(SDKCall_Raw, SDKConf_Signature, "KeyValues::SetString");
+	prep.Param(SDKType_String, SDKPass_Pointer, VDECODE_FLAG_ALLOWNULL);
+	prep.Param(SDKType_String, SDKPass_Pointer);
+	prep.End(g_hSDK_KeyValues_SetString);
+
+	/** Native_InternalKeyValues_GetSectionName */
+	prep.Start(SDKCall_Raw, SDKConf_Signature, "KeyValues::GetName");
+	prep.Return(SDKType_String, SDKPass_Pointer);
+	prep.End(g_hSDK_KeyValues_GetName);
+
+	/** Native_InternalKeyValues_SetSectionName */
+	prep.Start(SDKCall_Raw, SDKConf_Signature, "KeyValues::SetName");
+	prep.Param(SDKType_String, SDKPass_Pointer);
+	prep.End(g_hSDK_KeyValues_SetName);
+
+	/** Native_InternalKeyValues_FindKey */
+	prep.Start(SDKCall_Raw, SDKConf_Signature, "KeyValues::FindKey");
+	prep.Param(SDKType_String, SDKPass_Pointer);
+	prep.Param(SDKType_Bool, SDKPass_Plain);
+	prep.Return(SDKType_PlainOldData, SDKPass_Plain);
+	prep.End(g_hSDK_KeyValues_FindKey);
+
+	/** Native_InternalKeyValues_GetFirstSubKey */
+	prep.Start(SDKCall_Raw, SDKConf_Signature, "KeyValues::GetFirstSubKey");
+	prep.Return(SDKType_PlainOldData, SDKPass_Plain);
+	prep.End(g_hSDK_KeyValues_GetFirstSubKey);
+
+	/** Native_InternalKeyValues_GetNextSubKey */
+	prep.Start(SDKCall_Raw, SDKConf_Signature, "KeyValues::GetNextKey");
+	prep.Return(SDKType_PlainOldData, SDKPass_Plain);
+	prep.End(g_hSDK_KeyValues_GetNextKey);
+
+	/** Native_InternalKeyValues_SetNextSubKey */
+	prep.Start(SDKCall_Raw, SDKConf_Signature, "KeyValues::CreateKey");
+	prep.Param(SDKType_String, SDKPass_Pointer);
+	prep.Return(SDKType_PlainOldData, SDKPass_Plain);
+	prep.End(g_hSDK_KeyValues_CreateKey);
+
+	/** Native_InternalKeyValues_RemoveSubKey */
+	prep.Start(SDKCall_Raw, SDKConf_Signature, "KeyValues::RemoveSubKey");
+	prep.Param(SDKType_PlainOldData, SDKPass_Plain);
+	prep.End(g_hSDK_KeyValues_RemoveSubKey);
+
+	/** Native_InternalKeyValues_SaveToFile */
+	prep.Start(SDKCall_Raw, SDKConf_Signature, "KeyValues::SaveToFile");
+	prep.Param(SDKType_PlainOldData, SDKPass_Plain);
+	prep.Param(SDKType_String, SDKPass_Pointer);
+	prep.Param(SDKType_PlainOldData, SDKPass_Plain);
+	prep.Return(SDKType_Bool, SDKPass_Plain);
+	prep.End(g_hSDK_KeyValues_SaveToFile);
 
 	/** Native_SpawnSpecial */
 	prep.Start(SDKCall_Raw, SDKConf_Signature, "ZombieManager::SpawnSpecial");

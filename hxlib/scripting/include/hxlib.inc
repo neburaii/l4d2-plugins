@@ -395,6 +395,13 @@ enum CommonSpawnType
 	CommonSpawn_MobAmbient
 };
 
+enum RestoreState
+{
+	Restore_Transitioning	= 0,
+	Restore_Restoring		= 1, // probably
+	Restore_Done			= 2
+};
+
 enum WeaponID
 {
 	Weapon_None,
@@ -2328,6 +2335,40 @@ native bool DoesWaterSlowMovement();
  */
 native int GetFOV(int client);
 
+/**
+ * get a record from the list of saved human player data.
+ * use GetSavedPlayerCount() to get amount of records in this list.
+ *
+ * @param index			index in the list
+ *
+ * @return				see SavedPlayer methodmap
+ */
+native SavedPlayer GetSavedPlayer(int index);
+
+/**
+ * get total amount of records in the list of saved human player data
+ *
+ * @return				total indices in the list
+ */
+native int GetSavedPlayerCount();
+
+/**
+ * get a record from the list of saved survivor bot player data.
+ * use GetSavedSurvivorBotCount() to get amount of records in this list.
+ *
+ * @param index			index in the list
+ *
+ * @return				see SavedPlayer methodmap
+ */
+native SavedPlayer GetSavedSurvivorBot(int index);
+
+/**
+ * get total amount of records in the list of saved survivor bot player data
+ *
+ * @return				total indices in the list
+ */
+native int GetSavedSurvivorBotCount();
+
 /**************
  * Methodmaps
  *************/
@@ -3149,6 +3190,381 @@ methodmap Flame
 	public native void GetDirection(float buffer[3]);
 }
 
+/**
+ * a KeyValues pointer from the game's memory. same as the sourcemod one, but it's not
+ * provided as a handle. the sourcemod KeyValues should be preferred over this.
+ */
+methodmap InternalKeyValues __nullable__
+{
+	/**
+	 * create a new internal KeyValues object of the given name
+	 *
+	 * @param name			name of the keyvalue
+	 *
+	 * @note				delete with this.DeleteThis
+	 */
+	public native InternalKeyValues(const char[] name);
+
+	/**
+	 * delete this internal KeyValues object. this will recursively delete
+	 * any subkeys too.
+	 */
+	public native void DeleteThis();
+
+	/**
+	 * raw pointer address
+	 */
+	property Address address
+	{
+		public native get();
+	}
+
+	/**
+	 * get an int value from a key within
+	 *
+	 * @param key			subkey name, or NULL_STRING to refer to this key
+	 * @param defaultVal	default value if key doesn't exist
+	 *
+	 * @return				value of this key
+	 */
+	public native int GetInt(const char[] key, int defaultVal = 0);
+	/**
+	 * set an int value for a key within. the key will be created
+	 * if it doesn't exist.
+	 *
+	 * @param key			subkey name, or NULL_STRING to refer to this key
+	 * @param value			value to set the key to
+	 */
+	public native void SetInt(const char[] key, int value);
+
+	/**
+	 * get a float value from a key within
+	 *
+	 * @param key			subkey name, or NULL_STRING to refer to this key
+	 * @param defaultVal	default value if key doesn't exist
+	 *
+	 * @return				value of this key
+	 */
+	public native float GetFloat(const char[] key, float defaultVal = 0.0);
+	/**
+	 * set a float value for a key within. the key will be created
+	 * if it doesn't exist.
+	 *
+	 * @param key			subkey name, or NULL_STRING to refer to this key
+	 * @param value			value to set the key to
+	 */
+	public native void SetFloat(const char[] key, float value);
+
+	/**
+	 * get a vector value from a key within
+	 *
+	 * @param key			subkey name, or NULL_STRING to refer to this key
+	 * @param buffer		buffer to store the value in
+	 * @param defaultVal	default value if key doesn't exist
+	 */
+	public native void GetVector(const char[] key, float buffer[3], const float defaultVal[3] = {0.0, 0.0, 0.0});
+	/**
+	 * set a vector value for a key within. the key will be created
+	 * if it doesn't exist.
+	 *
+	 * @param key			subkey name, or NULL_STRING to refer to this key
+	 * @param value			value to set the key to
+	 */
+	public native void SetVector(const char[] key, const float value[3]);
+
+	/**
+	 * get a string value from a key within
+	 *
+	 * @param key			subkey name, or NULL_STRING to refer to this key
+	 * @param buffer		buffer to store the value in
+	 * @param bufferLen		length of the buffer
+	 * @param defaultVal	default value if key doesn't exist
+	 */
+	public native void GetString(const char[] key, char[] buffer, int bufferLen, const char[] defaultVal = "");
+	/**
+	 * set a string value for a key within. the key will be created
+	 * if it doesn't exist.
+	 *
+	 * @param key			subkey name, or NULL_STRING to refer to this key
+	 * @param value			value to set the key to
+	 */
+	public native void SetString(const char[] key, const char[] value);
+
+	/**
+	 * get the name of this key. either the key in a keyvalue pair, or a section name.
+	 *
+	 * @param buffer		buffer to store name in
+	 * @param bufferLen		length of the buffer
+	 */
+	public native void GetName(char[] buffer, int bufferLen);
+	/**
+	 * set the name of this key. either the key in a keyvalue pair, or a section name.
+	 *
+	 * @param value			new name
+	 */
+	public native void SetName(const char[] value);
+
+	/**
+	 * get the first subkey within this KeyValues node.
+	 *
+	 * @return				an internal KeyValues object
+	 */
+	public native InternalKeyValues GetFirstSubKey();
+
+	/**
+	 * get the next adjacent key from a key in the same node
+	 *
+	 * @return				an internal KeyValues object
+	 */
+	public native InternalKeyValues GetNextKey();
+
+	/**
+	 * get the KeyValues object with a key within of this name
+	 *
+	 * @param name			key name to look for
+	 * @param create		if true, then the key will be created if it doesn't exist
+	 *
+	 * @return				an internal KeyValues object
+	 */
+	public native InternalKeyValues FindKey(const char[] key, bool create = false);
+
+	/**
+	 * create a new key within this node of the given name
+	 *
+	 * @param name			name for the new key
+	 *
+	 * @return				an internal KeyValues object
+	 */
+	public native InternalKeyValues CreateKey(const char[] name);
+
+	/**
+	 * remove a key within this node
+	 *
+	 * @param keyvalue		internal KeyValues object address of the subkey to remove
+	 */
+	public native void RemoveSubKey(InternalKeyValues keyvalue);
+
+	/**
+	 * dump this KeyValues node recursively to a file
+	 *
+	 * @param path			file path
+	 *
+	 * @return				true if success
+	 */
+	public native bool SaveToFile(const char[] path);
+}
+
+/**
+ * saved players are just KeyValues. this methodmap is composed of shortcuts for a handful
+ * of the keys, but not all of them. you may need to use the InternalKeyValues methods for
+ * some keys.
+ */
+methodmap SavedPlayer < InternalKeyValues
+{
+	/** see Restore_* enums. state of transition process */
+	property RestoreState state
+	{
+		public get()
+		{
+			return view_as<RestoreState>(this.GetInt("restoreState"));
+		}
+	}
+
+	property int userid
+	{
+		public get()
+		{
+			return this.GetInt("userid");
+		}
+	}
+
+	property int team
+	{
+		public get()
+		{
+			return this.GetInt("teamNumber");
+		}
+	}
+
+	property int health
+	{
+		public get()
+		{
+			return this.GetInt("health");
+		}
+		public set(int value)
+		{
+			this.SetInt("health", value);
+		}
+	}
+
+	/** aka temp health */
+	property float healthBuffer
+	{
+		public get()
+		{
+			return this.GetFloat("healthBuffer");
+		}
+		public set(float value)
+		{
+			this.SetFloat("healthBuffer", value);
+		}
+	}
+
+	property bool incapacitated
+	{
+		public get()
+		{
+			return !!this.GetInt("incapacitated");
+		}
+		public set(bool value)
+		{
+			this.SetInt("incapacitated", value ? 1 : 0);
+		}
+	}
+
+	/** see Survivor_* enums */
+	property SurvivorCharacter survivorCharacter
+	{
+		public get()
+		{
+			return view_as<SurvivorCharacter>(this.GetInt("character"));
+		}
+		public set(SurvivorCharacter value)
+		{
+			this.SetInt("character", view_as<int>(value));
+		}
+	}
+
+	/** how many times was this player revived without getting a heal */
+	property int currentReviveCount
+	{
+		public get()
+		{
+			return this.GetInt("currentReviveCount");
+		}
+		public set(int value)
+		{
+			this.SetInt("currentReviveCount", value);
+		}
+	}
+
+	/** black and white? */
+	property bool thirdStrike
+	{
+		public get()
+		{
+			return !!this.GetInt("thirdStrike");
+		}
+		public set(bool value)
+		{
+			this.SetInt("thirdStrike", value ? 1 : 0);
+		}
+	}
+
+	property bool idle
+	{
+		public get()
+		{
+			return !!this.GetInt("idle");
+		}
+		public set(bool value)
+		{
+			this.SetInt("idle", value ? 1 : 0);
+		}
+	}
+
+	/**
+	 * get the player's display name
+	 *
+	 * @param buffer		buffer to store name in
+	 * @param bufferLen		length of buffer
+	 */
+	public void GetName(char[] buffer, int bufferLen)
+	{
+		this.GetString("Name", buffer, bufferLen);
+	}
+
+	/**
+	 * get file path of the player's model
+	 *
+	 * @param buffer		buffer to store model in
+	 * @param bufferLen		length of buffer
+	 */
+	public void GetModel(char[] buffer, int bufferLen)
+	{
+		this.GetString("modelName", buffer, bufferLen);
+	}
+
+	/**
+	 * get player's saved world position
+	 *
+	 * @param buffer		store vector to this buffer
+	 */
+	public void GetPosition(float buffer[3])
+	{
+		this.GetVector("pos", buffer);
+	}
+	/**
+	 * set player's saved world position
+	 *
+	 * @param value			new position vector
+	 */
+	public void SetPosition(const float value[3])
+	{
+		this.SetVector("pos", value);
+	}
+
+	/**
+	 * get player's saved facing angles
+	 *
+	 * @param buffer		store vector to this buffer
+	 */
+	public void GetAngles(float buffer[3])
+	{
+		this.GetVector("angles", buffer);
+	}
+	/**
+	 * set player's saved facing angles
+	 *
+	 * @param value			new angles vector
+	 */
+	public void SetAngles(const float value[3])
+	{
+		this.SetVector("angles", value);
+	}
+
+	/**
+	 * get player's saved velocity
+	 *
+	 * @param buffer		store vector to this buffer
+	 */
+	public void GetVelocity(float buffer[3])
+	{
+		this.GetVector("vel", buffer);
+	}
+	/**
+	 * set player's saved velocity
+	 *
+	 * @param value			new velocity vector
+	 */
+	public void SetVelocity(const float value[3])
+	{
+		this.SetVector("vel", value);
+	}
+
+	/**
+	 * get map name this player was set to transition into
+	 *
+	 * @param buffer		buffer to store map name in
+	 * @param bufferLen		length of buffer
+	 */
+	public void GetTargetMap(char[] buffer, int bufferLen)
+	{
+		this.GetString("targetMap", buffer, bufferLen);
+	}
+}
+
 public SharedPlugin __pl_hxlib =
 {
     name = HXLIB_LIBRARY,
@@ -3360,5 +3776,28 @@ public SharedPlugin __pl_hxlib =
 		MarkNativeAsOptional("GetScriptValueFloat");
 		MarkNativeAsOptional("DoesWaterSlowMovement");
 		MarkNativeAsOptional("GetFOV");
+		MarkNativeAsOptional("InternalKeyValues.InternalKeyValues");
+		MarkNativeAsOptional("InternalKeyValues.DeleteThis");
+		MarkNativeAsOptional("InternalKeyValues.address.get");
+		MarkNativeAsOptional("InternalKeyValues.GetInt");
+		MarkNativeAsOptional("InternalKeyValues.SetInt");
+		MarkNativeAsOptional("InternalKeyValues.GetFloat");
+		MarkNativeAsOptional("InternalKeyValues.SetFloat");
+		MarkNativeAsOptional("InternalKeyValues.GetVector");
+		MarkNativeAsOptional("InternalKeyValues.SetVector");
+		MarkNativeAsOptional("InternalKeyValues.GetString");
+		MarkNativeAsOptional("InternalKeyValues.SetString");
+		MarkNativeAsOptional("InternalKeyValues.GetName");
+		MarkNativeAsOptional("InternalKeyValues.SetName");
+		MarkNativeAsOptional("InternalKeyValues.GetFirstSubKey");
+		MarkNativeAsOptional("InternalKeyValues.GetNextKey");
+		MarkNativeAsOptional("InternalKeyValues.FindKey");
+		MarkNativeAsOptional("InternalKeyValues.CreateKey");
+		MarkNativeAsOptional("InternalKeyValues.RemoveSubKey");
+		MarkNativeAsOptional("InternalKeyValues.SaveToFile");
+		MarkNativeAsOptional("GetSavedPlayer");
+		MarkNativeAsOptional("GetSavedPlayerCount");
+		MarkNativeAsOptional("GetSavedSurvivorBot");
+		MarkNativeAsOptional("GetSavedSurvivorBotCount");
 	}
 #endif

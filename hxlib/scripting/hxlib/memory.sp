@@ -3,12 +3,15 @@
 
 #define	CUTLVECTOR_STRUCT_SIZE			20
 #define TRACEFILTERSIMPLE_STRUCT_SIZE	16
+#define KEYVALUES_SIZE					44
 
 Director g_director;
 ScriptedEventManager g_scriptedEventManager;
 ChallengeMode g_challengeMode;
 ZombieManager g_zombieManager;
 GameRules g_gameRules;
+CUtlVector g_pSavedPlayers;
+CUtlVector g_pSavedSurvivorBots;
 
 CountdownTimer g_MobTimer;
 CountdownTimer g_TempoTimer;
@@ -21,6 +24,7 @@ Address g_pTheNavAreas;
 Address g_pDefaultViewVectors;
 Address g_pTraceFilterSimple_vtable;
 Address g_pAmmoDef;
+Address g_pBaseFileSystem;
 
 MemoryPatch	g_hMemPatch_SpawnSpecialsBypassLimit;
 MemoryPatch	g_hMemPatch_SpawnTankBypassLimit;
@@ -380,6 +384,12 @@ void InitAddresses()
 		LoadAddress("CAmmoDef");
 	g_gameRules =
 		LoadAddress("CGameRules");
+	g_pSavedPlayers =
+		LoadAddress("SavedPlayers");
+	g_pSavedSurvivorBots =
+		LoadAddress("SavedSurvivorBots");
+	g_pBaseFileSystem =
+		LoadAddress("BaseFileSystem");
 
 	/** address + offset */
 	g_challengeMode =
