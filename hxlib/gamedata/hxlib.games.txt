@@ -562,6 +562,14 @@
 					}
 				}
 			}
+
+			"HX::CDirector::CheckForDeadPlayers"
+			{
+				"signature"	"CDirector::CheckForDeadPlayers"
+				"callconv"	"thiscall"
+				"return"	"void"
+				"this"		"ignore"
+			}
 		}
 
 		"Addresses"
@@ -747,6 +755,19 @@
 					"read"		"18"
 					"read"		"0"
 					"offset"	"4"
+				}
+			}
+
+			"Server"
+			{
+				"linux"
+				{
+					"signature"	"sv"
+				}
+				"windows"
+				{
+					"signature"	"Host_RunFrame"
+					"read"		"218"
 				}
 			}
 
@@ -1140,6 +1161,12 @@
 			{
 				"linux"		"1173"
 				"windows"	"1177"
+			}
+
+			"CBaseServer::reservationCookie"
+			{
+				"linux"		"364"
+				"windows"	"368"
 			}
 
 			/*****************
@@ -1692,6 +1719,23 @@
 					"patch"		"\xB8\xFF\xFF\xFF\xFF"
 				}
 			}
+
+			"CDirector::CheckForDeadPlayers::skipClamp"
+			{
+				"signature"	"CDirector::CheckForDeadPlayers"
+
+				"linux"
+				{
+					"offset"	"232"
+				}
+				"windows"
+				{
+					"offset"	"205"
+				}
+
+				/** replace JNZ with JMP */
+				"patch"	"\xEB"
+			}
 		}
 
 		"Signatures"
@@ -1699,6 +1743,19 @@
 			/********************
 			 * for some addresses
 			 *******************/
+
+			"sv"
+			{
+				"library"	"engine"
+				"linux"		"@sv"
+			}
+
+			"Host_RunFrame"
+			{
+				"library"	"engine"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x10\x80\x3D\x2A\x2A\x2A\x2A\x00\x75"
+				/** 55 8B EC 83 EC 10 80 3D ? ? ? ? 00 75 */
+			}
 
 			"TheDirector" // ty left4dhooks
 			{
@@ -2496,6 +2553,14 @@
 				"linux"		"@_ZN9KeyValues10SaveToFileEP15IBaseFileSystemPKcS3_"
 				"windows"	"\x55\x8B\xEC\x51\x53\x8B\x5D\x2A\x56\x8B\x75\x2A\x8B\x06"
 				/** 55 8B EC 51 53 8B 5D ? 56 8B 75 ? 8B 06 */
+			}
+
+			"CDirector::CheckForDeadPlayers"
+			{
+				"library"	"server"
+				"linux"		"@_ZN9CDirector19CheckForDeadPlayersEv"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x30\x57\x8B\xF9\x8B\x87"
+				/** 55 8B EC 83 EC 30 57 8B F9 8B 87 */
 			}
 		}
 	}

@@ -1297,6 +1297,27 @@ forward Action OnVocalize(int client, char gameSound[64], float &cooldown, float
  */
 forward void OnVocalize_Post(int client, const char gameSound[64], float cooldown, float durationAI, bool handled);
 
+/**
+ * CDirector::CheckForDeadPlayers pre-hook. this is called as part of the director updating
+ * the state of the "scenario". the most notable thing that can happen in this is a scenario
+ * being ended when the survivor team is dead or no longer capable of continuing.
+ *
+ * @param skipClamp		if true, apply memory patch to skip clamping total capable survivors to
+ * 						total alive human survivors (as if allow_all_bot_survivor_team were 1)
+ *
+ * @return				Plugin_Continue to take no action, Plugin_Changed to apply skipClamp patch, Plugin_Handled to skip
+ */
+forward Action OnScenarioCheckForDeadPlayers(bool &skipClamp);
+
+/**
+ * CDirector::CheckForDeadPlayers post-hook. this is called as part of the director updating
+ * the state of the "scenario". the most notable thing that can happen in this is a scenario
+ * being ended when the survivor team is dead or no longer capable of continuing.
+ *
+ * @param handled		true if OnScenarioCheckForDeadPlayers returned Plugin_Handled
+ */
+forward Action OnScenarioCheckForDeadPlayers_Post(bool handled);
+
 /***********
  * Natives
  ***********/
@@ -2368,6 +2389,13 @@ native SavedPlayer GetSavedSurvivorBot(int index);
  * @return				total indices in the list
  */
 native int GetSavedSurvivorBotCount();
+
+/**
+ * get current reservation cookie
+ *
+ * @param buffer		store int64 cookie to this
+ */
+native void GetReservationCookie(int buffer[2]);
 
 /**************
  * Methodmaps
@@ -3799,5 +3827,6 @@ public SharedPlugin __pl_hxlib =
 		MarkNativeAsOptional("GetSavedPlayerCount");
 		MarkNativeAsOptional("GetSavedSurvivorBot");
 		MarkNativeAsOptional("GetSavedSurvivorBotCount");
+		MarkNativeAsOptional("GetReservationCookie");
 	}
 #endif

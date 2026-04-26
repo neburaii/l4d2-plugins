@@ -110,6 +110,10 @@ void InitDetours()
 	CreateDetour("HX::CTerrorPlayer::Vocalize",
 		Detour_Vocalize_Pre, Detour_Vocalize_Post,
 		{Forward_OnVocalize, Forward_OnVocalize_Post, -1});
+
+	CreateDetour("HX::CDirector::CheckForDeadPlayers",
+		Detour_CheckForDeadPlayers_Pre, Detour_CheckForDeadPlayers_Post,
+		{Forward_OnScenarioCheckForDeadPlayers, Forward_OnScenarioCheckForDeadPlayers_Post, -1});
 }
 
 /************
@@ -1409,5 +1413,49 @@ void InitDetours()
 		Call_Finish();
 
 		g_bHandled_Vocalize = false;
+		return MRES_Ignored;
+	}
+
+/** OnScenarioCheckForDeadPlayers */
+	static bool g_bHandled_CheckForDeadPlayers;
+	static bool	g_bChanged_CheckForDeadPlayersClampPatched;
+
+	MRESReturn Detour_CheckForDeadPlayers_Pre()
+	{
+		bool bSkipClamp = false;
+
+		Call_StartForward(g_forward[Forward_OnScenarioCheckForDeadPlayers].handle);
+		Call_PushCellRef(bSkipClamp);
+		Action result = Plugin_Continue;
+		Call_Finish(result);
+
+		if (result == Plugin_Handled)
+		{
+			g_bHandled_CheckForDeadPlayers = true;
+			return MRES_Supercede;
+		}
+
+		if (result == Plugin_Changed && bSkipClamp)
+		{
+			g_hMemPatch_CheckForDeadSkipClamp.Enable();
+			g_bChanged_CheckForDeadPlayersClampPatched = true;
+		}
+
+		return MRES_Ignored;
+	}
+
+	MRESReturn Detour_CheckForDeadPlayers_Post()
+	{
+		if (g_bChanged_CheckForDeadPlayersClampPatched)
+		{
+			g_bChanged_CheckForDeadPlayersClampPatched = false;
+			g_hMemPatch_CheckForDeadSkipClamp.Disable();
+		}
+
+		Call_StartForward(g_forward[Forward_OnScenarioCheckForDeadPlayers_Post].handle);
+		Call_PushCell(g_bHandled_CheckForDeadPlayers);
+		Call_Finish();
+
+		g_bHandled_CheckForDeadPlayers = false;
 		return MRES_Ignored;
 	}

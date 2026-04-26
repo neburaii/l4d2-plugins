@@ -25,10 +25,12 @@ Address g_pDefaultViewVectors;
 Address g_pTraceFilterSimple_vtable;
 Address g_pAmmoDef;
 Address g_pBaseFileSystem;
+Address g_pServer;
 
 MemoryPatch	g_hMemPatch_SpawnSpecialsBypassLimit;
 MemoryPatch	g_hMemPatch_SpawnTankBypassLimit;
 MemoryPatch	g_hMemPatch_SpawnWitchBypassLimit;
+MemoryPatch g_hMemPatch_CheckForDeadSkipClamp;
 
 int		g_iOffset_EHandle;
 int		g_iOffset_Intensity;
@@ -53,6 +55,7 @@ int		g_iOffset_InfectedReservedWandererFlags;
 int		g_iOffset_InfectedMobAmbient;
 int		g_iOffset_ZombieManagerCommonSpawnCount;
 int		g_iOffset_GameRules_WaterSlowsMovement;
+int		g_iOffset_CBaseServer_ReservationCookie;
 
 /** CTraceFilterSimple */
 int		g_iOffset_TraceFilterSimple_vtable;
@@ -195,6 +198,8 @@ void InitOffsets()
 		LoadOffset("ZombieManager::commonSpawnCount");
 	g_iOffset_GameRules_WaterSlowsMovement =
 		LoadOffset("CTerrorGameRules::waterSlowsMovement");
+	g_iOffset_CBaseServer_ReservationCookie =
+		LoadOffset("CBaseServer::reservationCookie");
 
 	/** CTraceFilterSimple */
 	g_iOffset_TraceFilterSimple_vtable =
@@ -390,6 +395,8 @@ void InitAddresses()
 		LoadAddress("SavedSurvivorBots");
 	g_pBaseFileSystem =
 		LoadAddress("BaseFileSystem");
+	g_pServer =
+		LoadAddress("Server");
 
 	/** address + offset */
 	g_challengeMode =
@@ -414,4 +421,6 @@ void InitMemoryPatches()
 		LoadMemoryPatch("ZombieManager::SpawnTank::bypassLimit");
 	g_hMemPatch_SpawnWitchBypassLimit =
 		LoadMemoryPatch("ZombieManager::SpawnWitch::bypassLimit");
+	g_hMemPatch_CheckForDeadSkipClamp =
+		LoadMemoryPatch("CDirector::CheckForDeadPlayers::skipClamp");
 }
