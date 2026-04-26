@@ -791,3 +791,20 @@ stock int GetDefaultFOV(int client)
 	int fov = GetEntProp(client, Prop_Send, "m_iDefaultFOV");
 	return fov ? fov : 90;
 }
+
+stock bool IsSurvivorBot(int client)
+{
+	return HasEntProp(client, Prop_Send, "m_humanSpectatorUserID");
+}
+
+/**
+ * get the client index of the idle human this bot belongs to
+ *
+ * @param bot		client index of bot
+ *
+ * @return			client index of human. 0 if there is none.
+ */
+stock int GetIdlePlayer(int bot)
+{
+	return GetClientOfUserId(GetEntProp(bot, Prop_Send, "m_humanSpectatorUserID"));
+}
