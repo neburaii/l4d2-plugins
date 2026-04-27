@@ -31,6 +31,7 @@ enum
 	Forward_OnGetFreeClient,					Forward_OnGetFreeClient_Post,
 	Forward_OnVocalize,							Forward_OnVocalize_Post,
 	Forward_OnScenarioCheckForDeadPlayers,		Forward_OnScenarioCheckForDeadPlayers_Post,
+	Forward_OnCreateSurvivorDeathModel,			Forward_OnCreateSurvivorDeathModel_Post,
 
 	Forward_MAX
 };
@@ -293,6 +294,15 @@ GlobalForward InitGlobalForward(int forwardIndex, char name[MAX_FWD_LEN])
 		case Forward_OnScenarioCheckForDeadPlayers_Post:
 		{	name = "OnScenarioCheckForDeadPlayers_Post"; return CreateGlobalForward(name,
 				ET_Ignore, Param_Cell);
+		}
+
+		case Forward_OnCreateSurvivorDeathModel:
+		{	name = "OnCreateSurvivorDeathModel"; return CreateGlobalForward(name,
+				ET_Event, Param_Cell);
+		}
+		case Forward_OnCreateSurvivorDeathModel_Post:
+		{	name = "OnCreateSurvivorDeathModel_Post"; return CreateGlobalForward(name,
+				ET_Ignore, Param_Cell, Param_Cell, Param_Cell);
 		}
 	}
 

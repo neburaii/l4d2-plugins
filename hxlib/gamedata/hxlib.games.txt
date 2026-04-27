@@ -570,6 +570,21 @@
 				"return"	"void"
 				"this"		"ignore"
 			}
+
+			"HX::CSurvivorDeathModel::Create"
+			{
+				"signature"	"CSurvivorDeathModel::Create"
+				"callconv"	"cdecl"
+				"return"	"cbaseentity"
+
+				"arguments"
+				{
+					"owner"
+					{
+						"type"	"cbaseentity"
+					}
+				}
+			}
 		}
 
 		"Addresses"
@@ -2561,6 +2576,14 @@
 				"linux"		"@_ZN9CDirector19CheckForDeadPlayersEv"
 				"windows"	"\x55\x8B\xEC\x83\xEC\x30\x57\x8B\xF9\x8B\x87"
 				/** 55 8B EC 83 EC 30 57 8B F9 8B 87 */
+			}
+
+			"CSurvivorDeathModel::Create"
+			{
+				"library"	"server"
+				"linux"		"@_ZN19CSurvivorDeathModel6CreateEP13CTerrorPlayer"
+				"windows"	"\x55\x8B\xEC\x57\x8B\x7D\x2A\x85\xFF\x75\x2A\x33\xC0\x5F\x5D\xC3\x8B\x87"
+				/** 55 8B EC 57 8B 7D ? 85 FF 75 ? 33 C0 5F 5D C3 8B 87 */
 			}
 		}
 	}

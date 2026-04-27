@@ -1318,6 +1318,24 @@ forward Action OnScenarioCheckForDeadPlayers(bool &skipClamp);
  */
 forward Action OnScenarioCheckForDeadPlayers_Post(bool handled);
 
+/**
+ * called just before a survivor_death_model entity is created for a client
+ *
+ * @param client		client index of the survivor this death model substitutes
+ *
+ * @return				Plugin_Continue to allow, Plugin_Handled to block
+ */
+forward Action OnCreateSurvivorDeathModel(int client);
+
+/**
+ * called after a survivor_death_model entity is created for a client
+ *
+ * @param client		client index of the survivor this death model substitutes
+ * @param model			entity index of the newly created model
+ * @param handled		true if OnCreateSurvivorDeathModel returned Plugin_Handled
+ */
+forward void OnCreateSurvivorDeathModel_Post(int client, int model, bool handled);
+
 /***********
  * Natives
  ***********/

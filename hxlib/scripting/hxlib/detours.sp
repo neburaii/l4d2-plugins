@@ -114,6 +114,10 @@ void InitDetours()
 	CreateDetour("HX::CDirector::CheckForDeadPlayers",
 		Detour_CheckForDeadPlayers_Pre, Detour_CheckForDeadPlayers_Post,
 		{Forward_OnScenarioCheckForDeadPlayers, Forward_OnScenarioCheckForDeadPlayers_Post, -1});
+
+	CreateDetour("HX::CSurvivorDeathModel::Create",
+		Detour_SurvivorDeathModelCreate_Pre, Detour_SurvivorDeathModelCreate_Post,
+		{Forward_OnCreateSurvivorDeathModel, Forward_OnCreateSurvivorDeathModel_Post, -1});
 }
 
 /************
@@ -1457,5 +1461,43 @@ void InitDetours()
 		Call_Finish();
 
 		g_bHandled_CheckForDeadPlayers = false;
+		return MRES_Ignored;
+	}
+
+/** OnCreateSurvivorDeathModel */
+	static bool g_bHandled_SurvivorDeathModelCreate;
+
+	MRESReturn Detour_SurvivorDeathModelCreate_Pre(DHookReturn hReturn, DHookParam hParams)
+	{
+		int iOwner = INVALID_ENT_REFERENCE;
+		if (!hParams.IsNull(1)) iOwner = hParams.Get(1);
+
+		Call_StartForward(g_forward[Forward_OnCreateSurvivorDeathModel].handle);
+		Call_PushCell(iOwner);
+		Action result = Plugin_Continue;
+		Call_Finish(result);
+
+		if (result == Plugin_Handled)
+		{
+			g_bHandled_SurvivorDeathModelCreate = true;
+			hReturn.Value = 0;
+			return MRES_Supercede;
+		}
+
+		return MRES_Ignored;
+	}
+
+	MRESReturn Detour_SurvivorDeathModelCreate_Post(DHookReturn hReturn, DHookParam hParams)
+	{
+		int iOwner = INVALID_ENT_REFERENCE;
+		if (!hParams.IsNull(1)) iOwner = hParams.Get(1);
+
+		Call_StartForward(g_forward[Forward_OnCreateSurvivorDeathModel_Post].handle);
+		Call_PushCell(iOwner);
+		Call_PushCell(hReturn.Value);
+		Call_PushCell(g_bHandled_SurvivorDeathModelCreate);
+		Call_Finish();
+
+		g_bHandled_SurvivorDeathModelCreate = false;
 		return MRES_Ignored;
 	}
