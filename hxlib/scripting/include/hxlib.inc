@@ -2415,6 +2415,16 @@ native int GetSavedSurvivorBotCount();
  */
 native void GetReservationCookie(int buffer[2]);
 
+/**
+ * get KeyValues info of a gamemode
+ *
+ * @param gamemode		name of gamemode, as it's written for mp_gamemode convar.
+ * 						NULL_STRING means use current mp_gamemode value
+ *
+ * @return				GameModeInfo methodmap. also see KeyValues methodmap
+ */
+native GameModeInfo GetGameModeInfo(const char[] gamemode = NULL_STRING);
+
 /**************
  * Methodmaps
  *************/
@@ -3611,6 +3621,62 @@ methodmap SavedPlayer < InternalKeyValues
 	}
 }
 
+methodmap GameModeInfo < InternalKeyValues
+{
+	/** is gamemode a mutation? */
+	property bool mutation
+	{
+		public get()
+		{
+			return !!this.GetInt("mutation", 0);
+		}
+	}
+
+	property int maxplayers
+	{
+		public get()
+		{
+			return this.GetInt("maxplayers");
+		}
+	}
+
+	property bool hasPlayerControlledZombies
+	{
+		public get()
+		{
+			return !!this.GetInt("playercontrolledzombies", 0);
+		}
+	}
+
+	property bool singleChapterMode
+	{
+		public get()
+		{
+			return !!this.GetInt("singlechapter", 0);
+		}
+	}
+
+	/** is gamemode from an addon? */
+	property bool addon
+	{
+		public get()
+		{
+			return !!this.GetInt("addon", 0);
+		}
+	}
+
+	/**
+	 * get the name of this gamemode's base mode
+	 *
+	 * @param buffer		store name to this buffer
+	 * @param bufferLen		length of buffer
+	 */
+	public void GetBase(char[] buffer, int bufferLen)
+	{
+		this.GetString("base", buffer, bufferLen);
+	}
+}
+
 public SharedPlugin __pl_hxlib =
 {
     name = HXLIB_LIBRARY,
@@ -3846,5 +3912,6 @@ public SharedPlugin __pl_hxlib =
 		MarkNativeAsOptional("GetSavedSurvivorBot");
 		MarkNativeAsOptional("GetSavedSurvivorBotCount");
 		MarkNativeAsOptional("GetReservationCookie");
+		MarkNativeAsOptional("GetGameModeInfo");
 	}
 #endif

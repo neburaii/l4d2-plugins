@@ -786,6 +786,20 @@
 				}
 			}
 
+			"CMatchExtL4D"
+			{
+				"linux"
+				{
+					"signature"	"g_pMatchExtL4D"
+				}
+				"windows"
+				{
+					"signature"	"CTerrorGameRules::IsSingleChapterMode"
+					"read"		"2"
+				}
+				"read"	"0"
+			}
+
 			/********************************************************************************
 			 * FUNCTIONS FROM CALL INSTRUCTION
 			 *
@@ -980,6 +994,12 @@
 			{
 				"linux"		"403"
 				"windows"	"402"
+			}
+
+			"GetGameModeInfo"
+			{
+				"linux"		"4"
+				"windows"	"4"
 			}
 
 			/*****************
@@ -1952,6 +1972,19 @@
 				"library"	"server"
 				"windows"	"\x8B\x0D\x2A\x2A\x2A\x2A\x8B\x01\x8B\x90\x2A\x2A\x2A\x2A\xFF\xD2\x50\xA1"
 				/** 8B 0D ? ? ? ? 8B 01 8B 90 ? ? ? ? FF D2 50 A1 */
+			}
+
+			"g_pMatchExtL4D"
+			{
+				"library"	"server"
+				"linux"		"@g_pMatchExtL4D"
+			}
+
+			"CTerrorGameRules::IsSingleChapterMode"
+			{
+				"library"	"server"
+				"windows"	"\x8B\x0D\x2A\x2A\x2A\x2A\x85\xC9\x75\x2A\x32\xC0\xC3\x56"
+				/** 8B 0D ? ? ? ? 85 C9 75 ? 32 C0 C3 56 */
 			}
 
 			/**********************

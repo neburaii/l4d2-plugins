@@ -225,6 +225,7 @@ void RegisterNatives()
 	CreateNative("GetSavedSurvivorBot", Native_GetSavedSurvivorBot);
 	CreateNative("GetSavedSurvivorBotCount", Native_GetSavedSurvivorBotCount);
 	CreateNative("GetReservationCookie", Native_GetReservationCookie);
+	CreateNative("GetGameModeInfo", Native_GetGameModeInfo);
 }
 
 /******************
@@ -1248,6 +1249,18 @@ public any Native_GetServerOS(Handle hPlugin, int iNumParams)
 			g_iOffset_CBaseServer_ReservationCookie + 4), NumberType_Int32);
 
 		SetNativeArray(1, iCookie, sizeof(iCookie));
+	}
+
+	public any Native_GetGameModeInfo(Handle hPlugin, int iNumParams)
+	{
+		if (IsNativeParamNullString(1))
+			return SDKCall(g_hSDK_GetGameModeInfo, g_pMatchExtL4D, g_sConVar_MpGamemode);
+
+		int iLen = GetNativeStringLengthFull(1);
+		char[] sGameMode = new char[iLen];
+		GetNativeString(1, sGameMode, iLen);
+
+		return SDKCall(g_hSDK_GetGameModeInfo, g_pMatchExtL4D, sGameMode);
 	}
 
 /** InternalKeyValues methodmap */

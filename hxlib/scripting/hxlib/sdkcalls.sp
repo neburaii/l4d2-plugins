@@ -78,6 +78,7 @@ Handle g_hSDK_KeyValues_GetNextKey;
 Handle g_hSDK_KeyValues_CreateKey;
 Handle g_hSDK_KeyValues_RemoveSubKey;
 Handle g_hSDK_KeyValues_SaveToFile;
+Handle g_hSDK_GetGameModeInfo;
 
 void InitSDKCalls()
 {
@@ -466,6 +467,12 @@ void InitSDKCalls()
 	prep.Param(SDKType_PlainOldData, SDKPass_Plain);
 	prep.Return(SDKType_Bool, SDKPass_Plain);
 	prep.End(g_hSDK_KeyValues_SaveToFile);
+
+	/** Native_GetGameModeInfo */
+	prep.Start(SDKCall_Raw, SDKConf_Virtual, "GetGameModeInfo");
+	prep.Param(SDKType_String, SDKPass_Pointer);
+	prep.Return(SDKType_PlainOldData, SDKPass_Plain);
+	prep.End(g_hSDK_GetGameModeInfo);
 
 	/** Native_SpawnSpecial */
 	prep.Start(SDKCall_Raw, SDKConf_Signature, "ZombieManager::SpawnSpecial");

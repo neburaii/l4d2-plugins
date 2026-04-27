@@ -26,6 +26,7 @@ Address g_pTraceFilterSimple_vtable;
 Address g_pAmmoDef;
 Address g_pBaseFileSystem;
 Address g_pServer;
+Address g_pMatchExtL4D;
 
 MemoryPatch	g_hMemPatch_SpawnSpecialsBypassLimit;
 MemoryPatch	g_hMemPatch_SpawnTankBypassLimit;
@@ -397,6 +398,8 @@ void InitAddresses()
 		LoadAddress("BaseFileSystem");
 	g_pServer =
 		LoadAddress("Server");
+	g_pMatchExtL4D =
+		LoadAddress("CMatchExtL4D");
 
 	/** address + offset */
 	g_challengeMode =
