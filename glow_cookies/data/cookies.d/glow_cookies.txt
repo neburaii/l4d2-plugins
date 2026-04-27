@@ -1,0 +1,22 @@
+"Cookies"
+{
+	"enable_glow"
+	{
+		"#name"
+		{
+			"en"	"Enable Glows"
+		}
+
+		"#desc"
+		{
+			"en"	"If the gamemode doesn't force item/survivor glows, then this cookie's value is used to toggle the glows."
+		}
+
+		"default_convar"	"cookie_enable_glow"
+
+		"input"
+		{
+			"type"	"onoff"
+		}
+	}
+}
