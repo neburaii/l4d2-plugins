@@ -68,35 +68,6 @@ enum PlayerPhysFlag
 	PFlag_GamePhysicsRotPush 		= (1 << 5)		// game physics did a rotating push that we may want to override with vphysics
 };
 
-/** m_iPlayerState netprop values */
-enum PlayerState
-{
-	// Happily running around in the game.
-	// You can't move though if CSGameRules()->IsFreezePeriod() returns true.
-	// This state can jump to a bunch of other states like STATE_PICKINGCLASS or STATE_DEATH_ANIM.
-	PlayerState_Active = 0,
-
-	// This is the state you're in when you first enter the server.
-	// It's switching between intro cameras every few seconds, and there's a level info
-	// screen up.
-	PlayerState_Welcome,			// Show the level intro screen.
-
-	// During these states, you can either be a new player waiting to join, or
-	// you can be a live player in the game who wants to change teams.
-	// Either way, you can't move while choosing team or class (or while any menu is up).
-	PlayerState_PickingTeam,		// Choosing team.
-	PlayerState_PickingClass,		// Choosing class.
-
-	PlayerState_DeathAnim,			// Playing death anim, waiting for that to finish.
-	PlayerState_DeathWaitForKey,	// Done playing death anim. Waiting for keypress to go into observer mode.
-	PlayerState_ObserverMode,		// Noclipping around, watching players, etc.
-
-	PlayerState_GunGameRespawn,		// Respawning the player in a gun game
-	PlayerState_Dormant,			// No thinking, client updates, etc
-
-	PlayerState_MAX
-};
-
 enum ZombieClass
 {
 	ZClass_Null		= -1,

@@ -72,11 +72,10 @@ public APLRes AskPluginLoad2(Handle hMyself, bool bLate, char[] sError, int iErr
 	RegisterGlobalForwards();
 	RegisterNatives();
 
-	RegPluginLibrary("hxlib");
-
 	g_hThisPlugin = hMyself;
 	g_bLateLoaded = bLate;
 
+	RegPluginLibrary(HXLIB_LIBRARY);
 	return APLRes_Success;
 }
 

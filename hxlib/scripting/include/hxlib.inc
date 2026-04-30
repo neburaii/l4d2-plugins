@@ -2742,7 +2742,11 @@ methodmap NavArea
 	 * path towards the ending saferoom. same logic as how the ESCAPE_ROUTE attribute is given
 	 * to nav areas, except it's freshly computed from any area
 	 *
-	 * @return				the nav area that's the biggest step towards the end saferoom
+	 * @return				the nav area that's the biggest step towards the end saferoom.
+	 * 						NavArea_Null if there is no "next step"
+	 *
+	 * @note				at the end of some maps, there can be nav areas which both return
+	 * 						each other. be wary of this if using it in an infinite loop.
 	 */
 	public native NavArea GetNextEscapeStep();
 
@@ -2755,6 +2759,10 @@ methodmap NavArea
 	 * @param type			TraverseType_* enum. represents what kind of traversal is required to take this step
 	 *
 	 * @return				the nav area that's the biggest step towards the end saferoom
+	 * 						NavArea_Null if there is no "next step"
+	 *
+	 * @note				at the end of some maps, there can be nav areas which both return
+	 * 						each other. be wary of this if using it in an infinite loop.
 	 *
 	 * @note				slightly slower than NavArea.GetNextEscapeStep. only use this if
 	 * 						you need the traverse type.
