@@ -14,7 +14,7 @@ public Plugin myinfo =
 	name = "Skip Intro Cutscenes",
 	author = "Neburai",
 	description = "reliably skips intro cutscenes for all maps not in a whitelist",
-	version = "1.1",
+	version = "1.2",
 	url = "https://github.com/neburaii/l4d2-plugins/tree/main/skip_intro"
 };
 
@@ -23,10 +23,12 @@ bool g_bMapAllowIntro;
 bool g_bIntroSequenceStripped;
 
 bool g_bLateLoaded;
+bool g_bHookingEnabled;
 
 public APLRes AskPluginLoad2(Handle hMyself, bool bLate, char[] sError, int iErrMax)
 {
 	g_bLateLoaded = bLate;
+	return APLRes_Success;
 }
 
 public void OnPluginStart()
@@ -35,37 +37,67 @@ public void OnPluginStart()
 
 	if (g_bLateLoaded)
 	{
-		int iEntity = -1;
-
-		while ((iEntity = FindEntityByClassname(iEntity, "info_director")) != -1)
-			AddEntityHook(iEntity, EntityHook_AcceptInput, EHook_Pre, OnAcceptInput_InfoDirector);
-
-		while ((iEntity = FindEntityByClassname(iEntity, "point_viewcontrol_multiplayer")) != -1)
-			AddEntityHook(iEntity, EntityHook_AcceptInput, EHook_Pre, OnAcceptInput_PointViewcontrol);
-
-		while ((iEntity = FindEntityByClassname(iEntity, "point_viewcontrol_survivor")) != -1)
-			AddEntityHook(iEntity, EntityHook_AcceptInput, EHook_Pre, OnAcceptInput_PointViewcontrol);
-
-		while ((iEntity = FindEntityByClassname(iEntity, "env_fade")) != -1)
-			AddEntityHook(iEntity, EntityHook_AcceptInput, EHook_Pre, OnAcceptInput_EnvFade);
+		OnMapStart();
+		if (LibraryExists(HXLIB_LIBRARY))
+			EnableHooking();
 	}
+}
+
+public void OnAllPluginsLoaded()
+{
+	if (!g_bHookingEnabled && LibraryExists(HXLIB_LIBRARY))
+		EnableHooking();
+}
+
+public void OnLibraryAdded(const char[] sName)
+{
+	if (strcmp(sName, HXLIB_LIBRARY) == 0)
+		EnableHooking();
+}
+
+public void OnLibraryRemoved(const char[] sName)
+{
+	if (strcmp(sName, HXLIB_LIBRARY) == 0)
+		g_bHookingEnabled = false;
+}
+
+void EnableHooking()
+{
+	g_bHookingEnabled = true;
+
+	int iEntity = -1;
+
+	while ((iEntity = FindEntityByClassname(iEntity, "info_director")) != -1)
+		AddEntityHook(iEntity, EntityHook_AcceptInput, EHook_Pre, OnAcceptInput_InfoDirector);
+
+	while ((iEntity = FindEntityByClassname(iEntity, "point_viewcontrol_multiplayer")) != -1)
+		AddEntityHook(iEntity, EntityHook_AcceptInput, EHook_Pre, OnAcceptInput_PointViewcontrol);
+
+	while ((iEntity = FindEntityByClassname(iEntity, "point_viewcontrol_survivor")) != -1)
+		AddEntityHook(iEntity, EntityHook_AcceptInput, EHook_Pre, OnAcceptInput_PointViewcontrol);
+
+	while ((iEntity = FindEntityByClassname(iEntity, "env_fade")) != -1)
+		AddEntityHook(iEntity, EntityHook_AcceptInput, EHook_Pre, OnAcceptInput_EnvFade);
 }
 
 public void OnPluginEnd()
 {
-	int iEntity = -1;
+	if (g_bHookingEnabled)
+	{
+		int iEntity = -1;
 
-	while ((iEntity = FindEntityByClassname(iEntity, "info_director")) != -1)
-		RemoveEntityHook(iEntity, EntityHook_AcceptInput, EHook_Pre, OnAcceptInput_InfoDirector);
+		while ((iEntity = FindEntityByClassname(iEntity, "info_director")) != -1)
+			RemoveEntityHook(iEntity, EntityHook_AcceptInput, EHook_Pre, OnAcceptInput_InfoDirector);
 
-	while ((iEntity = FindEntityByClassname(iEntity, "point_viewcontrol_multiplayer")) != -1)
-		RemoveEntityHook(iEntity, EntityHook_AcceptInput, EHook_Pre, OnAcceptInput_PointViewcontrol);
+		while ((iEntity = FindEntityByClassname(iEntity, "point_viewcontrol_multiplayer")) != -1)
+			RemoveEntityHook(iEntity, EntityHook_AcceptInput, EHook_Pre, OnAcceptInput_PointViewcontrol);
 
-	while ((iEntity = FindEntityByClassname(iEntity, "point_viewcontrol_survivor")) != -1)
-		RemoveEntityHook(iEntity, EntityHook_AcceptInput, EHook_Pre, OnAcceptInput_PointViewcontrol);
+		while ((iEntity = FindEntityByClassname(iEntity, "point_viewcontrol_survivor")) != -1)
+			RemoveEntityHook(iEntity, EntityHook_AcceptInput, EHook_Pre, OnAcceptInput_PointViewcontrol);
 
-	while ((iEntity = FindEntityByClassname(iEntity, "env_fade")) != -1)
-		RemoveEntityHook(iEntity, EntityHook_AcceptInput, EHook_Pre, OnAcceptInput_EnvFade);
+		while ((iEntity = FindEntityByClassname(iEntity, "env_fade")) != -1)
+			RemoveEntityHook(iEntity, EntityHook_AcceptInput, EHook_Pre, OnAcceptInput_EnvFade);
+	}
 }
 
 public void OnMapStart()
@@ -122,14 +154,17 @@ public Action L4D_OnFirstSurvivorLeftSafeArea(int iClient)
 
 public void OnEntityCreated(int iEntity, const char[] sClassname)
 {
-    if (strcmp(sClassname, "info_director") == 0)
-		AddEntityHook(iEntity, EntityHook_AcceptInput, EHook_Pre, OnAcceptInput_InfoDirector);
+	if (g_bHookingEnabled)
+	{
+		if (strcmp(sClassname, "info_director") == 0)
+			AddEntityHook(iEntity, EntityHook_AcceptInput, EHook_Pre, OnAcceptInput_InfoDirector);
 
-	else if (StrContains(sClassname, "point_viewcontrol_") == 0)
-		AddEntityHook(iEntity, EntityHook_AcceptInput, EHook_Pre, OnAcceptInput_PointViewcontrol);
+		else if (StrContains(sClassname, "point_viewcontrol_") == 0)
+			AddEntityHook(iEntity, EntityHook_AcceptInput, EHook_Pre, OnAcceptInput_PointViewcontrol);
 
-	else if (strcmp(sClassname, "env_fade") == 0)
-		AddEntityHook(iEntity, EntityHook_AcceptInput, EHook_Pre, OnAcceptInput_EnvFade);
+		else if (strcmp(sClassname, "env_fade") == 0)
+			AddEntityHook(iEntity, EntityHook_AcceptInput, EHook_Pre, OnAcceptInput_EnvFade);
+	}
 }
 
 public Action OnAcceptInput_InfoDirector(int iReceiver, char[] sInput, int &iActivator, int &iSource, Variant params)
