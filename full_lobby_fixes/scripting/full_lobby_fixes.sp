@@ -13,7 +13,7 @@ public Plugin myinfo =
 	name = "Max Clients Fixes",
 	author = "Neburai",
 	description = "fixes some issues that occur in full lobbies: players unable to join. survivor players disconnecting will delete the character they played as. survivors going idle will delete their character.",
-	version = "1.0",
+	version = "1.1",
 	url = "https://github.com/neburaii/l4d2-plugins/tree/main/full_lobby_fixes"
 };
 
@@ -246,7 +246,7 @@ enum struct RecordedSurvivor
 
 public void OnClientDisconnect(int iClient)
 {
-	if (IsClientConnected(iClient)
+	if (IsClientInGame(iClient)
 		&& !IsFakeClient(iClient)
 		&& GetClientTeam(iClient) == Team_Survivor)
 	{

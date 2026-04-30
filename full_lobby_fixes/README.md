@@ -19,6 +19,9 @@ these issues happen because they all involve creating a new bot client, but with
 - [left4dhooks](https://forums.alliedmods.net/showthread.php?t=321696)
 
 # Changelog
-## v1.0
+### 1.1
+- fixed error
+
+### 1.0
 - initial release
 - moved the idle on full lobby block from the "block_idle" plugin to here. "block_idle" has been removed from the repo.
