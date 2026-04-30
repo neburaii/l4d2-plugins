@@ -12,7 +12,7 @@ public Plugin myinfo =
 	name = "Cookie Manager",
 	author = "Neburai",
 	description = "Cookie interface for clients. Cookies can be searched, names/descriptions translated, and accept several types of Panel-driven input",
-	version = "1.0",
+	version = "1.0.1",
 	url = "https://github.com/neburaii/l4d2-plugins/tree/main/cookie_manager"
 };
 
@@ -78,6 +78,8 @@ public APLRes AskPluginLoad2(Handle hMyself, bool bLate, char[] sError, int iErr
 {
 	CreateNative("HookCookieChange", Native_HookCookieChange);
 	CreateNative("UnhookCookieChange", Native_UnhookCookieChange);
+
+	RegPluginLibrary(COOKIE_MANAGER_LIBRARY);
 }
 
 public void OnPluginStart()
@@ -115,8 +117,6 @@ public void OnPluginStart()
 
 	g_hArray_Cookies = new ArrayList(sizeof(RegisteredCookie));
 	g_hArray_Directories = new ArrayList(sizeof(RegisteredDirectory));
-
-	RegPluginLibrary(COOKIE_MANAGER_LIBRARY);
 }
 
 public void OnAllPluginsLoaded()

@@ -18,7 +18,7 @@ public Plugin myinfo =
 	name = "Players as Hosts",
 	author = "Neburai",
 	description = "tracks which player originally hosted/joined the lobby. It does nothing on its own. Other plugins may use its natives to provide special features for this player",
-	version = "1.1",
+	version = "1.1.1",
 	url = "https://github.com/neburaii/l4d2-plugins/tree/main/host_player"
 };
 
@@ -382,6 +382,7 @@ public APLRes AskPluginLoad2(Handle hMyself, bool bLate, char[] sError, int iErr
 	CreateNative("GetLobbyHost", Native_GetHostClient);
 	g_bLateLoaded = bLate;
 
+	RegPluginLibrary(HOST_PLAYER_LIBRARY);
 	return APLRes_Success;
 }
 
@@ -450,8 +451,6 @@ public void OnPluginStart()
 			}
 		#endif
 	}
-
-	RegPluginLibrary(HOST_PLAYER_LIBRARY);
 }
 
 #if defined _cookie_manager_included_
