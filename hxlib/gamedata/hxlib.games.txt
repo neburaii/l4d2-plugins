@@ -1204,6 +1204,12 @@
 				"windows"	"368"
 			}
 
+			"CGameServer::hibernationStatus"
+			{
+				"linux"		"185209"
+				"windows"	"185217"
+			}
+
 			/*****************
 			 * CountdownTimer
 			 ****************/

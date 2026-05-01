@@ -226,6 +226,7 @@ void RegisterNatives()
 	CreateNative("GetSavedSurvivorBotCount", Native_GetSavedSurvivorBotCount);
 	CreateNative("GetReservationCookie", Native_GetReservationCookie);
 	CreateNative("GetGameModeInfo", Native_GetGameModeInfo);
+	CreateNative("GetHibernationState", Native_GetHibernationState);
 }
 
 /******************
@@ -1244,9 +1245,9 @@ public any Native_GetServerOS(Handle hPlugin, int iNumParams)
 	{
 		int iCookie[2];
 		iCookie[0] = LoadFromAddress(g_pServer + view_as<Address>(
-			g_iOffset_CBaseServer_ReservationCookie), NumberType_Int32);
+			g_iOffset_Server_ReservationCookie), NumberType_Int32);
 		iCookie[1] = LoadFromAddress(g_pServer + view_as<Address>(
-			g_iOffset_CBaseServer_ReservationCookie + 4), NumberType_Int32);
+			g_iOffset_Server_ReservationCookie + 4), NumberType_Int32);
 
 		SetNativeArray(1, iCookie, sizeof(iCookie));
 	}
@@ -1261,6 +1262,12 @@ public any Native_GetServerOS(Handle hPlugin, int iNumParams)
 		GetNativeString(1, sGameMode, iLen);
 
 		return SDKCall(g_hSDK_GetGameModeInfo, g_pMatchExtL4D, sGameMode);
+	}
+
+	public any Native_GetHibernationState(Handle hPlugin, int iNumParams)
+	{
+		return LoadFromAddress(g_pServer + view_as<Address>(
+			g_iOffset_Server_HibernationStatus), NumberType_Int8);
 	}
 
 /** InternalKeyValues methodmap */

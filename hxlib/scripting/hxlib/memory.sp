@@ -56,7 +56,8 @@ int		g_iOffset_InfectedReservedWandererFlags;
 int		g_iOffset_InfectedMobAmbient;
 int		g_iOffset_ZombieManagerCommonSpawnCount;
 int		g_iOffset_GameRules_WaterSlowsMovement;
-int		g_iOffset_CBaseServer_ReservationCookie;
+int		g_iOffset_Server_ReservationCookie;
+int		g_iOffset_Server_HibernationStatus;
 
 /** CTraceFilterSimple */
 int		g_iOffset_TraceFilterSimple_vtable;
@@ -199,8 +200,10 @@ void InitOffsets()
 		LoadOffset("ZombieManager::commonSpawnCount");
 	g_iOffset_GameRules_WaterSlowsMovement =
 		LoadOffset("CTerrorGameRules::waterSlowsMovement");
-	g_iOffset_CBaseServer_ReservationCookie =
+	g_iOffset_Server_ReservationCookie =
 		LoadOffset("CBaseServer::reservationCookie");
+	g_iOffset_Server_HibernationStatus =
+		LoadOffset("CGameServer::hibernationStatus");
 
 	/** CTraceFilterSimple */
 	g_iOffset_TraceFilterSimple_vtable =

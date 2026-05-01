@@ -2425,6 +2425,13 @@ native void GetReservationCookie(int buffer[2]);
  */
 native GameModeInfo GetGameModeInfo(const char[] gamemode = NULL_STRING);
 
+/**
+ * get current hibernation state of the server
+ *
+ * @return				true if hibernating, false if not.
+ */
+native bool GetHibernationState();
+
 /**************
  * Methodmaps
  *************/
@@ -3921,5 +3928,6 @@ public SharedPlugin __pl_hxlib =
 		MarkNativeAsOptional("GetSavedSurvivorBotCount");
 		MarkNativeAsOptional("GetReservationCookie");
 		MarkNativeAsOptional("GetGameModeInfo");
+		MarkNativeAsOptional("GetHibernationState");
 	}
 #endif
