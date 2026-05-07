@@ -32,6 +32,8 @@ enum
 	Forward_OnVocalize,							Forward_OnVocalize_Post,
 	Forward_OnScenarioCheckForDeadPlayers,		Forward_OnScenarioCheckForDeadPlayers_Post,
 	Forward_OnCreateSurvivorDeathModel,			Forward_OnCreateSurvivorDeathModel_Post,
+	Forward_OnIncapacitatedAsSurvivor,			Forward_OnIncapacitatedAsSurvivor_Post,
+	Forward_OnIncapacitatedAsTank,				Forward_OnIncapacitatedAsTank_Post,
 
 	Forward_MAX
 };
@@ -303,6 +305,24 @@ GlobalForward InitGlobalForward(int forwardIndex, char name[MAX_FWD_LEN])
 		case Forward_OnCreateSurvivorDeathModel_Post:
 		{	name = "OnCreateSurvivorDeathModel_Post"; return CreateGlobalForward(name,
 				ET_Ignore, Param_Cell, Param_Cell, Param_Cell);
+		}
+
+		case Forward_OnIncapacitatedAsSurvivor:
+		{	name = "OnIncapacitatedAsSurvivor"; return CreateGlobalForward(name,
+				ET_Event, Param_Cell, Param_CellByRef, Param_CellByRef, Param_CellByRef, Param_CellByRef, Param_Cell, Param_Array, Param_Array);
+		}
+		case Forward_OnIncapacitatedAsSurvivor_Post:
+		{	name = "OnIncapacitatedAsSurvivor_Post"; return CreateGlobalForward(name,
+				ET_Ignore, Param_Cell, Param_Cell, Param_Cell, Param_Cell, Param_Cell, Param_Cell, Param_Array, Param_Array, Param_Cell);
+		}
+
+		case Forward_OnIncapacitatedAsTank:
+		{	name = "OnIncapacitatedAsTank"; return CreateGlobalForward(name,
+				ET_Event, Param_Cell, Param_CellByRef, Param_CellByRef, Param_CellByRef, Param_CellByRef, Param_Cell, Param_Array, Param_Array);
+		}
+		case Forward_OnIncapacitatedAsTank_Post:
+		{	name = "OnIncapacitatedAsTank_Post"; return CreateGlobalForward(name,
+				ET_Ignore, Param_Cell, Param_Cell, Param_Cell, Param_Cell, Param_Cell, Param_Cell, Param_Array, Param_Array, Param_Cell);
 		}
 	}
 

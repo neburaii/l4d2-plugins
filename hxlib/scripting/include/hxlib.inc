@@ -1336,6 +1336,68 @@ forward Action OnCreateSurvivorDeathModel(int client);
  */
 forward void OnCreateSurvivorDeathModel_Post(int client, int model, bool handled);
 
+/**
+ * called just before a survivor becomes incapacitated
+ *
+ * @param client		client index of survivor
+ * @param attacker		index of the entity who incapacitated this survivor
+ * @param inflictor
+ * @param damage		damage dealt for the damage event that caused this incapacitation
+ * @param damageType	type of damage
+ * @param weapon		entity index of the weapon used
+ * @param damageForce
+ * @param damagePos
+ *
+ * @return				Plugin_Continue to take no action. Plugin_Changed to apply param changes. Plugin_Handled to block
+ */
+forward Action OnIncapacitatedAsSurvivor(int client, int &attacker, int &inflictor, float &damage, int &damageType, int weapon, const float damageForce[3], const float damagePos[3]);
+
+/**
+ * called after a survivor becomes incapacitated
+ *
+ * @param client		client index of survivor
+ * @param attacker		index of the entity who incapacitated this survivor
+ * @param inflictor
+ * @param damage		damage dealt for the damage event that caused this incapacitation
+ * @param damageType	type of damage
+ * @param weapon		entity index of the weapon used
+ * @param damageForce
+ * @param damagePos
+ * @param handled		true if OnIncapacitatedAsSurvivor returned Plugin_Handled
+ */
+forward void OnIncapacitatedAsSurvivor_Post(int client, int attacker, int inflictor, float damage, int damageType, int weapon, const float damageForce[3], const float damagePos[3], bool handled);
+
+/**
+ * called just before a tank becomes incapacitated. incapacitation for tanks means their death animation
+ *
+ * @param client		client index of tank
+ * @param attacker		index of the entity who incapacitated this tank
+ * @param inflictor
+ * @param damage		damage dealt for the damage event that caused this incapacitation
+ * @param damageType	type of damage
+ * @param weapon		entity index of the weapon used
+ * @param damageForce
+ * @param damagePos
+ *
+ * @return				Plugin_Continue to take no action. Plugin_Changed to apply param changes. Plugin_Handled to block
+ */
+forward Action OnIncapacitatedAsTank(int client, int &attacker, int &inflictor, float &damage, int &damageType, int weapon, const float damageForce[3], const float damagePos[3]);
+
+/**
+ * called after a tank becomes incapacitated. incapacitation for tanks means their death animation
+ *
+ * @param client		client index of tank
+ * @param attacker		index of the entity who incapacitated this tank
+ * @param inflictor
+ * @param damage		damage dealt for the damage event that caused this incapacitation
+ * @param damageType	type of damage
+ * @param weapon		entity index of the weapon used
+ * @param damageForce
+ * @param damagePos
+ * @param handled		true if OnIncapacitatedAsTank returned Plugin_Handled
+ */
+forward void OnIncapacitatedAsTank_Post(int client, int attacker, int inflictor, float damage, int damageType, int weapon, const float damageForce[3], const float damagePos[3], bool handled);
+
 /***********
  * Natives
  ***********/

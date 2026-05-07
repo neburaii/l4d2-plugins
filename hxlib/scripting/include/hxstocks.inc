@@ -245,7 +245,6 @@ stock bool IsCombatCharacter(int entity)
  */
 stock bool IsCommonInfected(int entity)
 {
-	if (!IsInfected(entity)) return false;
 	return IsEntityOfClass(entity, "infected");
 }
 
@@ -266,7 +265,6 @@ stock bool IsInfected(int entity)
  */
 stock bool IsWitch(int entity)
 {
-	if (!IsInfected(entity)) return false;
 	return IsEntityOfClass(entity, "witch");
 }
 
@@ -651,6 +649,11 @@ stock int GetMeleeWeaponName(int weapon, char[] buffer, int bufferLen)
 	return GetEntPropString(weapon, Prop_Data, "m_strMapSetScriptName", buffer, bufferLen);
 }
 
+stock bool IsTerrorGun(int weapon)
+{
+	return HasEntProp(weapon, Prop_Send, "m_isDualWielding");
+}
+
 /**
  * check if a weapon is being dual wielded
  *
@@ -660,7 +663,7 @@ stock int GetMeleeWeaponName(int weapon, char[] buffer, int bufferLen)
  */
 stock bool IsDualWielding(int weapon)
 {
-	if (!HasEntProp(weapon, Prop_Send, "m_isDualWielding"))
+	if (!IsTerrorGun(weapon))
 		return false;
 
 	return GetEntProp(weapon, Prop_Send, "m_isDualWielding", 1);

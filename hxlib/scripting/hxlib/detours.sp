@@ -118,6 +118,14 @@ void InitDetours()
 	CreateDetour("HX::CSurvivorDeathModel::Create",
 		Detour_SurvivorDeathModelCreate_Pre, Detour_SurvivorDeathModelCreate_Post,
 		{Forward_OnCreateSurvivorDeathModel, Forward_OnCreateSurvivorDeathModel_Post, -1});
+
+	CreateDetour("HX::CTerrorPlayer::OnIncapacitatedAsSurvivor",
+		Detour_OnIncapacitatedAsSurvivor_Pre, Detour_OnIncapacitatedAsSurvivor_Post,
+		{Forward_OnIncapacitatedAsSurvivor, Forward_OnIncapacitatedAsSurvivor_Post, -1});
+
+	CreateDetour("HX::CTerrorPlayer::OnIncapacitatedAsTank",
+		Detour_OnIncapacitatedAsTank_Pre, Detour_OnIncapacitatedAsTank_Post,
+		{Forward_OnIncapacitatedAsTank, Forward_OnIncapacitatedAsTank_Post, -1});
 }
 
 /************
@@ -1499,5 +1507,145 @@ void InitDetours()
 		Call_Finish();
 
 		g_bHandled_SurvivorDeathModelCreate = false;
+		return MRES_Ignored;
+	}
+
+/** OnIncapacitatedAsSurvivor */
+	static bool g_bHandled_OnIncapacitatedAsSurvivor;
+
+	MRESReturn Detour_OnIncapacitatedAsSurvivor_Pre(int pThis, DHookParam hParams)
+	{
+		TakeDamageInfo info = hParams.Get(1);
+		int iAttacker = info.attacker;
+		int iInflictor = info.inflictor;
+		float fDamage = info.damage;
+		int iDamageType = info.damageType;
+
+		float vDamageForce[3];
+		float vDamagePos[3];
+		info.GetDamageForce(vDamageForce);
+		info.GetDamagePos(vDamagePos);
+
+		Call_StartForward(g_forward[Forward_OnIncapacitatedAsSurvivor].handle);
+		Call_PushCell(pThis);
+		Call_PushCellRef(iAttacker);
+		Call_PushCellRef(iInflictor);
+		Call_PushCellRef(fDamage);
+		Call_PushCellRef(iDamageType);
+		Call_PushCell(info.weapon);
+		Call_PushArray(vDamageForce, sizeof(vDamageForce));
+		Call_PushArray(vDamagePos, sizeof(vDamagePos));
+		Action result = Plugin_Continue;
+		Call_Finish(result);
+
+		if (result == Plugin_Handled)
+		{
+			g_bHandled_OnIncapacitatedAsSurvivor = true;
+			return MRES_Supercede;
+		}
+
+		if (result == Plugin_Changed)
+		{
+			info.attacker = iAttacker;
+			info.inflictor = iInflictor;
+			info.damage = fDamage;
+			info.damageType = iDamageType;
+			return MRES_Ignored;
+		}
+
+		return MRES_Ignored;
+	}
+
+	MRESReturn Detour_OnIncapacitatedAsSurvivor_Post(int pThis, DHookParam hParams)
+	{
+		TakeDamageInfo info = hParams.Get(1);
+		float vDamageForce[3];
+		float vDamagePos[3];
+		info.GetDamageForce(vDamageForce);
+		info.GetDamagePos(vDamagePos);
+
+		Call_StartForward(g_forward[Forward_OnIncapacitatedAsSurvivor_Post].handle);
+		Call_PushCell(pThis);
+		Call_PushCell(info.attacker);
+		Call_PushCell(info.inflictor);
+		Call_PushCell(info.damage);
+		Call_PushCell(info.damageType);
+		Call_PushCell(info.weapon);
+		Call_PushArray(vDamageForce, sizeof(vDamageForce));
+		Call_PushArray(vDamagePos, sizeof(vDamagePos));
+		Call_PushCell(g_bHandled_OnIncapacitatedAsSurvivor);
+		Call_Finish();
+
+		g_bHandled_OnIncapacitatedAsSurvivor = false;
+		return MRES_Ignored;
+	}
+
+/** OnIncapacitatedAsTank */
+	static bool g_bHandled_OnIncapacitatedAsTank;
+
+	MRESReturn Detour_OnIncapacitatedAsTank_Pre(int pThis, DHookParam hParams)
+	{
+		TakeDamageInfo info = hParams.Get(1);
+		int iAttacker = info.attacker;
+		int iInflictor = info.inflictor;
+		float fDamage = info.damage;
+		int iDamageType = info.damageType;
+
+		float vDamageForce[3];
+		float vDamagePos[3];
+		info.GetDamageForce(vDamageForce);
+		info.GetDamagePos(vDamagePos);
+
+		Call_StartForward(g_forward[Forward_OnIncapacitatedAsTank].handle);
+		Call_PushCell(pThis);
+		Call_PushCellRef(iAttacker);
+		Call_PushCellRef(iInflictor);
+		Call_PushCellRef(fDamage);
+		Call_PushCellRef(iDamageType);
+		Call_PushCell(info.weapon);
+		Call_PushArray(vDamageForce, sizeof(vDamageForce));
+		Call_PushArray(vDamagePos, sizeof(vDamagePos));
+		Action result = Plugin_Continue;
+		Call_Finish(result);
+
+		if (result == Plugin_Handled)
+		{
+			g_bHandled_OnIncapacitatedAsTank = true;
+			return MRES_Supercede;
+		}
+
+		if (result == Plugin_Changed)
+		{
+			info.attacker = iAttacker;
+			info.inflictor = iInflictor;
+			info.damage = fDamage;
+			info.damageType = iDamageType;
+			return MRES_Ignored;
+		}
+
+		return MRES_Ignored;
+	}
+
+	MRESReturn Detour_OnIncapacitatedAsTank_Post(int pThis, DHookParam hParams)
+	{
+		TakeDamageInfo info = hParams.Get(1);
+		float vDamageForce[3];
+		float vDamagePos[3];
+		info.GetDamageForce(vDamageForce);
+		info.GetDamagePos(vDamagePos);
+
+		Call_StartForward(g_forward[Forward_OnIncapacitatedAsTank_Post].handle);
+		Call_PushCell(pThis);
+		Call_PushCell(info.attacker);
+		Call_PushCell(info.inflictor);
+		Call_PushCell(info.damage);
+		Call_PushCell(info.damageType);
+		Call_PushCell(info.weapon);
+		Call_PushArray(vDamageForce, sizeof(vDamageForce));
+		Call_PushArray(vDamagePos, sizeof(vDamagePos));
+		Call_PushCell(g_bHandled_OnIncapacitatedAsTank);
+		Call_Finish();
+
+		g_bHandled_OnIncapacitatedAsTank = false;
 		return MRES_Ignored;
 	}

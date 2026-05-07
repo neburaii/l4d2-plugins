@@ -36,6 +36,11 @@ None of the stocks in this file require anything from the main [hxlib.inc](./scr
 # Changelog
 this mostly focuses on core hxlib. hxstocks updates go mostly undocumented.
 
+### 1.11
+- added forwards:
+	- `OnIncapacitatedAsSurvivor` and `OnIncapacitatedAsSurvivor_Post`
+	- `OnIncapacitatedAsTank` and `OnIncapacitatedAsTank_Post`
+
 ### 1.10
 - added `GetHibernationState` native
 
