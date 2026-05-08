@@ -1,0 +1,162 @@
+"Cookies"
+{
+	"headshot_sound_si_gun"
+	{
+		"#name"
+		{
+			"en"	"Headshot Sound - SI - Guns"
+		}
+
+		"#desc"
+		{
+			"en"	"Filepath of sound file relative to sounds directory. This is the sound to play for non-lethal headshots against special infected targets using a gun. leave empty to disable headshot sounds in this context."
+		}
+
+		"default_convar"	"cookie_headshot_sound_si_gun"
+
+		"input"
+		{
+			"type"	"text"
+		}
+	}
+
+	"headshot_sound_si_gun_kill"
+	{
+		"#name"
+		{
+			"en"	"Headshot Sound - SI - Guns (lethal)"
+		}
+
+		"#desc"
+		{
+			"en"	"Filepath of sound file relative to sounds directory. This is the sound to play for lethal headshots against special infected targets using a gun. leave empty to disable headshot sounds in this context."
+		}
+
+		"default_convar"	"cookie_headshot_sound_si_gun_kill"
+
+		"input"
+		{
+			"type"	"text"
+		}
+	}
+
+	"headshot_sound_si_melee"
+	{
+		"#name"
+		{
+			"en"	"Headshot Sound - SI - Melee"
+		}
+
+		"#desc"
+		{
+			"en"	"Filepath of sound file relative to sounds directory. This is the sound to play for non-lethal headshots against special infected targets using a melee. leave empty to disable headshot sounds in this context."
+		}
+
+		"default_convar"	"cookie_headshot_sound_si_melee"
+
+		"input"
+		{
+			"type"	"text"
+		}
+	}
+
+	"headshot_sound_si_melee_kill"
+	{
+		"#name"
+		{
+			"en"	"Headshot Sound - SI - Melee (lethal)"
+		}
+
+		"#desc"
+		{
+			"en"	"Filepath of sound file relative to sounds directory. This is the sound to play for lethal headshots against special infected targets using a melee. leave empty to disable headshot sounds in this context."
+		}
+
+		"default_convar"	"cookie_headshot_sound_si_melee_kill"
+
+		"input"
+		{
+			"type"	"text"
+		}
+	}
+
+	"headshot_sound_ci_gun"
+	{
+		"#name"
+		{
+			"en"	"Headshot Sound - CI - Guns"
+		}
+
+		"#desc"
+		{
+			"en"	"Filepath of sound file relative to sounds directory. This is the sound to play for non-lethal headshots against common infected targets using a gun. leave empty to disable headshot sounds in this context."
+		}
+
+		"default_convar"	"cookie_headshot_sound_ci_gun"
+
+		"input"
+		{
+			"type"	"text"
+		}
+	}
+
+	"headshot_sound_ci_gun_kill"
+	{
+		"#name"
+		{
+			"en"	"Headshot Sound - CI - Guns (lethal)"
+		}
+
+		"#desc"
+		{
+			"en"	"Filepath of sound file relative to sounds directory. This is the sound to play for lethal headshots against common infected targets using a gun. leave empty to disable headshot sounds in this context."
+		}
+
+		"default_convar"	"cookie_headshot_sound_ci_gun_kill"
+
+		"input"
+		{
+			"type"	"text"
+		}
+	}
+
+	"headshot_sound_ci_melee"
+	{
+		"#name"
+		{
+			"en"	"Headshot Sound - CI - Melee"
+		}
+
+		"#desc"
+		{
+			"en"	"Filepath of sound file relative to sounds directory. This is the sound to play for non-lethal headshots against common infected targets using a melee. leave empty to disable headshot sounds in this context."
+		}
+
+		"default_convar"	"cookie_headshot_sound_ci_melee"
+
+		"input"
+		{
+			"type"	"text"
+		}
+	}
+
+	"headshot_sound_ci_melee_kill"
+	{
+		"#name"
+		{
+			"en"	"Headshot Sound - CI - Melee (lethal)"
+		}
+
+		"#desc"
+		{
+			"en"	"Filepath of sound file relative to sounds directory. This is the sound to play for lethal headshots against common infected targets using a melee. leave empty to disable headshot sounds in this context."
+		}
+
+		"default_convar"	"cookie_headshot_sound_ci_melee_kill"
+
+		"input"
+		{
+			"type"	"text"
+		}
+	}
+}
