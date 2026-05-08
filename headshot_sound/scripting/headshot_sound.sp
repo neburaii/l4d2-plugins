@@ -18,7 +18,7 @@ public Plugin myinfo =
 	name = "Headshot Feedback Sound",
 	author = "Neburai",
 	description = "audio feedback for hitting headshots on infected",
-	version = "1.0",
+	version = "1.0.1",
 	url = "https://github.com/neburaii/l4d2-plugins/tree/main/headshot_sound"
 };
 
@@ -126,6 +126,9 @@ public void OnPluginStart()
 			}
 		}
 	}
+
+	ReadCookieConVars();
+	AutoExecConfig(_, "headshot_sound");
 
 	if (g_bLateLoaded)
 	{
