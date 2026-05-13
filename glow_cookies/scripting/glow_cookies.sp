@@ -17,7 +17,7 @@ public Plugin myinfo =
 	name = "Glow Cookies",
 	author = "Neburai",
 	description = "let's clients enable/disable glows",
-	version = "1.0",
+	version = "1.0.1",
 	url = "https://github.com/neburaii/l4d2-plugins/tree/main/glow_cookies"
 };
 
@@ -116,8 +116,8 @@ public void OnPluginStart()
 
 	g_hConVar_GameModeBlacklist = CreateConVar(
 		"glow_cookies_gamemode_blacklist", "realism",
-		"comma separated base gamemodes to disable glow cookies in. in a blacklisted \
-		gamemode, the glow convar default values will always be replicated to clients.",
+		"comma separated base gamemodes to disable glow cookies in. in a blacklisted " ...
+		"gamemode, the glow convar default values will always be replicated to clients.",
 		FCVAR_NOTIFY);
 	g_hConVar_GameModeBlacklist.AddChangeHook(ConVarChanged_Blacklist);
 
@@ -126,8 +126,8 @@ public void OnPluginStart()
 
 	g_hCookie_EnableGlow = new GlowCookie(
 		COOKIE_ENABLE_GLOW,
-		"if the gamemode doesn't force item/survivor glows, then this cookie's value \
-		is used to toggle the glows.", CookieAccess_Public);
+		"if the gamemode doesn't force item/survivor glows, then this cookie's value " ...
+		"is used to toggle the glows.", CookieAccess_Public);
 
 	g_hConVar_EnableGlowDefault = CreateConVar(
 		CONVAR_ENABLE_GLOW, "1",

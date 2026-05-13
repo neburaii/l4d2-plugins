@@ -18,7 +18,7 @@ public Plugin myinfo =
 	name = "Players as Hosts",
 	author = "Neburai",
 	description = "tracks which player originally hosted/joined the lobby. It does nothing on its own. Other plugins may use its natives to provide special features for this player",
-	version = "1.1.1",
+	version = "1.1.2",
 	url = "https://github.com/neburaii/l4d2-plugins/tree/main/host_player"
 };
 
@@ -410,18 +410,18 @@ public void OnPluginStart()
 
 	g_hConVar_AnnounceHostChange = CreateConVar(
 		COOKIE_CONVAR, "1",
-		"default value for the " ... COOKIE ... " cookie. determines if changes \
-		to the lobby host should be announced to clients. \
-		0 = off | 1 = to affected only | 2 = to everyone",
+		"default value for the " ... COOKIE ... " cookie. determines if changes " ...
+		"to the lobby host should be announced to clients. " ...
+		"0 = off | 1 = to affected only | 2 = to everyone",
 		FCVAR_NOTIFY, true, float(ANNOUNCE_ENUM_MIN), true, float(ANNOUNCE_ENUM_MAX));
 
 	g_hConVar_AnnounceHostChange.AddChangeHook(ConVarChanged_Announce);
 	g_iAnnounceSettingDefault = g_hConVar_AnnounceHostChange.IntValue;
 
 	g_hCookie_AnnounceHostChange = new AnnounceCookie(
-		COOKIE, "how do you want to receive an announcement for when the lobby \
-		host changes? 0 = don't announce | 1 = only if my host status is changed | \
-		2 = always announce", CookieAccess_Public);
+		COOKIE, "how do you want to receive an announcement for when the lobby " ...
+		"host changes? 0 = don't announce | 1 = only if my host status is changed | " ...
+		"2 = always announce", CookieAccess_Public);
 
 	g_hForward_OnHostChanged = new GlobalForward(
 		"OnLobbyHostChanged", ET_Ignore, Param_Cell, Param_Cell);
@@ -432,8 +432,8 @@ public void OnPluginStart()
 	RegConsoleCmd("sm_host", Command_Host,
 		"Prints the name of the lobby host.");
 	RegConsoleCmd("sm_host_transfer", Command_TransferPriority,
-		"Exchange host priority with a player whose priority is \
-		lower than yours. Usage: /host_transfer <player name>");
+		"Exchange host priority with a player whose priority is " ...
+		"lower than yours. Usage: /host_transfer <player name>");
 
 	g_records = new HostRecords();
 

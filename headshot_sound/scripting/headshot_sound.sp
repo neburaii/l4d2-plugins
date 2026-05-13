@@ -18,7 +18,7 @@ public Plugin myinfo =
 	name = "Headshot Feedback Sound",
 	author = "Neburai",
 	description = "audio feedback for hitting headshots on infected",
-	version = "1.0.1",
+	version = "1.0.2",
 	url = "https://github.com/neburaii/l4d2-plugins/tree/main/headshot_sound"
 };
 
@@ -81,8 +81,8 @@ public void OnPluginStart()
 
 	g_hConVar_ReqRatio = CreateConVar(
 		"headshot_sound_required_ratio", "0.49",
-		"if multiple shots from for example a shotgun blast hits a target, \
-		at least this ratio of the shots must be headshots for the sound to trigger.",
+		"if multiple shots from for example a shotgun blast hits a target, " ...
+		"at least this ratio of the shots must be headshots for the sound to trigger.",
 		CVAR_FLAGS, true, 0.0, true, 1.0);
 	g_hConVar_ReqRatio.AddChangeHook(ConVarChanged_Ratio);
 	g_fReqRatio = g_hConVar_ReqRatio.FloatValue;

@@ -32,7 +32,7 @@ public Plugin myinfo =
 	name = "Vote Blocker",
 	author = "Neburai",
 	description = "block votes from being started based on who the issuer and target are",
-	version = "1.1",
+	version = "1.1.1",
 	url = "https://github.com/neburaii/l4d2-plugins/tree/main/vote_blocker"
 };
 
@@ -58,8 +58,8 @@ public void OnPluginStart()
 	{
 		FormatEx(sBuffer, sizeof(sBuffer), "vote_require_admin_%s", sIssues[i]);
 		g_hConVar_RequiredAdminFlags[i] = CreateConVar(
-			sBuffer, "", "a string of admin flags a user must have to call a vote of this type. \
-			empty string means anyone can call the vote",
+			sBuffer, "", "a string of admin flags a user must have to call a vote of this type. " ...
+			"empty string means anyone can call the vote",
 			FCVAR_NOTIFY);
 		g_hConVar_RequiredAdminFlags[i].AddChangeHook(ConVarChanged_Update);
 
@@ -72,8 +72,8 @@ public void OnPluginStart()
 		FCVAR_NOTIFY, true, 0.0, true, 1.0);
 	g_hConVar_KickImmunity.AddChangeHook(ConVarChanged_Update);
 
-	ReadConVars();
 	AutoExecConfig(_, "vote_blocker");
+	ReadConVars();
 
 	AddCommandListener(Listener_Callvote, "callvote");
 }

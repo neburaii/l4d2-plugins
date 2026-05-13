@@ -11,7 +11,7 @@ public Plugin myinfo =
 	name = "Ammo Command",
 	author = "Neburai",
 	description = "provides sm_ammo command to check reserve ammo usage",
-	version = "1.0",
+	version = "1.0.1",
 	url = "https://github.com/neburaii/l4d2-plugins/tree/main/ammo_command"
 };
 
@@ -20,8 +20,8 @@ public void OnPluginStart()
 	LoadTranslations("ammo_command.phrases");
 
 	RegConsoleCmd("sm_ammo", Command_Ammo,
-		"Return usage of your weapon's reserve ammo. no args for equipped, or \
-		the slot number (as they are on keyboard, 1 through 5)");
+		"Return usage of your weapon's reserve ammo. no args for equipped, or " ...
+		"the slot number (as they are on keyboard, 1 through 5)");
 }
 
 Action Command_Ammo(int iClient, int iArgs)

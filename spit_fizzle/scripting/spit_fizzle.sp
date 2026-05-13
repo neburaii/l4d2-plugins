@@ -23,13 +23,14 @@ public Plugin myinfo =
 	name = "Spit Fizzle",
 	author = "Neburai",
 	description = "If a spitter dies or staggers, her spit projectile will go poof and her spit puddles stop growing",
-	version = "2.2",
+	version = "2.2.1",
 	url = "https://github.com/neburaii/l4d2-plugins/tree/main/spit_fizzle"
 };
 
 public APLRes AskPluginLoad2(Handle hMyself, bool bLate, char[] sError, int iErrMax)
 {
 	g_bLateLoaded = bLate;
+	return APLRes_Success;
 }
 
 public void OnPluginStart()

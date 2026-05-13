@@ -12,7 +12,7 @@ public Plugin myinfo =
 	name = "Despawner",
 	author = "Neburai",
 	description = "despawn stuck infected",
-	version = "1.2",
+	version = "1.2.1",
 	url = "https://github.com/neburaii/l4d2-plugins/tree/main/strict_despawn"
 };
 
@@ -147,8 +147,8 @@ public void OnPluginStart()
 
 	g_hConVar_MaxStuckTime = CreateConVar(
 		"despawn_max_stuck_time", "10.0",
-		"time in seconds an infected must be stuck to be a candidate \
-		for being despawned. -1.0 to disable stuck despawns",
+		"time in seconds an infected must be stuck to be a candidate " ...
+		"for being despawned. -1.0 to disable stuck despawns",
 		CVAR_FLAGS, true, -1.0);
 	g_hConVar_MaxStuckTime.AddChangeHook(ConVarChanged_Update);
 

@@ -13,7 +13,7 @@ public Plugin myinfo =
 	name = "Max Clients Fixes",
 	author = "Neburai",
 	description = "fixes some issues that occur in full lobbies: players unable to join. survivor players disconnecting will delete the character they played as. survivors going idle will delete their character.",
-	version = "1.1",
+	version = "1.1.1",
 	url = "https://github.com/neburaii/l4d2-plugins/tree/main/full_lobby_fixes"
 };
 
@@ -39,9 +39,8 @@ public void OnPluginStart()
 {
 	g_hConVarMinDiscardRange = CreateConVar(
 		"full_lobby_fixes_min_discard_range", "800.0",
-		"if a player tries to join the server when there are no free client slots, attempt to \
-		free a slot by kicking an infected bot nobody will notice gone missing. any infected bots \
-		within this range from any survivor will not be a candidate for discard",
+		"if a player tries to join the server when there are no free client slots, attempt to " ...
+		"free a slot by kicking an infected bot beyond this range",
 		CVAR_FLAGS, true, 0.0);
 	g_hConVarMinDiscardRange.AddChangeHook(ConVarChanged_Update);
 

@@ -20,7 +20,7 @@ public Plugin myinfo =
 	name = "Ragdoll Options",
 	author = "Neburai",
 	description = "Per-client implementaion of ragdoll fades and commons disappearing instantly on death",
-	version = "1.2",
+	version = "1.2.1",
 	url = "https://github.com/neburaii/l4d2-plugins/tree/main/ragdoll_options"
 };
 
@@ -45,8 +45,8 @@ public void OnPluginStart()
 	g_ragdollFader.Init();
 
 	g_removeCommonRagdoll.Init(
-		COOKIE_CI_BEGONE, "toggle common infected disappearing instantly on death. \
-		1 for enabled, 0 for disabled", false);
+		COOKIE_CI_BEGONE, "toggle common infected disappearing instantly on death. " ...
+		"1 for enabled, 0 for disabled", false);
 
 	g_fadeEnabled.Init(
 		COOKIE_FADE, "toggle infected ragdolls fading on death", false);

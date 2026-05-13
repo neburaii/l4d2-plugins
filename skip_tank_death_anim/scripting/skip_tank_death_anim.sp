@@ -10,7 +10,7 @@ public Plugin myinfo =
 	name = "Skip Tank Death Animation",
 	author = "Neburai",
 	description = "replace the slow tank death animation with an instant ragdoll",
-	version = "1.0",
+	version = "1.0.1",
 	url = "https://github.com/neburaii/l4d2-plugins/tree/main/skip_tank_death_anim"
 };
 
@@ -21,8 +21,8 @@ public void OnPluginStart()
 {
 	g_hConVar_Enabled = CreateConVar(
 		"skip_tank_death_animation", "1",
-		"make tank die sooner by skipping its death animation. Has a gameplay \
-		side effect of preventing his collision from lingering after death",
+		"make tank die sooner by skipping its death animation. Has a gameplay " ...
+		"side effect of preventing his collision from lingering after death",
 		FCVAR_NOTIFY, true, 0.0, true, 1.0);
 	g_hConVar_Enabled.AddChangeHook(ConVarChanged_Update);
 

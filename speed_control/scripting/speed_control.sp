@@ -12,7 +12,7 @@ public Plugin myinfo =
 	name = "speed control",
 	author = "Neburai",
 	description = "adds new convars for previously hardcoded top speed values under various contexts",
-	version = "2.0",
+	version = "2.0.1",
 	url = "https://github.com/neburaii/l4d2-plugins/tree/main/speed_control"
 };
 
@@ -207,6 +207,7 @@ public void OnPluginStart()
 		}
 	}
 
+	AutoExecConfig(_, "speed_control");
 	ReadConVars();
 }
 

@@ -9,7 +9,7 @@ public Plugin myinfo =
 	name = "Fix Idle Scenario End",
 	author = "Neburai",
 	description = "prevent a scenario from ending if idle survivors remain",
-	version = "1.0",
+	version = "1.0.1",
 	url = "https://github.com/neburaii/l4d2-plugins/tree/main/fix_idle_scenario_end"
 };
 
@@ -30,9 +30,9 @@ public void OnPluginStart()
 {
 	g_hConVar_MaxIdleTime = CreateConVar(
 		"fix_idle_scenario_end_max_idle", "30.0",
-		"if a survivor player has been idle for less than this amount of seconds, \
-		then prevent them from causing a round to restart/fail. -1.0 to allow any \
-		amount of time, 0.0 to disable plugin.",
+		"if a survivor player has been idle for less than this amount of seconds, " ...
+		"then prevent them from causing a round to restart/fail. -1.0 to allow any " ...
+		"amount of time, 0.0 to disable plugin.",
 		FCVAR_NOTIFY, true, 0.0);
 	g_hConVar_MaxIdleTime.AddChangeHook(ConVarChanged_Update);
 	g_fMaxIdleTime = g_hConVar_MaxIdleTime.FloatValue;

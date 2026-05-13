@@ -20,7 +20,7 @@ public Plugin myinfo =
 	name = "View Punch Control",
 	author = "Neburai",
 	description = "Provides ConVars to modify view punch from many sources. view punch from weapon recoil uses a cookie as a toggle",
-	version = "3.0",
+	version = "3.0.1",
 	url = "https://github.com/neburaii/l4d2-plugins/tree/main/view_punch_control"
 };
 
@@ -241,9 +241,9 @@ public void OnPluginStart()
 
 	g_hConVar_RecoilCookieDefault = CreateConVar(
 		CONVAR_DEFAULT_RECOIL, "1",
-		"if view_punch_use_recoil_cookie is set to 1, this convar will behave \
-		as a default value for clients who don't have the cookie set. otherwise \
-		its value is enforced regardless of that cookie's value.",
+		"if view_punch_use_recoil_cookie is set to 1, this convar will behave " ...
+		"as a default value for clients who don't have the cookie set. otherwise " ...
+		"its value is enforced regardless of that cookie's value.",
 		CVAR_FLAGS, true, 0.0, true, 1.0);
 	g_hConVar_RecoilCookieDefault.AddChangeHook(ConVarChanged_CookieDefault);
 	g_bRecoilEnabledDefault = g_hConVar_RecoilCookieDefault.BoolValue;

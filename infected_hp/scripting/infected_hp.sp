@@ -16,7 +16,7 @@ public Plugin myinfo =
 	name = "Infected HP Bars",
 	author = "Neburai",
 	description = "Special infected health bars using center text HUD element.",
-	version = "2.2",
+	version = "2.2.1",
 	url = "https://github.com/neburaii/l4d2-plugins/tree/main/infected_hp"
 };
 
@@ -119,8 +119,8 @@ public void OnPluginStart()
 {
 	g_hConVar_DecayDelay = CreateConVar(
 		"infected_hp_recent_damage_decay_delay", "0.64",
-		"how long in seconds must a client not deal damage to a target for the recent \
-		damage ticks to start decaying away?",
+		"how long in seconds must a client not deal damage to a target for the recent " ...
+		"damage ticks to start decaying away?",
 		CVAR_FLAGS, true, 0.0);
 	g_hConVar_DecayDelay.AddChangeHook(ConVarChanged_General);
 
@@ -132,17 +132,16 @@ public void OnPluginStart()
 
 	g_hConVar_FrameInterval = CreateConVar(
 		"infected_hp_animation_frametime", "0.04", // 25fps
-		"if a health bar has an ongoing animated effect, how many seconds should we wait \
-		between frames?",
+		"if a health bar has an ongoing animated effect, how many seconds should we wait " ...
+		"between frames?",
 		CVAR_FLAGS, true, 0.0);
 	g_hConVar_FrameInterval.AddChangeHook(ConVarChanged_General);
 
 	g_hConVar_KillerFeedbackPattern = CreateConVar(
 		"infected_hp_pattern_killer_feedback", "0,0,0,1,0,1,0,1",
-		"pattern of character types to use when drawing HP bars when the bar's owner \
-		is the killer (and this killer feedback is enabled by the client). \
-		format it like \"n,n,n\". n is a number, either 0 (normal character), or 1 \
-		(\"shift\" character). this pattern repeats across the length of the bar.",
+		"a repeating pattern of character types to use when drawing HP bars when the bar's owner " ...
+		"is the killer (and this feedback is enabled by the client). format it like \"n,n,n\". " ...
+		"n is a number, either 0 (normal character), or 1 (\"shift\" character).",
 		CVAR_FLAGS);
 	g_hConVar_KillerFeedbackPattern.AddChangeHook(ConVarChanged_General);
 
@@ -160,15 +159,15 @@ public void OnPluginStart()
 
 	g_hConVar_BarLen[Target_Common] = CreateConVar(
 		"infected_hp_bar_len_common", "20",
-		"how many ticks to draw for health bars of the \"common\" (common infected) \
-		target type.",
+		"how many ticks to draw for health bars of the \"common\" (common infected) " ...
+		"target type.",
 		CVAR_FLAGS, true, 1.0, true, 171.0);
 	g_hConVar_BarLen[Target_Common].AddChangeHook(ConVarChanged_General);
 
 	g_hConVar_BarLen[Target_Special] = CreateConVar(
 		"infected_hp_bar_len_special", "40",
-		"how many ticks to draw for health bars of the \"special\" (all non-boss special \
-		infected) target type.",
+		"how many ticks to draw for health bars of the \"special\" (all non-boss special " ...
+		"infected) target type.",
 		CVAR_FLAGS, true, 1.0, true, 171.0);
 	g_hConVar_BarLen[Target_Special].AddChangeHook(ConVarChanged_General);
 
@@ -180,10 +179,9 @@ public void OnPluginStart()
 
 	g_hConVar_AnchorLineLen = CreateConVar(
 		"infected_hp_anchor_len", "50",
-		"to make on-screen position of the healthbars consistent, the plugin will draw a line of \
-		whitespaces. if this whitespace line is the longest line, all lines containing the bars will \
-		be aligned to the left most character of the whitespace line - or rather, the \"anchor\" \
-		line. this convar controls the amount of whitespace bytes to draw for this anchor line.",
+		"the longest center-text line has all other lines align with its left most character. " ...
+		"this convar controls the amount of whitespace bytes to draw for an \"anchor\" line. this" ...
+		"line is intended to be the longest, so that bar positions are fixed.",
 		CVAR_FLAGS, true, 0.0, true, 170.0);
 	g_hConVar_AnchorLineLen.AddChangeHook(ConVarChanged_General);
 
@@ -207,6 +205,7 @@ public void OnPluginStart()
 		"hp_celebrate_your_kills", "0",
 		"should healthbars of infected you kill animate with a special effect?");
 
+	AutoExecConfig(_, "infected_hp");
 	ReadGeneralConVars();
 	ReadCookieConVars();
 

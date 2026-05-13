@@ -11,7 +11,7 @@ public Plugin myinfo =
 	name = "Jockey Audio Feedback",
 	author = "Neburai",
 	description = "jockey plays a warning sound when he gets close to his target",
-	version = "1.1",
+	version = "1.1.1",
 	url = "https://github.com/neburaii/l4d2-plugins/tree/main/jockey_audio_feedback"
 };
 
@@ -88,11 +88,12 @@ public void OnPluginStart()
 
 	g_hConVar_IdleSoundLevel = CreateConVar(
 		"audio_feedback_jockey_idle_sound_level", "85",
-		"force idle voice sounds to be of this sound level in decibels. \
-		in vanilla: jockey 105, all other SI 85",
+		"force idle voice sounds to be of this sound level in decibels. " ...
+		"in vanilla: jockey 105, all other SI 85",
 		CVAR_FLAGS, true, 0.0, true, 180.0);
 	g_hConVar_IdleSoundLevel.AddChangeHook(ConVarChanged_Update);
 
+	AutoExecConfig(_, "jockey_audio_feedback");
 	ReadConVars();
 
 	AddNormalSoundHook(OnNormalSound);
