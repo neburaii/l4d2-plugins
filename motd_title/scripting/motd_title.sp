@@ -4,6 +4,8 @@
 #include <sourcemod>
 #include <hxstocks>
 
+#define MOTD_TITLE_LIBRARY	"motd_title"
+
 #define CVAR_FLAGS			FCVAR_NOTIFY
 #define MAX_MOTD_TITLE_LEN	192
 
@@ -12,7 +14,7 @@ public Plugin myinfo =
 	name = "MOTD Title",
 	author = "Neburai",
 	description = "Provides ConVar for modifying the \"Message of the day\" title",
-	version = "2.0",
+	version = "2.1",
 	url = "https://github.com/neburaii/l4d2-plugins/tree/main/motd_title"
 };
 
@@ -31,6 +33,12 @@ MOTDTitle	g_MOTDTitleType;
 char 		g_sMOTDTitle[MAX_MOTD_TITLE_LEN];
 
 bool		g_bSendNewMsg;
+
+public APLRes AskPluginLoad2(Handle hMyself, bool bLate, char[] sError, int iErrMax)
+{
+	RegPluginLibrary(MOTD_TITLE_LIBRARY);
+	return APLRes_Success;
+}
 
 public void OnPluginStart()
 {
@@ -148,6 +156,7 @@ enum struct MOTDBuffer
 
 				for (int p = 0; p < this.playersNum; p++)
 				{
+					DebugPrint("sending to %i", this.players[p]);
 					iSinglePlayer[0] = this.players[p];
 					FormatEx(sTranslatedTitle, sizeof(sTranslatedTitle), "%t", "#MOTD_Title", p);
 					this.SendUserMessage(iSinglePlayer, 1, sTranslatedTitle);
