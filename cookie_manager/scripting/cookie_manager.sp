@@ -12,7 +12,7 @@ public Plugin myinfo =
 	name = "Cookie Manager",
 	author = "Neburai",
 	description = "Cookie interface for clients. Cookies can be searched, names/descriptions translated, and accept several types of Panel-driven input",
-	version = "1.0.1",
+	version = "1.0.2",
 	url = "https://github.com/neburaii/l4d2-plugins/tree/main/cookie_manager"
 };
 
@@ -21,6 +21,8 @@ public Plugin myinfo =
 #define MAX_LANGUAGE_CODE_LENGTH	5
 
 #define INVALID_DIRECTORY			-1
+
+bool g_bPluginStarted;
 
 StringMap g_hMap_Cookies;
 StringMap g_hMap_CookiesInDirectory;
@@ -117,12 +119,16 @@ public void OnPluginStart()
 
 	g_hArray_Cookies = new ArrayList(sizeof(RegisteredCookie));
 	g_hArray_Directories = new ArrayList(sizeof(RegisteredDirectory));
+	g_bPluginStarted = true;
 }
 
 public void OnAllPluginsLoaded()
 {
 	ParseConfigs();
 	RegisterUndefinedCookies();
+
+	if (FindPluginByFile("clientprefs.smx") != null)
+		ThrowError("this plugin replaces clientprefs.smx!! menu likely won't work.");
 }
 
 public void OnMapStart()

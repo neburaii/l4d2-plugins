@@ -53,6 +53,12 @@ methodmap CookieChangedForwards < StringMap
 
 public void Native_HookCookieChange(Handle hPlugin, int iNumParams)
 {
+	if (!g_bPluginStarted)
+	{
+		ThrowNativeError(SP_ERROR_ABORTED, "cookie_manager isn't ready yet!");
+		return;
+	}
+
 	char sCookie[COOKIE_MAX_NAME_LENGTH];
 	GetNativeString(1, sCookie, sizeof(sCookie));
 	Function callback = (GetNativeFunction(2));
@@ -62,6 +68,12 @@ public void Native_HookCookieChange(Handle hPlugin, int iNumParams)
 
 public void Native_UnhookCookieChange(Handle hPlugin, int iNumParams)
 {
+	if (!g_bPluginStarted)
+	{
+		ThrowNativeError(SP_ERROR_ABORTED, "cookie_manager isn't ready yet!");
+		return;
+	}
+
 	char sCookie[COOKIE_MAX_NAME_LENGTH];
 	GetNativeString(1, sCookie, sizeof(sCookie));
 	Function callback = GetNativeFunction(2);
