@@ -17,7 +17,7 @@ public Plugin myinfo =
 	name = "Glow Cookies",
 	author = "Neburai",
 	description = "let's clients enable/disable glows",
-	version = "1.0.1",
+	version = "1.1",
 	url = "https://github.com/neburaii/l4d2-plugins/tree/main/glow_cookies"
 };
 
@@ -26,6 +26,7 @@ public Plugin myinfo =
 #endif
 
 bool		g_bLateLoaded;
+bool		g_bHXLibReady;
 
 ConVar		g_hConVar_DisableItemGlow;
 ConVar		g_hConVar_DisableSurvivorGlow;
@@ -138,7 +139,6 @@ public void OnPluginStart()
 
 	g_hMap_GamemodeBlacklist = new StringMap();
 	UpdateBlackList();
-	UpdateGameMode();
 
 	if (g_bLateLoaded)
 	{
@@ -151,34 +151,59 @@ public void OnPluginStart()
 				g_bCookieHooked = true;
 			}
 		#endif
+
+		if (LibraryExists(HXLIB_LIBRARY))
+			SetHXLibReady();
 	}
 }
 
-#if defined _cookie_manager_included_
-	public void OnAllPluginsLoaded()
-	{
+public void OnAllPluginsLoaded()
+{
+	#if defined _cookie_manager_included_
 		if (!g_bCookieHooked && LibraryExists(COOKIE_MANAGER_LIBRARY))
 		{
 			HookCookieChange(COOKIE_ENABLE_GLOW, OnCookieChanged);
 			g_bCookieHooked = true;
 		}
-	}
+	#endif
 
-	public void OnLibraryAdded(const char[] sName)
-	{
+	if (!g_bHXLibReady && LibraryExists(HXLIB_LIBRARY))
+		SetHXLibReady();
+}
+
+void SetHXLibReady()
+{
+	g_bHXLibReady = true;
+	UpdateGameMode();
+}
+
+public void OnLibraryAdded(const char[] sName)
+{
+	#if defined _cookie_manager_included_
 		if (!g_bCookieHooked && strcmp(sName, COOKIE_MANAGER_LIBRARY) == 0)
 		{
 			HookCookieChange(COOKIE_ENABLE_GLOW, OnCookieChanged);
 			g_bCookieHooked = true;
 		}
-	}
+	#endif
 
-	public void OnLibraryRemoved(const char[] sName)
-	{
-		if (strcmp(sName, COOKIE_MANAGER_LIBRARY) == 0)
+	if (!g_bHXLibReady && strcmp(sName, HXLIB_LIBRARY) == 0)
+		SetHXLibReady();
+}
+
+public void OnLibraryRemoved(const char[] sName)
+{
+	if (strcmp(sName, HXLIB_LIBRARY) == 0)
+		g_bHXLibReady = false;
+
+	#if defined _cookie_manager_included_
+		else if (strcmp(sName, COOKIE_MANAGER_LIBRARY) == 0)
 			g_bCookieHooked = false;
-	}
+	#endif
 
+}
+
+#if defined _cookie_manager_included_
 	void OnCookieChanged(const char[] sCookie, int iClient, const char[] sOldValue, const char[] sNewValue)
 	{
 		g_hCookie_EnableGlow.Update(iClient);
@@ -261,6 +286,8 @@ void UpdateBlackList()
 
 void UpdateGameMode()
 {
+	if (!g_bHXLibReady) return;
+
 	char sGameMode[32];
 	g_hConVar_GameMode.GetString(sGameMode, sizeof(sGameMode));
 	GetGameModeInfo(sGameMode).GetBase(sGameMode, sizeof(sGameMode));
