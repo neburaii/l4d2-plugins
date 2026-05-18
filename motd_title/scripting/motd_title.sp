@@ -14,7 +14,7 @@ public Plugin myinfo =
 	name = "MOTD Title",
 	author = "Neburai",
 	description = "Provides ConVar for modifying the \"Message of the day\" title",
-	version = "2.1",
+	version = "2.2",
 	url = "https://github.com/neburaii/l4d2-plugins/tree/main/motd_title"
 };
 
@@ -31,8 +31,6 @@ ConVar		g_hConVarMOTDTitle;
 
 MOTDTitle	g_MOTDTitleType;
 char 		g_sMOTDTitle[MAX_MOTD_TITLE_LEN];
-
-bool		g_bSendNewMsg;
 
 public APLRes AskPluginLoad2(Handle hMyself, bool bLate, char[] sError, int iErrMax)
 {
@@ -58,7 +56,7 @@ public void OnPluginStart()
 
 	LoadTranslations("motd_title.phrases");
 
-	HookUserMessage(GetUserMessageId("VGUIMenu"), MsgHook_VGUIMenu, true, MsgPostHook_VGUIMenu);
+	HookUserMessage(GetUserMessageId("VGUIMenu"), MsgHook_VGUIMenu, true);
 }
 
 /**********
@@ -85,6 +83,7 @@ enum struct MOTDBuffer
 {
 	int flags;
 	int players[MAXPLAYERS_L4D2];
+	int playersRef[MAXPLAYERS_L4D2];
 	int playersNum;
 
 	char buffer[256];
@@ -139,29 +138,31 @@ enum struct MOTDBuffer
 		for (int i = 0; i < iPlayersNum; i++)
 		{
 			this.players[i] = iPlayers[i];
+			this.playersRef[i] = EntIndexToEntRef(iPlayers[i]);
 		}
 	}
 
 	void Send()
 	{
-		switch (g_MOTDTitleType)
+		if (g_MOTDTitleType == MOTDTitle_Vanilla)
+			return;
+
+		static char sTranslatedTitle[MAX_MOTD_TITLE_LEN];
+		int iRecipient[1];
+
+		for (int p = 0; p < this.playersNum; p++)
 		{
-			case MOTDTitle_ConVar:
-				this.SendUserMessage(this.players, this.playersNum, g_sMOTDTitle);
+			if (EntIndexToEntRef(this.players[p]) != this.playersRef[p])
+				continue;
 
-			case MOTDTitle_Translation:
+			iRecipient[0] = this.players[p];
+
+			if (g_MOTDTitleType == MOTDTitle_Translation)
 			{
-				static char sTranslatedTitle[MAX_MOTD_TITLE_LEN];
-				int iSinglePlayer[1];
-
-				for (int p = 0; p < this.playersNum; p++)
-				{
-					DebugPrint("sending to %i", this.players[p]);
-					iSinglePlayer[0] = this.players[p];
-					FormatEx(sTranslatedTitle, sizeof(sTranslatedTitle), "%t", "#MOTD_Title", p);
-					this.SendUserMessage(iSinglePlayer, 1, sTranslatedTitle);
-				}
+				FormatEx(sTranslatedTitle, sizeof(sTranslatedTitle), "%T", "#MOTD_Title", this.players[p]);
+				this.SendUserMessage(iRecipient, 1, sTranslatedTitle);
 			}
+			else this.SendUserMessage(iRecipient, 1, g_sMOTDTitle);
 		}
 	}
 
@@ -213,15 +214,12 @@ Action MsgHook_VGUIMenu(UserMsg msg_id, BfRead hBuffer, const int[] iPlayers, in
 		return Plugin_Continue;
 
 	g_motd.Record(hBuffer, iPlayers, iPlayersNum, bReliable, bInit, sLine);
-	g_bSendNewMsg = true;
+	RequestFrame(SendNewMsg);
 
 	return Plugin_Handled;
 }
 
-void MsgPostHook_VGUIMenu(UserMsg msg_id, bool bSent)
+void SendNewMsg()
 {
-	if (!g_bSendNewMsg) return;
-	g_bSendNewMsg = false;
-
 	g_motd.Send();
 }

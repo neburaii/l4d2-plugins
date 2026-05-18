@@ -14,13 +14,20 @@ there's a convar called `motd_title_type`. its value determines where the plugin
 edit the convar values and translation file to your liking
 
 # Changelog
-## v2.0
+### 2.2
+- fixed error when motd is shown by ShowVGUIPanel native (which fixes broken compat with basetriggers.smx)
+- fixed broken code for translation motd_title_type
+
+### 2.1
+- added plugin library
+
+### 2.0
 - rewritten with new method. uses usermessage hook to intercept, reformat, and resend the user message responsible for triggering the panel on the client
 - new option to read title from a sourcemod translation file
 - less prone to bugs and more compatible with other plugins.
 
-## v1.1
+### 1.1
 - fixes bug where motd auto-opened when it shouldn't have
 
-## v1.0
+### 1.0
 - original release
