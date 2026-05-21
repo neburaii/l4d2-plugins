@@ -408,7 +408,7 @@ stock int GetFirstHuman()
 {
 	for (int i = 1; i <= MaxClients; i++)
 	{
-		if (!IsClientConnected(i)) continue;
+		if (!IsClientInGame(i)) continue;
 		if (IsFakeClient(i)) continue;
 
 		return i;
@@ -516,7 +516,7 @@ stock int GetClosestPlayer(const float pos[3], float &distance, int team = Team_
 
 	for (int i = 1; i <= MaxClients; i++)
 	{
-		if (!IsClientConnected(i)) continue;
+		if (!IsClientInGame(i)) continue;
 		if (team != Team_Unassigned && GetClientTeam(i) != team) continue;
 		if (team > 1 && !IsPlayerAlive(i)) continue;
 

@@ -132,7 +132,7 @@ bool Util_AreSurvivorsInBattlefieldOrFinale()
 
 	for (int i = 1; i <= MaxClients; i++)
 	{
-		if (!IsClientConnected(i)
+		if (!IsClientInGame(i)
 			|| GetClientTeam(i) != Team_Survivor
 			|| IsFakeClient(i)	// FakeClient check exists internally too
 			|| !IsPlayerAlive(i)) continue;
