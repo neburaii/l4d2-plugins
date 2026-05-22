@@ -704,6 +704,7 @@ stock AmmoType GetAmmoType(int weapon)
 	return view_as<AmmoType>(GetEntProp(weapon, Prop_Send, "m_iPrimaryAmmoType"));
 }
 
+/** is CBaseCombatWeapon entity */
 stock bool IsWeapon(int entity)
 {
 	return HasEntProp(entity, Prop_Send, "m_iPrimaryAmmoType");
@@ -811,4 +812,10 @@ stock bool IsSurvivorBot(int client)
 stock int GetIdlePlayer(int bot)
 {
 	return GetClientOfUserId(GetEntProp(bot, Prop_Send, "m_humanSpectatorUserID"));
+}
+
+/** CBasePlayer */
+stock bool IsOnGround(int client)
+{
+	return IsValidEntity(GetEntPropEnt(client, Prop_Send, "m_hGroundEntity"));
 }

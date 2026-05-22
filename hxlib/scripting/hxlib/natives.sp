@@ -227,6 +227,9 @@ void RegisterNatives()
 	CreateNative("GetReservationCookie", Native_GetReservationCookie);
 	CreateNative("GetGameModeInfo", Native_GetGameModeInfo);
 	CreateNative("GetHibernationState", Native_GetHibernationState);
+	CreateNative("GetZoomLevel", Native_GetZoomLevel);
+	CreateNative("SetFOV", Native_SetFOV);
+	CreateNative("EmitGameSoundFromEntity", Native_EmitGameSoundFromEntity);
 }
 
 /******************
@@ -1268,6 +1271,34 @@ public any Native_GetServerOS(Handle hPlugin, int iNumParams)
 	{
 		return LoadFromAddress(g_pServer + view_as<Address>(
 			g_iOffset_Server_HibernationStatus), NumberType_Int8);
+	}
+
+	public any Native_GetZoomLevel(Handle hPlugin, int iNumParams)
+	{
+		int iWeapon = GetNativeCell(1);
+		return SDKCall(g_hSDK_GetZoomLevel, iWeapon);
+	}
+
+	public any Native_SetFOV(Handle hPlugin, int iNumParams)
+	{
+		int iClient = GetNativeCell(1);
+		int iTargetFOV = GetNativeCell(2);
+		float fDuration = GetNativeCell(3);
+		int iStartFOV = GetNativeCell(4);
+		int iOwner = GetNativeCell(5);
+
+		if (!iOwner) iOwner = iClient;
+		return SDKCall(g_hSDK_SetFOV, iClient, iOwner, iTargetFOV, fDuration, iStartFOV);
+	}
+
+	public void Native_EmitGameSoundFromEntity(Handle hPlugin, int iNumParams)
+	{
+		int iEntity = GetNativeCell(1);
+		int iLen = GetNativeStringLengthFull(2);
+		char[] sSound = new char[iLen];
+		GetNativeString(2, sSound, iLen);
+
+		SDKCall(g_hSDK_EmitGameSoundFromEntity, iEntity, sSound, 0, 0);
 	}
 
 /** InternalKeyValues methodmap */

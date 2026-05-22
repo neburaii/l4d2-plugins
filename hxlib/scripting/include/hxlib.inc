@@ -1398,6 +1398,23 @@ forward Action OnIncapacitatedAsTank(int client, int &attacker, int &inflictor, 
  */
 forward void OnIncapacitatedAsTank_Post(int client, int attacker, int inflictor, float damage, int damageType, int weapon, const float damageForce[3], const float damagePos[3], bool handled);
 
+/**
+ * called just before a CTerrorGun is told to toggle its zoom state
+ *
+ * @param weapon		entity index of weapon
+ *
+ * @return				Plugin_Continue to take no action, Plugin_Handled to skip
+ */
+forward Action OnCycleZoom(int weapon);
+
+/**
+ * called after a CTerrorGun is told to toggle its zoom state
+ *
+ * @param weapon		entity index of weapon
+ * @param handled		true of OnCycleZoom returned Plugin_Handled
+ */
+forward void OnCycleZoom_Post(int weapon, bool handled);
+
 /***********
  * Natives
  ***********/
@@ -2493,6 +2510,38 @@ native GameModeInfo GetGameModeInfo(const char[] gamemode = NULL_STRING);
  * @return				true if hibernating, false if not.
  */
 native bool GetHibernationState();
+
+/**
+ * get the FOV this gun should zoom to
+ *
+ * @param weapon		entity index of weapon
+ *
+ * @return				FOV as int
+ */
+native int GetZoomLevel(int weapon);
+
+/**
+ * set FOV with a smoothing transtion for a client
+ *
+ * @param client		client index of player to affect
+ * @param targetFOV		smooth to this value. set to 0 for default
+ * @param duration		duration for smoothing transition
+ * @param startFOV		smooth from this value. 0 for current
+ * @param owner			zoom owner entity. 0 to use this client (most common)
+ *
+ * @return				true if success, false if failure
+ */
+native bool SetFOV(int client, int targetFOV = 0, float duration = 0.0, int startFOV = 0, int owner = 0);
+
+/**
+ * emit a game sound from an entity.
+ * this will automatically emit a sound to the right recipient list with the
+ * sound's attenuation in mind.
+ *
+ * @param entity		emit from this entity
+ * @param sound			game sound (script entry name)
+ */
+native void EmitGameSoundFromEntity(int entity, const char[] sound);
 
 /**************
  * Methodmaps
@@ -3991,5 +4040,8 @@ public SharedPlugin __pl_hxlib =
 		MarkNativeAsOptional("GetReservationCookie");
 		MarkNativeAsOptional("GetGameModeInfo");
 		MarkNativeAsOptional("GetHibernationState");
+		MarkNativeAsOptional("GetZoomLevel");
+		MarkNativeAsOptional("SetFOV");
+		MarkNativeAsOptional("EmitGameSoundFromEntity");
 	}
 #endif

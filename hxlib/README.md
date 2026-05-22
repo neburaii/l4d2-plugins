@@ -36,6 +36,13 @@ None of the stocks in this file require anything from the main [hxlib.inc](./scr
 # Changelog
 this mostly focuses on core hxlib. hxstocks updates go mostly undocumented.
 
+### 1.12
+- added forwards `OnCycleZoom` and `OnCycleZoom_Post`
+- added natives:
+	- `GetZoomLevel`
+	- `SetFOV`
+	- `EmitGameSoundFromEntity`
+
 ### 1.11
 - added forwards:
 	- `OnIncapacitatedAsSurvivor` and `OnIncapacitatedAsSurvivor_Post`

@@ -34,6 +34,7 @@ enum
 	Forward_OnCreateSurvivorDeathModel,			Forward_OnCreateSurvivorDeathModel_Post,
 	Forward_OnIncapacitatedAsSurvivor,			Forward_OnIncapacitatedAsSurvivor_Post,
 	Forward_OnIncapacitatedAsTank,				Forward_OnIncapacitatedAsTank_Post,
+	Forward_OnCycleZoom,						Forward_OnCycleZoom_Post,
 
 	Forward_MAX
 };
@@ -323,6 +324,15 @@ GlobalForward InitGlobalForward(int forwardIndex, char name[MAX_FWD_LEN])
 		case Forward_OnIncapacitatedAsTank_Post:
 		{	name = "OnIncapacitatedAsTank_Post"; return CreateGlobalForward(name,
 				ET_Ignore, Param_Cell, Param_Cell, Param_Cell, Param_Cell, Param_Cell, Param_Cell, Param_Array, Param_Array, Param_Cell);
+		}
+
+		case Forward_OnCycleZoom:
+		{	name = "OnCycleZoom"; return CreateGlobalForward(name,
+				ET_Event, Param_Cell);
+		}
+		case Forward_OnCycleZoom_Post:
+		{	name = "OnCycleZoom_Post"; return CreateGlobalForward(name,
+				ET_Ignore, Param_Cell, Param_Cell);
 		}
 	}
 

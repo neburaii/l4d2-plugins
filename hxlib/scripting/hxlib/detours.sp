@@ -126,6 +126,10 @@ void InitDetours()
 	CreateDetour("HX::CTerrorPlayer::OnIncapacitatedAsTank",
 		Detour_OnIncapacitatedAsTank_Pre, Detour_OnIncapacitatedAsTank_Post,
 		{Forward_OnIncapacitatedAsTank, Forward_OnIncapacitatedAsTank_Post, -1});
+
+	CreateDetour("HX::CTerrorGun::CycleZoom",
+		Detour_CycleZoom_Pre, Detour_CycleZoom_Post,
+		{Forward_OnCycleZoom, Forward_OnCycleZoom_Post, -1});
 }
 
 /************
@@ -1647,5 +1651,35 @@ void InitDetours()
 		Call_Finish();
 
 		g_bHandled_OnIncapacitatedAsTank = false;
+		return MRES_Ignored;
+	}
+
+/** OnCycleZoom */
+	static bool g_bHandled_CycleZoom;
+
+	MRESReturn Detour_CycleZoom_Pre(int pThis)
+	{
+		Call_StartForward(g_forward[Forward_OnCycleZoom].handle);
+		Call_PushCell(pThis);
+		Action result = Plugin_Continue;
+		Call_Finish(result);
+
+		if (result == Plugin_Handled)
+		{
+			g_bHandled_CycleZoom = true;
+			return MRES_Supercede;
+		}
+
+		return MRES_Ignored;
+	}
+
+	MRESReturn Detour_CycleZoom_Post(int pThis)
+	{
+		Call_StartForward(g_forward[Forward_OnCycleZoom_Post].handle);
+		Call_PushCell(pThis);
+		Call_PushCell(g_bHandled_CycleZoom);
+		Call_Finish();
+
+		g_bHandled_CycleZoom = false;
 		return MRES_Ignored;
 	}

@@ -79,6 +79,9 @@ Handle g_hSDK_KeyValues_CreateKey;
 Handle g_hSDK_KeyValues_RemoveSubKey;
 Handle g_hSDK_KeyValues_SaveToFile;
 Handle g_hSDK_GetGameModeInfo;
+Handle g_hSDK_GetZoomLevel;
+Handle g_hSDK_SetFOV;
+Handle g_hSDK_EmitGameSoundFromEntity;
 
 void InitSDKCalls()
 {
@@ -473,6 +476,26 @@ void InitSDKCalls()
 	prep.Param(SDKType_String, SDKPass_Pointer);
 	prep.Return(SDKType_PlainOldData, SDKPass_Plain);
 	prep.End(g_hSDK_GetGameModeInfo);
+
+	/** Native_GetZoomLevel */
+	prep.Start(SDKCall_Entity, SDKConf_Virtual, "GetZoomLevel");
+	prep.Return(SDKType_PlainOldData, SDKPass_Plain);
+	prep.End(g_hSDK_GetZoomLevel);
+
+	/** Native_SetFOV */
+	prep.Start(SDKCall_Player, SDKConf_Signature, "CBasePlayer::SetFOV");
+	prep.Param(SDKType_CBaseEntity, SDKPass_Pointer);
+	prep.Param(SDKType_PlainOldData, SDKPass_Plain);
+	prep.Param(SDKType_Float, SDKPass_Plain);
+	prep.Param(SDKType_PlainOldData, SDKPass_Plain);
+	prep.End(g_hSDK_SetFOV);
+
+	/** Native_EmitGameSoundFromEntity */
+	prep.Start(SDKCall_Entity, SDKConf_Signature, "CBaseEntity::EmitSound_Game");
+	prep.Param(SDKType_String, SDKPass_Pointer);
+	prep.Param(SDKType_PlainOldData, SDKPass_Plain);
+	prep.Param(SDKType_PlainOldData, SDKPass_Plain);
+	prep.End(g_hSDK_EmitGameSoundFromEntity);
 
 	/** Native_SpawnSpecial */
 	prep.Start(SDKCall_Raw, SDKConf_Signature, "ZombieManager::SpawnSpecial");
