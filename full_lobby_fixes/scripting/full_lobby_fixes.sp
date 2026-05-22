@@ -13,7 +13,7 @@ public Plugin myinfo =
 	name = "Max Clients Fixes",
 	author = "Neburai",
 	description = "fixes some issues that occur in full lobbies: players unable to join. survivor players disconnecting will delete the character they played as. survivors going idle will delete their character.",
-	version = "1.1.1",
+	version = "1.1.2",
 	url = "https://github.com/neburaii/l4d2-plugins/tree/main/full_lobby_fixes"
 };
 
@@ -68,6 +68,9 @@ void ReadConVars()
 enum struct RecordedWeapon
 {
 	WeaponID weaponid;
+	AmmoType ammoType;
+	bool terrorWeapon;
+	bool terrorGun;
 
 	int ammoMagazine;
 	int ammoReserve;
@@ -79,6 +82,74 @@ enum struct RecordedWeapon
 	bool equipped;
 
 	char melee[80];
+
+	void Record(int iWeapon, int iCurrentWeapon)
+	{
+		this.weaponid = Weapon_None;
+		if (iWeapon == -1) return;
+
+		this.weaponid = GetWeaponID(iWeapon);
+
+		if (this.weaponid == Weapon_Melee)
+		{
+			GetMeleeWeaponName(iWeapon, this.melee, sizeof(this.melee));
+			return;
+		}
+
+		this.ammoMagazine = GetMagazineAmmo(iWeapon);
+		this.ammoType = GetAmmoType(iWeapon);
+
+		if (this.ammoType != Ammo_Null)
+			this.ammoReserve = GetReserveAmmo(iWeapon);
+
+		this.terrorWeapon = IsTerrorWeapon(iWeapon);
+		if (this.terrorWeapon)
+			this.ammoUpgraded = GetUpgradedAmmo(iWeapon);
+
+		this.terrorGun = IsTerrorGun(iWeapon);
+		if (this.terrorGun)
+		{
+			this.dualWielded = IsDualWielding(iWeapon);
+			this.upgrades = GetWeaponUpgrades(iWeapon);
+		}
+
+		this.equipped = iCurrentWeapon == iWeapon;
+	}
+
+	bool Restore(int iClient)
+	{
+		if (this.weaponid == Weapon_None)
+			return false;
+
+		int iWeapon;
+
+		if (this.weaponid == Weapon_Melee)
+		{
+			iWeapon = GivePlayerItem(iClient, this.melee);
+			if (iWeapon == -1) return false;
+			return this.equipped;
+		}
+
+		iWeapon = GivePlayerItem(iClient, g_sWeapon[this.weaponid]);
+		if (iWeapon == -1) return false;
+
+		SetMagazineAmmo(iWeapon, this.ammoMagazine);
+
+		if (this.ammoType != Ammo_Null)
+			SetReserveAmmo(iWeapon, this.ammoReserve);
+
+		if (this.terrorWeapon)
+			SetUpgradedAmmo(iWeapon, this.ammoUpgraded);
+
+		if (this.terrorGun)
+		{
+			if (this.dualWielded)
+				GivePlayerItem(iClient, g_sWeapon[this.weaponid]);
+			SetWeaponUpgrades(iWeapon, this.upgrades);
+		}
+
+		return this.equipped;
+	}
 }
 
 enum struct RecordedSurvivor
@@ -119,31 +190,8 @@ enum struct RecordedSurvivor
 			this.restoreSecondaryWeapon = EntIndexToEntRef(this.restoreSecondaryWeapon);
 
 		int iCurrentWeapon = GetCurrentWeapon(g_iDisconnectingPlayer);
-		int iWeapon;
-
 		for (int i = 0; i < WeaponSlot_MAX; i++)
-		{
-			this.weapons[i].weaponid = Weapon_None;
-
-			iWeapon = GetPlayerWeaponSlot(g_iDisconnectingPlayer, i);
-			if (iWeapon == -1) continue;
-
-			this.weapons[i].weaponid = GetWeaponID(iWeapon);
-			if (this.weapons[i].weaponid == Weapon_Melee)
-			{
-				GetMeleeWeaponName(iWeapon, this.weapons[i].melee, sizeof(this.weapons[i].melee));
-			}
-			else
-			{
-				this.weapons[i].ammoMagazine = GetMagazineAmmo(iWeapon);
-				this.weapons[i].ammoReserve = GetReserveAmmo(iWeapon);
-				this.weapons[i].ammoUpgraded = L4D2_GetWeaponUpgradeAmmoCount(iWeapon);
-				this.weapons[i].dualWielded = IsDualWielding(iWeapon);
-				this.weapons[i].upgrades = L4D2_GetWeaponUpgrades(iWeapon);
-			}
-
-			this.weapons[i].equipped = iCurrentWeapon == iWeapon;
-		}
+			this.weapons[i].Record(GetPlayerWeaponSlot(g_iDisconnectingPlayer, i), iCurrentWeapon);
 
 		if (this.alive)
 		{
@@ -194,28 +242,8 @@ enum struct RecordedSurvivor
 		/** restore weapon loadout */
 		for (int i = 0; i < WeaponSlot_MAX; i++)
 		{
-			if (this.weapons[i].weaponid == Weapon_None)
-				continue;
-
-			if (this.weapons[i].weaponid == Weapon_Melee)
-			{
-				iWeapon = GivePlayerItem(iClient, this.weapons[i].melee);
-				if (iWeapon == -1) continue;
-			}
-			else
-			{
-				iWeapon = GivePlayerItem(iClient, g_sWeapon[this.weapons[i].weaponid]);
-				if (iWeapon == -1) continue;
-				if (this.weapons[i].dualWielded)
-					GivePlayerItem(iClient, g_sWeapon[this.weapons[i].weaponid]);
-
-				SetMagazineAmmo(iWeapon, this.weapons[i].ammoMagazine);
-				SetReserveAmmo(iWeapon, this.weapons[i].ammoReserve);
-				L4D2_SetWeaponUpgradeAmmoCount(iWeapon, this.weapons[i].ammoUpgraded);
-				L4D2_SetWeaponUpgrades(iWeapon, this.weapons[i].upgrades);
-			}
-
-			if (this.weapons[i].equipped) iEquipSlot = i;
+			if (this.weapons[i].Restore(iClient))
+				iEquipSlot = i;
 		}
 
 		if (iEquipSlot != -1)

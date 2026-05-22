@@ -31,6 +31,7 @@ enum
 
 enum AmmoType
 {
+	Ammo_Null = -1,
 	Ammo_None = 0,
 
 	Ammo_Pistol,
@@ -652,6 +653,35 @@ stock int GetMeleeWeaponName(int weapon, char[] buffer, int bufferLen)
 stock bool IsTerrorGun(int weapon)
 {
 	return HasEntProp(weapon, Prop_Send, "m_isDualWielding");
+}
+
+stock bool IsTerrorWeapon(int weapon)
+{
+	return HasEntProp(weapon, Prop_Send, "m_nUpgradedPrimaryAmmoLoaded");
+}
+
+/** must be CTerrorWeapon */
+stock int GetUpgradedAmmo(int weapon)
+{
+	return GetEntProp(weapon, Prop_Send, "m_nUpgradedPrimaryAmmoLoaded");
+}
+
+/** must be CTerrorWeapon */
+stock void SetUpgradedAmmo(int weapon, int ammo)
+{
+	SetEntProp(weapon, Prop_Send, "m_nUpgradedPrimaryAmmoLoaded", ammo);
+}
+
+/** must be CTerrorGun */
+stock int GetWeaponUpgrades(int weapon)
+{
+	return GetEntProp(weapon, Prop_Send, "m_upgradeBitVec");
+}
+
+/** must be CTerrorGun */
+stock void SetWeaponUpgrades(int weapon, int upgrades)
+{
+	SetEntProp(weapon, Prop_Send, "m_upgradeBitVec", upgrades);
 }
 
 /**
