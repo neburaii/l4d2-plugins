@@ -21,7 +21,7 @@ public Plugin myinfo =
 	name = "Panels Hide HUD",
 	author = "Neburai",
 	description = "Optional via cookie. Opened panels like the admin menu, etc, will hide HUD elements likely to overlap",
-	version = "1.0",
+	version = "1.0.1",
 	url = "https://github.com/neburaii/l4d2-plugins/tree/main/panels_hide_hud"
 };
 
@@ -30,7 +30,6 @@ bool g_bLateLoaded;
 int g_iTerrorPlayerManagerRef = INVALID_ENT_REFERENCE;
 UserMessageRecord g_PZDamageUserMessageRecord;
 bool g_bResendPZDamageUserMessage;
-bool g_bPluginBroadcastingPZDamageMessageEvent;
 
 Cookie g_hCookie_ShouldHideHud[2];
 ConVar g_hConVar_ShouldHideHudDefault[2];
@@ -304,11 +303,6 @@ Action HideTeamHealthHud(const int iEntity, const char[] cPropName, int &iValue,
 /** red text */
 Action Event_OnPZDamageMessage(Event hEvent, const char[] sName, bool bDontBroadcast)
 {
-	if (g_bPluginBroadcastingPZDamageMessageEvent)
-		return Plugin_Continue;
-
-	g_bPluginBroadcastingPZDamageMessageEvent = true;
-
 	for (int i = 1; i <= MaxClients; i++)
 	{
 		if (!IsClientInGame(i)) continue;
@@ -318,8 +312,8 @@ Action Event_OnPZDamageMessage(Event hEvent, const char[] sName, bool bDontBroad
 		hEvent.FireToClient(i);
 	}
 
-	g_bPluginBroadcastingPZDamageMessageEvent = false;
-	return Plugin_Handled;
+	hEvent.BroadcastDisabled = true;
+	return Plugin_Continue;
 }
 
 /** white text */
