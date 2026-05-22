@@ -16,7 +16,7 @@ public Plugin myinfo =
 	name = "Infected HP Bars",
 	author = "Neburai",
 	description = "Special infected health bars using center text HUD element.",
-	version = "2.2.1",
+	version = "2.2.2",
 	url = "https://github.com/neburaii/l4d2-plugins/tree/main/infected_hp"
 };
 
@@ -54,6 +54,7 @@ enum PatternType
 };
 
 bool g_bLateLoaded;
+bool g_bPluginStarted;
 #if defined _cookie_manager_included_
 	bool g_bCookiesHooked;
 #endif
@@ -231,24 +232,71 @@ public void OnPluginStart()
 	if (g_bLateLoaded)
 	{
 		UpdateCookiesAll();
+		StartPlugin();
 
-		for (int i = 1; i <= MaxClients; i++)
-		{
-			if (!IsClientInGame(i)) continue;
-			if (IsFakeClient(i)) continue;
+		#if defined _cookie_manager_included_
+			if (LibraryExists(COOKIE_MANAGER_LIBRARY))
+				HookCookies();
+		#endif
+	}
+}
 
-			AddEntityHook(i, EntityHook_SetObserverTarget, EHook_Post, OnSetObserverTarget_Post);
-		}
+public void OnAllPluginsLoaded()
+{
+	if (!g_bPluginStarted)
+		StartPlugin();
 
-		char sClass[16];
-		for (int i = 1; i <= MAXEDICTS; i++)
-		{
-			if (!IsValidEdict(i)) continue;
-			GetEntityClassname(i, sClass, sizeof(sClass));
+	#if defined _cookie_manager_included_
+		if (!g_bCookiesHooked && LibraryExists(COOKIE_MANAGER_LIBRARY))
+			HookCookies();
+	#endif
+}
 
-			if (g_hMap_TargetClasses.ContainsKey(sClass))
-				HookTarget(i);
-		}
+public void OnLibraryAdded(const char[] sName)
+{
+	if (!g_bPluginStarted && strcmp(sName, HXLIB_LIBRARY) == 0)
+		StartPlugin();
+
+	#if defined _cookie_manager_included_
+		if (!g_bCookiesHooked && strcmp(sName, COOKIE_MANAGER_LIBRARY) == 0)
+			HookCookies();
+	#endif
+}
+
+public void OnLibraryRemoved(const char[] sName)
+{
+	if (strcmp(sName, HXLIB_LIBRARY) == 0)
+		g_bPluginStarted = false;
+
+	#if defined _cookie_manager_included_
+		else if (strcmp(sName, COOKIE_MANAGER_LIBRARY) == 0)
+			g_bCookiesHooked = false;
+	#endif
+}
+
+void StartPlugin()
+{
+	if (!LibraryExists(HXLIB_LIBRARY))
+		return;
+
+	g_bPluginStarted = true;
+
+	for (int i = 1; i <= MaxClients; i++)
+	{
+		if (!IsClientInGame(i)) continue;
+		if (IsFakeClient(i)) continue;
+
+		AddEntityHook(i, EntityHook_SetObserverTarget, EHook_Post, OnSetObserverTarget_Post);
+	}
+
+	char sClass[16];
+	for (int i = 1; i <= MAXEDICTS; i++)
+	{
+		if (!IsValidEdict(i)) continue;
+		GetEntityClassname(i, sClass, sizeof(sClass));
+
+		if (g_hMap_TargetClasses.ContainsKey(sClass))
+			HookTarget(i);
 	}
 }
 
@@ -339,18 +387,6 @@ void ReadCookieConVars()
  *********/
 
 #if defined _cookie_manager_included_
-	public void OnLibraryAdded(const char[] sName)
-	{
-		if (strcmp(sName, COOKIE_MANAGER_LIBRARY) == 0)
-			HookCookies();
-	}
-
-	public void OnLibraryRemoved(const char[] sName)
-	{
-		if (g_bCookiesHooked && strcmp(sName, COOKIE_MANAGER_LIBRARY) == 0)
-			g_bCookiesHooked = false;
-	}
-
 	void HookCookies()
 	{
 		g_bCookiesHooked = true;
