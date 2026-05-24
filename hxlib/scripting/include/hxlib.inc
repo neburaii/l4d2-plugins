@@ -2533,16 +2533,6 @@ native int GetZoomLevel(int weapon);
  */
 native bool SetFOV(int client, int targetFOV = 0, float duration = 0.0, int startFOV = 0, int owner = 0);
 
-/**
- * emit a game sound from an entity.
- * this will automatically emit a sound to the right recipient list with the
- * sound's attenuation in mind.
- *
- * @param entity		emit from this entity
- * @param sound			game sound (script entry name)
- */
-native void EmitGameSoundFromEntity(int entity, const char[] sound);
-
 /**************
  * Methodmaps
  *************/
@@ -4042,6 +4032,5 @@ public SharedPlugin __pl_hxlib =
 		MarkNativeAsOptional("GetHibernationState");
 		MarkNativeAsOptional("GetZoomLevel");
 		MarkNativeAsOptional("SetFOV");
-		MarkNativeAsOptional("EmitGameSoundFromEntity");
 	}
 #endif

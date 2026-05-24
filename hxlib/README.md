@@ -41,7 +41,6 @@ this mostly focuses on core hxlib. hxstocks updates go mostly undocumented.
 - added natives:
 	- `GetZoomLevel`
 	- `SetFOV`
-	- `EmitGameSoundFromEntity`
 
 ### 1.11
 - added forwards:

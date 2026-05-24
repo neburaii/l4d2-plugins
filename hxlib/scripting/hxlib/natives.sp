@@ -229,7 +229,6 @@ void RegisterNatives()
 	CreateNative("GetHibernationState", Native_GetHibernationState);
 	CreateNative("GetZoomLevel", Native_GetZoomLevel);
 	CreateNative("SetFOV", Native_SetFOV);
-	CreateNative("EmitGameSoundFromEntity", Native_EmitGameSoundFromEntity);
 }
 
 /******************
@@ -1289,16 +1288,6 @@ public any Native_GetServerOS(Handle hPlugin, int iNumParams)
 
 		if (!iOwner) iOwner = iClient;
 		return SDKCall(g_hSDK_SetFOV, iClient, iOwner, iTargetFOV, fDuration, iStartFOV);
-	}
-
-	public void Native_EmitGameSoundFromEntity(Handle hPlugin, int iNumParams)
-	{
-		int iEntity = GetNativeCell(1);
-		int iLen = GetNativeStringLengthFull(2);
-		char[] sSound = new char[iLen];
-		GetNativeString(2, sSound, iLen);
-
-		SDKCall(g_hSDK_EmitGameSoundFromEntity, iEntity, sSound, 0, 0);
 	}
 
 /** InternalKeyValues methodmap */

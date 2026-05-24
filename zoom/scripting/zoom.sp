@@ -2,6 +2,7 @@
 #pragma semicolon 1
 
 #include <sourcemod>
+#include <sdktools>
 #include <hxlib>
 
 #define CVAR_FLAGS	FCVAR_NOTIFY
@@ -11,7 +12,7 @@ public Plugin myinfo =
 	name = "Zoom Fix",
 	author = "Neburai",
 	description = "fixes zoom issues with high tickrate, along with exposing new convars to configure zoom",
-	version = "1.0",
+	version = "1.1",
 	url = "https://github.com/neburaii/l4d2-plugins/tree/main/zoom"
 };
 
@@ -75,7 +76,7 @@ void CustomCycleZoom(int iWeapon)
 		SetFOV(iClient, iZoomLevel, g_fZoomDuration);
 	}
 
-	EmitGameSoundFromEntity(iWeapon, "Default.Zoom");
+	EmitAttenuationFilteredGameSound(iWeapon, "Default.Zoom");
 
 	Event hEvent = CreateEvent("weapon_zoom", true);
 	hEvent.SetInt("userid", GetClientUserId(iClient));
@@ -95,4 +96,38 @@ bool ShouldUnZoom(int iClient)
 			|| IsJockeyed(iClient)
 			|| IsPlayerIncapacitated(iClient)
 			|| IsReloading(iClient);
+}
+
+void EmitAttenuationFilteredGameSound(int iEntity, const char[] sGameSound)
+{
+	int iChannel;
+	int iLevel;
+	float fVolume;
+	int iPitch;
+	static char sSample[PLATFORM_MAX_PATH];
+
+	GetGameSoundParams(sGameSound,
+		iChannel,
+		iLevel,
+		fVolume,
+		iPitch,
+		sSample,
+		sizeof(sSample));
+
+	int[] iRecipients = new int[MaxClients];
+	int total;
+
+	for (int i = 1; i <= MaxClients; i++)
+	{
+		if (!IsClientInGame(i))
+			continue;
+
+		iRecipients[total++] = i;
+	}
+
+	float vSource[3];
+	GetEntityAbsOrigin(iEntity, vSource);
+	FilterClientsByAttenuation(iRecipients, total, vSource, iLevel);
+
+	EmitSound(iRecipients, total, sSample, iEntity, iChannel, iLevel, _, fVolume, iPitch);
 }

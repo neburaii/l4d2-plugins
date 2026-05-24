@@ -18,5 +18,8 @@ they are what the name implies. the duration for the transition between zoom sta
 - [hxlib](../hxlib/README.md)
 
 # Changelog
+### 1.1
+- fix scope sound not playing (vanilla bug)
+
 ### 1.0
 - initial release
