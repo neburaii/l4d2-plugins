@@ -7,6 +7,7 @@
 #pragma semicolon 1
 
 #define CONVAR_MAX_NAME_LENGTH	256
+#define SOUND_NORMAL_CLIP_DIST	1000.0
 
 enum
 {
@@ -818,4 +819,53 @@ stock int GetIdlePlayer(int bot)
 stock bool IsOnGround(int client)
 {
 	return IsValidEntity(GetEntPropEnt(client, Prop_Send, "m_hGroundEntity"));
+}
+
+stock int FilterClientsByAttenuation(int[] clients, int &numClients, const float source[3], int level)
+{
+	float attn = 20.0 / (float(level) - 50.0);
+	float maxAudible = (2 * SOUND_NORMAL_CLIP_DIST) / attn;
+
+	float listenerPos[3];
+	float distance;
+	int i = 0;
+	int ret = 0;
+
+	while (i < numClients)
+	{
+		if (IsClientObserver(clients[i]))
+		{
+			i++;
+			continue;
+		}
+
+		GetClientEyePosition(clients[i], listenerPos);
+		distance = GetVectorDistance(source, listenerPos);
+
+		if (distance <= maxAudible)
+		{
+			i++;
+			continue;
+		}
+
+		for (int j = i; j < numClients; j++)
+			clients[j] = clients[j + 1];
+
+		numClients--;
+		ret++;
+	}
+
+	return ret;
+}
+
+stock bool IsAudible(int client, const float source[3], int level)
+{
+	float attn = 20.0 / (float(level) - 50.0);
+	float maxAudible = (2 * SOUND_NORMAL_CLIP_DIST) / attn;
+
+	float listenerPos[3];
+	GetClientEyePosition(client, listenerPos);
+
+	float distance = GetVectorDistance(source, listenerPos);
+	return distance <= maxAudible;
 }

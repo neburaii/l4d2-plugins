@@ -1,0 +1,52 @@
+"Cookies"
+{
+	"jockey_warning_sound"
+	{
+		"#name"
+		{
+			"en"	"Play Restored Jockey Warning Sound"
+		}
+
+		"#desc"
+		{
+			"en"	"Under what context should you hear a restored cut-sound for the jockey warning players?"
+		}
+
+		"default_convar"	"cookie_jockey_warning_sound"
+
+		"input"
+		{
+			"type"	"multiple_choice"
+
+			"1"
+			{
+				"#name"
+				{
+					"en"	"Never"
+				}
+
+				"value"	"0"
+			}
+
+			"2"
+			{
+				"#name"
+				{
+					"en"	"Only if I'm his target"
+				}
+
+				"value"	"1"
+			}
+
+			"3"
+			{
+				"#name"
+				{
+					"en"	"Always"
+				}
+
+				"value"	"2"
+			}
+		}
+	}
+}
