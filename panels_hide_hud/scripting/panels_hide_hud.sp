@@ -3,6 +3,7 @@
 
 #include <sourcemod>
 #include <sdktools>
+#include <sdkhooks>
 #include <clientprefs>
 #include <sendproxy>
 #include <hxstocks>
@@ -10,10 +11,7 @@
 #undef REQUIRE_PLUGIN
 #include <cookie_manager>
 
-#define CONVAR_NAME_SURVIVOR	"cookie_panels_hide_hud_survivor"
 #define COOKIE_NAME_SURVIVOR	"panels_hide_hud_survivor"
-
-#define CONVAR_NAME_INFECTED	"cookie_panels_hide_hud_infected"
 #define COOKIE_NAME_INFECTED	"panels_hide_hud_infected"
 
 public Plugin myinfo =
@@ -21,25 +19,64 @@ public Plugin myinfo =
 	name = "Panels Hide HUD",
 	author = "Neburai",
 	description = "Optional via cookie. Opened panels like the admin menu, etc, will hide HUD elements likely to overlap",
-	version = "1.0.1",
+	version = "1.1",
 	url = "https://github.com/neburaii/l4d2-plugins/tree/main/panels_hide_hud"
 };
 
 bool g_bLateLoaded;
-
-int g_iTerrorPlayerManagerRef = INVALID_ENT_REFERENCE;
-UserMessageRecord g_PZDamageUserMessageRecord;
-bool g_bResendPZDamageUserMessage;
-
-Cookie g_hCookie_ShouldHideHud[2];
-ConVar g_hConVar_ShouldHideHudDefault[2];
-
-bool g_bShouldHideHudDefault[2];
-bool g_bShouldHideHud[MAXPLAYERS_L4D2+1][2];
-
 #if defined _cookie_manager_included_
 	bool g_bCookiesHooked;
 #endif
+
+UserMessageRecord g_PZDamageUserMessageRecord;
+bool g_bResendPZDamageUserMessage;
+
+CookieEx g_hideSurvivor;
+CookieEx g_hideInfected;
+
+enum struct CookieEx
+{
+	ConVar defaultConVar;
+	bool defaultValue;
+
+	Cookie cookie;
+	bool value[MAXPLAYERS_L4D2 + 1];
+
+	void Init(const char[] sName, bool bDefault, const char[] sDesc)
+	{
+		this.cookie = new Cookie(sName, sDesc, CookieAccess_Public);
+
+		char sCName[40];
+		char sCDesc[330];
+		FormatEx(sCName, sizeof(sCName), "cookie_%s", sName);
+		FormatEx(sCDesc, sizeof(sCDesc), "default value for \"%s\" cookie. desc:\n\"%s\"", sName, sDesc);
+
+		this.defaultConVar = CreateConVar(sCName, bDefault ? "1" : "0", sCDesc, FCVAR_NOTIFY, true, 0.0, true, 1.0);
+		this.defaultConVar.AddChangeHook(ConVarChanged_Cookie);
+	}
+
+	void UpdateDefault()
+	{
+		this.defaultValue = this.defaultConVar.BoolValue;
+	}
+
+	void Update(int iClient)
+	{
+		if (AreClientCookiesCached(iClient))
+		{
+			static char sValue[2];
+			this.cookie.Get(iClient, sValue, sizeof(sValue));
+
+			switch (sValue[0])
+			{
+				case '1': this.value[iClient] = true;
+				case '0': this.value[iClient] = false;
+				default: this.value[iClient] = this.defaultValue;
+			}
+		}
+		else this.value[iClient] = this.defaultValue;
+	}
+}
 
 enum struct UserMessageRecord
 {
@@ -98,27 +135,15 @@ public APLRes AskPluginLoad2(Handle hMyself, bool bLate, char[] sError, int iErr
 
 public void OnPluginStart()
 {
-	g_hConVar_ShouldHideHudDefault[Team_Survivor - 2] = CreateConVar(
-		CONVAR_NAME_SURVIVOR, "1",
-		"set the default value for the " ...  COOKIE_NAME_SURVIVOR ... " cookie. 1 or 0",
-		FCVAR_NOTIFY, true, 0.0, true, 1.0);
-	g_hConVar_ShouldHideHudDefault[Team_Survivor - 2].AddChangeHook(ConVarChanged_Update);
+	g_hideSurvivor.Init(
+		COOKIE_NAME_SURVIVOR, true,
+		"survivor team only. when a panel opens, should we hide commonly overlapped HUD elements? 1 (hide) or 0 (don't hide)");
 
-	g_hConVar_ShouldHideHudDefault[Team_Infected - 2] = CreateConVar(
-		CONVAR_NAME_INFECTED, "0",
-		"set the default value for the " ... COOKIE_NAME_INFECTED ... " cookie. 1 or 0",
-		FCVAR_NOTIFY, true, 0.0, true, 1.0);
-	g_hConVar_ShouldHideHudDefault[Team_Infected - 2].AddChangeHook(ConVarChanged_Update);
+	g_hideInfected.Init(
+		COOKIE_NAME_INFECTED, false,
+		"infected team only. when a panel opens, should we hide commonly overlapped HUD elements? 1 (hide) or 0 (don't hide)");
 
-	ReadConVars();
-
-	g_hCookie_ShouldHideHud[Team_Survivor - 2] = new Cookie(COOKIE_NAME_SURVIVOR,
-		"survivor team only. when a panel opens, should we hide commonly overlapped HUD elements? 1 (hide) or 0 (don't hide)",
-		CookieAccess_Public);
-
-	g_hCookie_ShouldHideHud[Team_Infected - 2] = new Cookie(COOKIE_NAME_INFECTED,
-		"infected team only. when a panel opens, should we hide commonly overlapped HUD elements? 1 (hide) or 0 (don't hide)",
-		CookieAccess_Public);
+	UpdateCookieDefaults();
 
 	HookEvent("player_death", Event_OnPZDamageMessage, EventHookMode_Pre);
 	HookEvent("defibrillator_used", Event_OnPZDamageMessage, EventHookMode_Pre);
@@ -128,48 +153,21 @@ public void OnPluginStart()
 
 	HookUserMessage(GetUserMessageId("PZDmgMsg"), MsgHook_OnPZDamageMessage, true, MsgHookPost_OnPZDamageMessage);
 
-	if (!g_bLateLoaded) return;
-
-	for (int i = 1; i <= MaxClients; i++)
+	if (g_bLateLoaded)
 	{
-		if (!IsClientConnected(i)) continue;
+		UpdateAllCookies();
 
-		if (AreClientCookiesCached(i))
-		{
-			ReadCookies(i);
-			continue;
-		}
+		int iEnt = FindEntityByClassname(-1, "terror_player_manager");
+		if (iEnt != -1) HookTerrorPlayerManager(iEnt);
 
-		ReadDefaults(i);
+		#if defined _cookie_manager_included_
+			if (LibraryExists(COOKIE_MANAGER_LIBRARY))
+				HookCookies();
+		#endif
 	}
-
-	int iTerrorPlayerManager = GetTerrorPlayerManager();
-	if (iTerrorPlayerManager != INVALID_ENT_REFERENCE)
-	{
-		for (int i = 1; i <= MaxClients; i++)
-		{
-			if (!IsClientInGame(i)) continue;
-			SendProxy_HookArrayProp(iTerrorPlayerManager, "m_iTeam", i, Prop_Int, HideTeamHealthHud);
-
-			if (!IsFakeClient(i))
-				ReadCookies(i);
-		}
-	}
-
-	#if defined _cookie_manager_included_
-		if (LibraryExists(COOKIE_MANAGER_LIBRARY))
-			HookCookies();
-	#endif
 }
 
 #if defined _cookie_manager_included_
-	void HookCookies()
-	{
-		HookCookieChange(COOKIE_NAME_SURVIVOR, OnCookieChanged);
-		HookCookieChange(COOKIE_NAME_INFECTED, OnCookieChanged);
-		g_bCookiesHooked = true;
-	}
-
 	public void OnAllPluginsLoaded()
 	{
 		if (!g_bCookiesHooked && LibraryExists(COOKIE_MANAGER_LIBRARY))
@@ -184,88 +182,82 @@ public void OnPluginStart()
 
 	public void OnLibraryRemoved(const char[] sName)
 	{
-		if (g_bCookiesHooked && strcmp(sName, COOKIE_MANAGER_LIBRARY) == 0)
+		if (strcmp(sName, COOKIE_MANAGER_LIBRARY) == 0)
 			g_bCookiesHooked = false;
+	}
+
+	void HookCookies()
+	{
+		HookCookieChange(COOKIE_NAME_SURVIVOR, OnCookieChanged);
+		HookCookieChange(COOKIE_NAME_INFECTED, OnCookieChanged);
+		g_bCookiesHooked = true;
 	}
 
 	public void OnCookieChanged(const char[] sCookie, int iClient, const char[] sOldValue, const char[] sNewValue)
 	{
-		ReadCookies(iClient);
+		UpdateCookies(iClient);
 	}
 #endif
 
-public void OnClientConnected(int iClient)
-{
-	ReadDefaults(iClient);
-}
-
 public void OnClientPutInServer(int iClient)
 {
-	int iTerrorPlayerManager = GetTerrorPlayerManager();
-	if (iTerrorPlayerManager != INVALID_ENT_REFERENCE)
-		SendProxy_HookArrayProp(iTerrorPlayerManager, "m_iTeam", iClient, Prop_Int, HideTeamHealthHud);
-}
-
-void ConVarChanged_Update(ConVar hConVar, const char[] sOldValue, const char[] sNewValue)
-{
-	ReadConVars();
-}
-
-void ReadConVars()
-{
-	for (int i = 0; i < 2; i++)
-		g_bShouldHideHudDefault[i] = g_hConVar_ShouldHideHudDefault[i].BoolValue;
+	UpdateCookies(iClient);
 }
 
 public void OnClientCookiesCached(int iClient)
 {
-	ReadCookies(iClient);
+	UpdateCookies(iClient);
 }
 
-void ReadDefaults(int iClient)
+void ConVarChanged_Cookie(ConVar hConVar, const char[] sOldValue, const char[] sNewValue)
 {
-	for (int i = 0; i < 2; i++)
-		g_bShouldHideHud[iClient][i] = g_bShouldHideHudDefault[i];
+	UpdateCookieDefaults();
+	UpdateAllCookies();
 }
 
-void ReadCookies(int iClient)
+void UpdateCookieDefaults()
 {
-	for (int i = 0; i < 2; i++)
-		g_bShouldHideHud[iClient][i] = !!g_hCookie_ShouldHideHud[i].GetInt(iClient, g_bShouldHideHudDefault[i]);
+	g_hideSurvivor.UpdateDefault();
+	g_hideInfected.UpdateDefault();
 }
 
-/*******
- * util
- *******/
-
-int GetTerrorPlayerManager()
+void UpdateAllCookies()
 {
-	int iEnt = EntRefToEntIndex(g_iTerrorPlayerManagerRef);
-	if (iEnt != INVALID_ENT_REFERENCE)
-		return iEnt;
-
-	iEnt = FindEntityByClassname(-1, "terror_player_manager");
-
-	if (iEnt != -1)
+	for (int i = 1; i <= MaxClients; i++)
 	{
-		g_iTerrorPlayerManagerRef = EntIndexToEntRef(iEnt);
-		return iEnt;
-	}
+		if (!IsClientInGame(i)
+			|| IsFakeClient(i))
+			continue;
 
-	return INVALID_ENT_REFERENCE;
+		UpdateCookies(i);
+	}
 }
 
-bool ShouldHideHud(int iClient, int iTeam)
+void UpdateCookies(int iClient)
 {
-	iTeam -= 2;
-	if (iTeam < 0 || iTeam >= 2) return false;
-
-	return g_bShouldHideHud[iClient][iTeam] && GetClientMenu(iClient) != MenuSource_None;
+	g_hideSurvivor.Update(iClient);
+	g_hideInfected.Update(iClient);
 }
 
 /*****************
  * hide hud hooks
  ****************/
+
+public void OnEntityCreated(int iEntity, const char[] sClass)
+{
+	if (strcmp(sClass, "terror_player_manager") == 0)
+		RequestFrame(HookTerrorPlayerManager, EntIndexToEntRef(iEntity));
+}
+
+void HookTerrorPlayerManager(int iEntRef)
+{
+	int iEntity = EntRefToEntIndex(iEntRef);
+	if (iEntity == INVALID_ENT_REFERENCE)
+		return;
+
+	for (int i = 1; i <= MAXPLAYERS_L4D2; i++)
+		SendProxy_HookEntity(iEntity, "m_iTeam", Prop_Int, HideTeamHealthHud, i);
+}
 
 /** health.
  * note on versus:
@@ -285,6 +277,7 @@ bool ShouldHideHud(int iClient, int iTeam)
 Action HideTeamHealthHud(const int iEntity, const char[] cPropName, int &iValue, const int iElement, const int iClient)
 {
 	if ((iValue == Team_Survivor || iValue == Team_Infected)
+		&& IsValidClient(iElement)
 		&& iValue == GetClientTeam(iClient)
 		&& ShouldHideHud(iClient, iValue))
 	{
@@ -345,4 +338,23 @@ void MsgHookPost_OnPZDamageMessage(UserMsg msg_id, bool sent)
 		g_bResendPZDamageUserMessage = false;
 		g_PZDamageUserMessageRecord.Send();
 	}
+}
+
+/********
+ * check
+ *******/
+bool ShouldHideHud(int iClient, int iTeam)
+{
+	if (GetClientMenu(iClient) == MenuSource_None)
+		return false;
+
+	switch (iTeam)
+	{
+		case Team_Survivor:
+			return g_hideSurvivor.value[iClient];
+		case Team_Infected:
+			return g_hideInfected.value[iClient];
+	}
+
+	return false;
 }
