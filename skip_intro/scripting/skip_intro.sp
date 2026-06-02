@@ -5,6 +5,7 @@
 #include <sdkhooks>		// OnEntityCreated
 #include <sdktools>		// FindEntityByClassname
 #include <hxlib>		// AcceptInput hooks
+#include <left4dhooks>
 
 #define WHITELIST_FILE	"data/skip_intro_whitelist.txt"
 #define CVAR_FLAGS		FCVAR_NOTIFY
@@ -14,13 +15,14 @@ public Plugin myinfo =
 	name = "Skip Intro Cutscenes",
 	author = "Neburai",
 	description = "reliably skips intro cutscenes for all maps not in a whitelist",
-	version = "1.3",
+	version = "1.4",
 	url = "https://github.com/neburaii/l4d2-plugins/tree/main/skip_intro"
 };
 
 bool	g_bMapAllowIntro;
 bool	g_bInIntro;
 bool	g_bIntroSequenceStripped;
+bool	g_bHumanJoined;
 
 bool	g_bLateLoaded;
 bool	g_bHookingEnabled;
@@ -57,6 +59,7 @@ public void OnPluginStart()
 	ReadConVars();
 
 	HookEvent("round_start_pre_entity", Event_RoundStartPreEntity);
+	HookEvent("player_team", Event_PlayerTeam);
 
 	if (g_bLateLoaded)
 	{
@@ -174,7 +177,24 @@ public void OnMapStart()
 void Event_RoundStartPreEntity(Event hEvent, const char[] sName, bool bDontBroadcast)
 {
 	g_bIntroSequenceStripped = false;
+	g_bHumanJoined = false;
 	g_bInIntro = true;
+}
+
+void Event_PlayerTeam(Event hEvent, const char[] sName, bool bDontBroadcast)
+{
+	if (g_bHumanJoined)
+		return;
+
+	int iClient = GetClientOfUserId(hEvent.GetInt("userid"));
+	if (!IsValidClient(iClient) || IsFakeClient(iClient))
+		return;
+
+	int iTeam = hEvent.GetInt("team");
+	if (iTeam != Team_Survivor)
+		return;
+
+	g_bHumanJoined = true;
 	SetEndIntroDelay(g_fDelayFailsafe);
 }
 
@@ -253,7 +273,7 @@ public Action OnAcceptInput_EnvFade(int iReceiver, char[] sInput, int &iActivato
 
 bool CanSkipIntro()
 {
-	return g_bInIntro && !g_bMapAllowIntro;
+	return (g_bInIntro || !L4D_HasAnySurvivorLeftSafeArea()) && !g_bMapAllowIntro;
 }
 
 void SetEndIntroDelay(float fDelay)

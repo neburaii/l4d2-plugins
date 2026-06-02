@@ -9,6 +9,9 @@ skips intro cutscenes reliably for all maps (not just first maps of campaign)
 if you want an intro scene on a particular map to play, edit `sourcemod/data/skip_intro_whitelist.txt`. add map names there, each on a separate line
 
 # Changelog
+### 1.4
+- improve failsafe
+
 ### 1.3
 - detect intro ends via FinishIntro info_director input, or a failsafe timer since round start
 
