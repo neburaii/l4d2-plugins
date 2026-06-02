@@ -6,6 +6,8 @@
 #pragma newdecls required
 #pragma semicolon 1
 
+#include <sdktools>
+
 #define CONVAR_MAX_NAME_LENGTH	256
 #define SOUND_NORMAL_CLIP_DIST	1000.0
 
