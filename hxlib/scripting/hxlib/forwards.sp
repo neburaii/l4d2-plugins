@@ -35,6 +35,7 @@ enum
 	Forward_OnIncapacitatedAsSurvivor,			Forward_OnIncapacitatedAsSurvivor_Post,
 	Forward_OnIncapacitatedAsTank,				Forward_OnIncapacitatedAsTank_Post,
 	Forward_OnCycleZoom,						Forward_OnCycleZoom_Post,
+	Forward_OnSetReserveAmmo,					Forward_OnSetReserveAmmo_Post,
 
 	Forward_MAX
 };
@@ -334,6 +335,15 @@ GlobalForward InitGlobalForward(int forwardIndex, char name[MAX_FWD_LEN])
 		{	name = "OnCycleZoom_Post"; return CreateGlobalForward(name,
 				ET_Ignore, Param_Cell, Param_Cell);
 		}
+
+		case Forward_OnSetReserveAmmo:
+		{	name = "OnSetReserveAmmo"; return CreateGlobalForward(name,
+				ET_Event, Param_Cell, Param_CellByRef, Param_CellByRef);
+		}
+		case Forward_OnSetReserveAmmo_Post:
+		{	name = "OnSetReserveAmmo_Post"; return CreateGlobalForward(name,
+				ET_Ignore, Param_Cell, Param_Cell, Param_Cell, Param_Cell);
+		}
 	}
 
 	return null;
@@ -380,6 +390,24 @@ PrivateForward InitPrivateForward(EntityHook type, HookMode mode)
 		{
 			case Hook_Pre: return CreateForward(
 				ET_Event, Param_Cell, Param_CellByRef);
+
+			case Hook_Post: return CreateForward(
+				ET_Ignore, Param_Cell, Param_Cell, Param_Cell, Param_Cell);
+		}
+
+		case EntityHook_FinishReload: switch (mode)
+		{
+			case Hook_Pre: return CreateForward(
+				ET_Event, Param_Cell);
+
+			case Hook_Post: return CreateForward(
+				ET_Ignore, Param_Cell, Param_Cell);
+		}
+
+		case EntityHook_RemoveAmmo: switch (mode)
+		{
+			case Hook_Pre: return CreateForward(
+				ET_Event, Param_Cell, Param_CellByRef, Param_CellByRef);
 
 			case Hook_Post: return CreateForward(
 				ET_Ignore, Param_Cell, Param_Cell, Param_Cell, Param_Cell);

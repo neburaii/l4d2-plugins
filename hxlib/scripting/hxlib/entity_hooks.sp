@@ -17,6 +17,12 @@ void InitEntityHooks()
 
 	CreateEntityHook(EntityHook_SetObserverTarget,
 		"HX::SetObserverTarget", DHook_SetObserverTarget_Pre, DHook_SetObserverTarget_Post);
+
+	CreateEntityHook(EntityHook_FinishReload,
+		"HX::FinishReload", DHook_FinishReload_Pre, DHook_FinishReload_Post);
+
+	CreateEntityHook(EntityHook_RemoveAmmo,
+		"HX::RemoveAmmo", DHook_RemoveAmmo_Pre, DHook_RemoveAmmo_Post);
 }
 
 /************
@@ -316,5 +322,82 @@ void InitEntityHooks()
 		Call_Finish();
 
 		g_bHandled_SetObserverTarget = false;
+		return MRES_Ignored;
+	}
+
+/** EntityHook_FinishReload */
+	static bool g_bHandled_FinishReload;
+
+	MRESReturn DHook_FinishReload_Pre(int pThis, DHookParam hParams)
+	{
+		Call_StartForward_EntityHook(pThis, EntityHook_FinishReload, Hook_Pre);
+		Call_PushCell(pThis);
+		Action result = Plugin_Continue;
+		Call_Finish(result);
+
+		if (result == Plugin_Handled)
+		{
+			g_bHandled_FinishReload = true;
+			return MRES_Supercede;
+		}
+
+		return MRES_Ignored;
+	}
+
+	MRESReturn DHook_FinishReload_Post(int pThis, DHookParam hParams)
+	{
+		Call_StartForward_EntityHook(pThis, EntityHook_FinishReload, Hook_Post);
+		Call_PushCell(pThis);
+		Call_PushCell(g_bHandled_FinishReload);
+		Call_Finish();
+
+		g_bHandled_FinishReload = false;
+		return MRES_Ignored;
+	}
+
+/** EntityHook_RemoveAmmo */
+	static bool g_bHandled_RemoveAmmo;
+
+	MRESReturn DHook_RemoveAmmo_Pre(int pThis, DHookParam hParams)
+	{
+		int iAmount = hParams.Get(1);
+		AmmoType ammoType = hParams.Get(2);
+
+		Call_StartForward_EntityHook(pThis, EntityHook_RemoveAmmo, Hook_Pre);
+		Call_PushCell(pThis);
+		Call_PushCellRef(iAmount);
+		Call_PushCellRef(ammoType);
+		Action result = Plugin_Continue;
+		Call_Finish(result);
+
+		if (result == Plugin_Handled)
+		{
+			g_bHandled_RemoveAmmo = true;
+			return MRES_Supercede;
+		}
+
+		if (result == Plugin_Changed)
+		{
+			hParams.Set(1, iAmount);
+			hParams.Set(2, ammoType);
+			return MRES_ChangedHandled;
+		}
+
+		return MRES_Ignored;
+	}
+
+	MRESReturn DHook_RemoveAmmo_Post(int pThis, DHookParam hParams)
+	{
+		int iAmount = hParams.Get(1);
+		AmmoType ammoType = hParams.Get(2);
+
+		Call_StartForward_EntityHook(pThis, EntityHook_RemoveAmmo, Hook_Post);
+		Call_PushCell(pThis);
+		Call_PushCell(iAmount);
+		Call_PushCell(ammoType);
+		Call_PushCell(g_bHandled_RemoveAmmo);
+		Call_Finish();
+
+		g_bHandled_RemoveAmmo = false;
 		return MRES_Ignored;
 	}

@@ -81,6 +81,7 @@ Handle g_hSDK_KeyValues_SaveToFile;
 Handle g_hSDK_GetGameModeInfo;
 Handle g_hSDK_GetZoomLevel;
 Handle g_hSDK_SetFOV;
+Handle g_hSDK_CanCarryInfiniteAmmo;
 
 void InitSDKCalls()
 {
@@ -488,6 +489,12 @@ void InitSDKCalls()
 	prep.Param(SDKType_Float, SDKPass_Plain);
 	prep.Param(SDKType_PlainOldData, SDKPass_Plain);
 	prep.End(g_hSDK_SetFOV);
+
+	/** Native_IsAmmoTypeInfinite */
+	prep.Start(SDKCall_Raw, SDKConf_Signature, "CAmmoDef::CanCarryInfiniteAmmo");
+	prep.Param(SDKType_PlainOldData, SDKPass_Plain);
+	prep.Return(SDKType_Bool, SDKPass_Plain);
+	prep.End(g_hSDK_CanCarryInfiniteAmmo);
 
 	/** Native_SpawnSpecial */
 	prep.Start(SDKCall_Raw, SDKConf_Signature, "ZombieManager::SpawnSpecial");

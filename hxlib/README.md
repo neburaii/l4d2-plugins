@@ -34,7 +34,12 @@ None of the stocks in this file require anything from the main [hxlib.inc](./scr
 - [sourcescramble](https://github.com/nosoop/SMExt-SourceScramble)
 
 # Changelog
-this mostly focuses on core hxlib. hxstocks updates go mostly undocumented.
+this focuses on core hxlib. hxstocks updates go undocumented.
+
+### 1.13
+- added entity hook `EntityHook_FinishReload` and `EntityHook_RemoveAmmo`
+- added forwards `OnSetReserveAmmo` and `OnSetReserveAmmo_Post`
+- added native `IsAmmoTypeInfinite`
 
 ### 1.12
 - added forwards `OnCycleZoom` and `OnCycleZoom_Post`

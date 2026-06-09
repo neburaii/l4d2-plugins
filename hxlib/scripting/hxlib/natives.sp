@@ -229,6 +229,7 @@ void RegisterNatives()
 	CreateNative("GetHibernationState", Native_GetHibernationState);
 	CreateNative("GetZoomLevel", Native_GetZoomLevel);
 	CreateNative("SetFOV", Native_SetFOV);
+	CreateNative("IsAmmoTypeInfinite", Native_IsAmmoTypeInfinite);
 }
 
 /******************
@@ -1288,6 +1289,12 @@ public any Native_GetServerOS(Handle hPlugin, int iNumParams)
 
 		if (!iOwner) iOwner = iClient;
 		return SDKCall(g_hSDK_SetFOV, iClient, iOwner, iTargetFOV, fDuration, iStartFOV);
+	}
+
+	public any Native_IsAmmoTypeInfinite(Handle hPlugin, int iNumParams)
+	{
+		AmmoType ammoType = GetNativeCell(1);
+		return SDKCall(g_hSDK_CanCarryInfiniteAmmo, g_pAmmoDef, ammoType);
 	}
 
 /** InternalKeyValues methodmap */

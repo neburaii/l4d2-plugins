@@ -87,6 +87,37 @@
 				}
 			}
 
+			"HX::FinishReload"
+			{
+				"offset"	"FinishReload"
+				"callconv"	"thiscall"
+				"hooktype"	"entity"
+				"return"	"void"
+				"this"		"entity"
+			}
+
+			"HX::RemoveAmmo"
+			{
+				"offset"	"RemoveAmmo"
+				"callconv"	"thiscall"
+				"hooktype"	"entity"
+				"return"	"void"
+				"this"		"entity"
+
+				"arguments"
+				{
+					"amount"
+					{
+						"type"	"int"
+					}
+
+					"ammoType"
+					{
+						"type"	"int"
+					}
+				}
+			}
+
 			"HX::OnNavAreaChanged"
 			{
 				"offset"	"OnNavAreaChanged"
@@ -625,6 +656,27 @@
 				"this"		"entity"
 				"return"	"void"
 			}
+
+			"HX::CBaseCombatCharacter::SetAmmoCount"
+			{
+				"signature"	"CBaseCombatCharacter::SetAmmoCount"
+				"callconv"	"thiscall"
+				"this"		"entity"
+				"return"	"void"
+
+				"arguments"
+				{
+					"amount"
+					{
+						"type"	"int"
+					}
+
+					"ammoType"
+					{
+						"type"	"int"
+					}
+				}
+			}
 		}
 
 		"Addresses"
@@ -1046,6 +1098,18 @@
 			{
 				"linux"		"453"
 				"windows"	"451"
+			}
+
+			"FinishReload"
+			{
+				"linux"		"280"
+				"windows"	"279"
+			}
+
+			"RemoveAmmo"
+			{
+				"linux"		"276"
+				"windows"	"275"
 			}
 
 			/*****************
@@ -2701,6 +2765,22 @@
 				"linux"		"@_ZN11CBasePlayer6SetFOVEP11CBaseEntityifi"
 				"windows"	"\x55\x8B\xEC\x53\x8B\x5D\x2A\x56\x8B\xF1\x85\xDB\x75\x2A\x5E"
 				/** 55 8B EC 53 8B 5D ? 56 8B F1 85 DB 75 ? 5E */
+			}
+
+			"CAmmoDef::CanCarryInfiniteAmmo"
+			{
+				"library"	"server"
+				"linux"		"@_ZN8CAmmoDef20CanCarryInfiniteAmmoEi"
+				"windows"	"\x55\x8B\xEC\x8B\x45\x2A\x83\xF8\x01\x7C\x2A\x3B\x41\x2A\x7D\x2A\x6B\xC0\x34\x03\xC8\x8B\x41\x2A\x83\xF8\xFF\x75\x2A\x8B\x49\x2A\x85\xC9\x74\x2A\x8B\x41\x2A\x8B\x40\x2A\x83\xF8\xFE"
+				/** 55 8B EC 8B 45 ? 83 F8 01 7C ? 3B 41 ? 7D ? 6B C0 34 03 C8 8B 41 ? 83 F8 FF 75 ? 8B 49 ? 85 C9 74 ? 8B 41 ? 8B 40 ? 83 F8 FE */
+			}
+
+			"CBaseCombatCharacter::SetAmmoCount"
+			{
+				"library"	"server"
+				"linux"		"@_ZN20CBaseCombatCharacter12SetAmmoCountEii"
+				"windows"	"\x55\x8B\xEC\x8B\x45\x2A\x56\x57\x8B\x7D\x2A\x39\xBC"
+				/** 55 8B EC 8B 45 ? 56 57 8B 7D ? 39 BC */
 			}
 		}
 	}

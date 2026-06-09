@@ -130,6 +130,10 @@ void InitDetours()
 	CreateDetour("HX::CTerrorGun::CycleZoom",
 		Detour_CycleZoom_Pre, Detour_CycleZoom_Post,
 		{Forward_OnCycleZoom, Forward_OnCycleZoom_Post, -1});
+
+	CreateDetour("HX::CBaseCombatCharacter::SetAmmoCount",
+		Detour_SetAmmoCount_Pre, Detour_SetAmmoCount_Post,
+		{Forward_OnSetReserveAmmo, Forward_OnSetReserveAmmo_Post, -1});
 }
 
 /************
@@ -1683,3 +1687,51 @@ void InitDetours()
 		g_bHandled_CycleZoom = false;
 		return MRES_Ignored;
 	}
+
+/** OnSetReserveAmmo */
+	static bool g_bHandled_SetAmmoCount;
+
+	MRESReturn Detour_SetAmmoCount_Pre(int pThis, DHookParam hParams)
+	{
+		int iAmount = hParams.Get(1);
+		AmmoType ammoType = hParams.Get(2);
+
+		Call_StartForward(g_forward[Forward_OnSetReserveAmmo].handle);
+		Call_PushCell(pThis);
+		Call_PushCellRef(iAmount);
+		Call_PushCellRef(ammoType);
+		Action result = Plugin_Continue;
+		Call_Finish(result);
+
+		if (result == Plugin_Handled)
+		{
+			g_bHandled_SetAmmoCount = true;
+			return MRES_Supercede;
+		}
+
+		if (result == Plugin_Changed)
+		{
+			hParams.Set(1, iAmount);
+			hParams.Set(2, ammoType);
+			return MRES_ChangedHandled;
+		}
+
+		return MRES_Ignored;
+	}
+
+	MRESReturn Detour_SetAmmoCount_Post(int pThis, DHookParam hParams)
+	{
+		int iAmount = hParams.Get(1);
+		AmmoType ammoType = hParams.Get(2);
+
+		Call_StartForward(g_forward[Forward_OnSetReserveAmmo_Post].handle);
+		Call_PushCell(pThis);
+		Call_PushCell(iAmount);
+		Call_PushCell(ammoType);
+		Call_PushCell(g_bHandled_SetAmmoCount);
+		Call_Finish();
+
+		g_bHandled_SetAmmoCount = false;
+		return MRES_Ignored;
+	}
+

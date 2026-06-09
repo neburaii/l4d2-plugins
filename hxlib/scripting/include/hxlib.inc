@@ -541,6 +541,8 @@ enum EntityHook
 	EntityHook_CreateRagdollEntity,	// Player
 	EntityHook_EventKilled,			// CBaseEntity
 	EntityHook_SetObserverTarget,	// Player
+	EntityHook_FinishReload,		// CBaseCombatWeapon
+	EntityHook_RemoveAmmo,			// CBaseCombatCharacter
 
 	EntityHook_MAX
 };
@@ -667,6 +669,40 @@ typeset EntityHookCB
 	 * @param handled		true if pre-hook for this observer returned Plugin_Handled
 	 */
 	function void (int observer, int target, bool success, bool handled);
+
+	/** EntityHook_FinishReload, EHook_Pre
+	 *
+	 * @param weapon		entity index of weapon
+	 *
+	 * @return				Plugin_Continue to allow, Plugin_Handled to block
+	 */
+	function Action (int weapon);
+
+	/** EntityHook_FinishReload, EHook_Post
+	 *
+	 * @param weapon		entity index of weapon
+	 * @param handled		true if pre-hook returned Plugin_Handled
+	 */
+	function void (int weapon, bool handled);
+
+	/** EntityHook_RemoveAmmo, EHook_Pre
+	 *
+	 * @param client		client index to remove ammo from
+	 * @param amount		amount of ammo to remove
+	 * @param weaponID		type of ammo to remove from
+	 *
+	 * @return				Plugin_Continue to take no action, Plugin_Changed to change amount/weaponID, Plugin_Handled to block
+	 */
+	function Action (int client, int &amount, AmmoType &ammoType);
+
+	/** EntityHook_RemoveAmmo, EHook_Post
+	 *
+	 * @param client		client index to remove ammo from
+	 * @param amount		amount of ammo to remove
+	 * @param weaponID		type of ammo to remove from
+	 * @param handled		true if pre-hook returned Plugin_Handled
+	 */
+	function void (int client, int amount, AmmoType ammoType, bool handled);
 };
 
 /**
@@ -1414,6 +1450,27 @@ forward Action OnCycleZoom(int weapon);
  * @param handled		true of OnCycleZoom returned Plugin_Handled
  */
 forward void OnCycleZoom_Post(int weapon, bool handled);
+
+/**
+ * the reserve ammo of a client is about to be set to an amount
+ *
+ * @param client		client index of the player owning this reserve ammo
+ * @param amount		amount to set it to
+ * @param ammoType		reserve ammo is of this Ammo_* type
+ *
+ * @return				Plugin_Continue to take no action, Plugin_Changed to change amount/ammoType, Plugin_Handled to block
+ */
+forward Action OnSetReserveAmmo(int client, int &amount, AmmoType &ammoType);
+
+/**
+ * the reserve ammo of a client was set to an amount
+ *
+ * @param client		client index of the player owning this reserve ammo
+ * @param amount		amount to set it to
+ * @param ammoType		reserve ammo is of this Ammo_* type
+ * @param handled		true if OnSetReserveAmmo returned Plugin_Handled
+ */
+forward void OnSetReserveAmmo_Post(int client, int amount, AmmoType ammoType, bool handled);
 
 /***********
  * Natives
@@ -2532,6 +2589,15 @@ native int GetZoomLevel(int weapon);
  * @return				true if success, false if failure
  */
 native bool SetFOV(int client, int targetFOV = 0, float duration = 0.0, int startFOV = 0, int owner = 0);
+
+/**
+ * check if this ammo type can carry an infinite amount of ammo
+ *
+ * @param ammoType		Ammo_* enum
+ *
+ * @return				true if inifnite ammo, false otherwise
+ */
+native bool IsAmmoTypeInfinite(AmmoType ammoType);
 
 /**************
  * Methodmaps
@@ -4032,5 +4098,6 @@ public SharedPlugin __pl_hxlib =
 		MarkNativeAsOptional("GetHibernationState");
 		MarkNativeAsOptional("GetZoomLevel");
 		MarkNativeAsOptional("SetFOV");
+		MarkNativeAsOptional("IsAmmoTypeInfinite");
 	}
 #endif
