@@ -15,14 +15,15 @@ public Plugin myinfo =
 	name = "Skip Intro Cutscenes",
 	author = "Neburai",
 	description = "reliably skips intro cutscenes for all maps not in a whitelist",
-	version = "1.4",
+	version = "1.5",
 	url = "https://github.com/neburaii/l4d2-plugins/tree/main/skip_intro"
 };
 
 bool	g_bMapAllowIntro;
 bool	g_bInIntro;
 bool	g_bIntroSequenceStripped;
-bool	g_bHumanJoined;
+bool	g_bRoundStarted;
+bool	g_bIntroOccurred;
 
 bool	g_bLateLoaded;
 bool	g_bHookingEnabled;
@@ -60,6 +61,7 @@ public void OnPluginStart()
 
 	HookEvent("round_start_pre_entity", Event_RoundStartPreEntity);
 	HookEvent("player_team", Event_PlayerTeam);
+	HookEvent("round_start", Event_RoundStart);
 
 	if (g_bLateLoaded)
 	{
@@ -177,13 +179,14 @@ public void OnMapStart()
 void Event_RoundStartPreEntity(Event hEvent, const char[] sName, bool bDontBroadcast)
 {
 	g_bIntroSequenceStripped = false;
-	g_bHumanJoined = false;
+	g_bRoundStarted = false;
 	g_bInIntro = true;
+	g_bIntroOccurred = false;
 }
 
 void Event_PlayerTeam(Event hEvent, const char[] sName, bool bDontBroadcast)
 {
-	if (g_bHumanJoined)
+	if (g_bRoundStarted)
 		return;
 
 	int iClient = GetClientOfUserId(hEvent.GetInt("userid"));
@@ -194,8 +197,39 @@ void Event_PlayerTeam(Event hEvent, const char[] sName, bool bDontBroadcast)
 	if (iTeam != Team_Survivor)
 		return;
 
-	g_bHumanJoined = true;
+	StartRound();
+}
+
+void Event_RoundStart(Event hEvent, const char[] sName, bool bDontBroadcast)
+{
+	if (g_bRoundStarted)
+		return;
+
+	for (int i = 1; i <= MaxClients; i++)
+	{
+		if (!IsClientInGame(i)
+			|| IsFakeClient(i)
+			|| GetClientTeam(i) != Team_Survivor)
+			continue;
+
+		StartRound();
+		return;
+	}
+}
+
+void StartRound()
+{
+	g_bRoundStarted = true;
 	SetEndIntroDelay(g_fDelayFailsafe);
+}
+
+public void L4D_OnFirstSurvivorLeftSafeArea_Post(int iClient)
+{
+	if (g_bInIntro && !g_bIntroOccurred)
+	{
+		if (g_hTimer_DelayEndIntro) delete g_hTimer_DelayEndIntro;
+		g_bInIntro = false;
+	}
 }
 
 /*********
@@ -235,6 +269,7 @@ public Action OnAcceptInput_InfoDirector(int iReceiver, char[] sInput, int &iAct
 		else if (strcmp(sInput, "StartIntro") == 0)
 		{
 			if (g_hTimer_DelayEndIntro) delete g_hTimer_DelayEndIntro;
+			g_bIntroOccurred = true;
 			return Plugin_Handled;
 		}
 
