@@ -1,0 +1,44 @@
+"Cookies"
+{
+	"low_ammo_warning"
+	{
+		"#name"
+		{
+			"en"	"Warn On Low Ammo"
+		}
+
+		"#desc"
+		{
+			"en"	"Should your primary weapon's reserve ammo display blink when low?"
+		}
+
+		"default_convar"	"cookie_low_ammo_warning"
+
+		"input"
+		{
+			"type"	"yesno"
+		}
+	}
+
+	"ammo_as_percent"
+	{
+		"#name"
+		{
+			"en"	"Display Ammo As Percentage"
+		}
+
+		"#desc"
+		{
+			"en"	"Should your primary weapon's reserve ammo be displayed as a percentage (0 through 100)?"
+		}
+
+		"default_convar"	"cookie_ammo_as_percent"
+
+		"input"
+		{
+			"type"	"yesno"
+		}
+	}
+}
+
+
