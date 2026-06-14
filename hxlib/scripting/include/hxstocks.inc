@@ -58,7 +58,7 @@ enum AmmoType
 	Ammo_Chainsaw,
 	Ammo_CarriedItem,
 
-	Ammo_MAX
+	Ammo_MAX = 32
 };
 
 /** there are likely l4d2 specific flags missing from this */

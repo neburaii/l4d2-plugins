@@ -59,6 +59,18 @@ int		g_iOffset_GameRules_WaterSlowsMovement;
 int		g_iOffset_Server_ReservationCookie;
 int		g_iOffset_Server_HibernationStatus;
 
+int		g_iOffset_StudioHdr;
+int		g_iOffset_ActivityToSequenceMapper;
+int		g_iOffset_ActivityToSequenceMapper_SequenceTuples;
+int		g_iOffset_ActivityToSequenceMapper_Hash;
+int		g_iOffset_HashValueType_startingIdx;
+int		g_iOffset_HashValueType_count;
+int		g_iOffset_HashValueType_weight;
+int		g_iOffset_CUtlHash_powerOfTwo;
+int		g_iOffset_CUtlHash_modMask;
+int		g_iOffset_HashValueType_activity;
+int		g_iOffset_ActivityToSequenceMapper_SequenceTuplesCount;
+
 /** CTraceFilterSimple */
 int		g_iOffset_TraceFilterSimple_vtable;
 int		g_iOffset_TraceFilterSimple_passEnt;
@@ -204,6 +216,29 @@ void InitOffsets()
 		LoadOffset("CBaseServer::reservationCookie");
 	g_iOffset_Server_HibernationStatus =
 		LoadOffset("CGameServer::hibernationStatus");
+
+	g_iOffset_StudioHdr =
+		LoadOffset("CBaseAnimating::sudioHdr");
+	g_iOffset_ActivityToSequenceMapper =
+		LoadOffset("CStudioHdr::m_pActivityToSequence");
+	g_iOffset_ActivityToSequenceMapper_SequenceTuples =
+		LoadOffset("CActivityToSequenceMapping::m_pSequenceTuples");
+	g_iOffset_ActivityToSequenceMapper_Hash =
+		LoadOffset("CActivityToSequenceMapping::m_ActToSeqHash");
+	g_iOffset_ActivityToSequenceMapper_SequenceTuplesCount =
+		LoadOffset("CActivityToSequenceMapping::m_iSequenceTuplesCount");
+	g_iOffset_HashValueType_activity =
+		LoadOffset("HashValueType::activity");
+	g_iOffset_HashValueType_startingIdx =
+		LoadOffset("HashValueType::startingIdx");
+	g_iOffset_HashValueType_count =
+		LoadOffset("HashValueType::count");
+	g_iOffset_HashValueType_weight =
+		LoadOffset("HashValueType::totalWeight");
+	g_iOffset_CUtlHash_powerOfTwo =
+		LoadOffset("CUtlHash::m_bPowerOfTwo");
+	g_iOffset_CUtlHash_modMask =
+		LoadOffset("CUtlHash::m_ModMask");
 
 	/** CTraceFilterSimple */
 	g_iOffset_TraceFilterSimple_vtable =

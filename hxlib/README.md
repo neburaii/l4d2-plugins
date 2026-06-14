@@ -39,7 +39,17 @@ this focuses on core hxlib. hxstocks updates go undocumented.
 ### 1.13
 - added entity hook `EntityHook_FinishReload` and `EntityHook_RemoveAmmo`
 - added forwards `OnSetReserveAmmo` and `OnSetReserveAmmo_Post`
-- added native `IsAmmoTypeInfinite`
+- added natives:
+	- `IsAmmoTypeInfinite`
+	- `RemoveAmmo`
+	- `GetDeployActivity`
+	- `SelectWeightedSequence`
+	- `GetSequencesForActivity`
+	- `GetSequences`
+	- `GetSequenceDuration`
+- methodmaps:
+	- `SequenceTupleList`
+	- `SequenceTuple`
 
 ### 1.12
 - added forwards `OnCycleZoom` and `OnCycleZoom_Post`

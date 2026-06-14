@@ -82,6 +82,13 @@ Handle g_hSDK_GetGameModeInfo;
 Handle g_hSDK_GetZoomLevel;
 Handle g_hSDK_SetFOV;
 Handle g_hSDK_CanCarryInfiniteAmmo;
+Handle g_hSDK_SelectWeightedSequence;
+Handle g_hSDK_GetDeployActivity;
+Handle g_hSDK_TranslateViewModelActivity;
+Handle g_hSDK_SequenceDuration;
+Handle g_hSDK_FindActivityToSequenceMapper;
+Handle g_hSDK_HashInt;
+Handle g_hSDK_RemoveAmmo;
 
 void InitSDKCalls()
 {
@@ -495,6 +502,45 @@ void InitSDKCalls()
 	prep.Param(SDKType_PlainOldData, SDKPass_Plain);
 	prep.Return(SDKType_Bool, SDKPass_Plain);
 	prep.End(g_hSDK_CanCarryInfiniteAmmo);
+
+	/** Native_RemoveAmmo */
+	prep.Start(SDKCall_Player, SDKConf_Virtual, "RemoveAmmo");
+	prep.Param(SDKType_PlainOldData, SDKPass_Plain);
+	prep.Param(SDKType_PlainOldData, SDKPass_Plain);
+	prep.End(g_hSDK_RemoveAmmo);
+
+	/** Native_GetDeployActivity */
+	prep.Start(SDKCall_Entity, SDKConf_Virtual, "GetDeployActivity");
+	prep.Return(SDKType_PlainOldData, SDKPass_Plain);
+	prep.End(g_hSDK_GetDeployActivity);
+
+	prep.Start(SDKCall_Entity, SDKConf_Virtual, "TranslateViewmodelActivity");
+	prep.Param(SDKType_PlainOldData, SDKPass_Plain);
+	prep.Return(SDKType_PlainOldData, SDKPass_Plain);
+	prep.End(g_hSDK_TranslateViewModelActivity);
+
+	/** Native_GetWeightedSequence */
+	prep.Start(SDKCall_Entity, SDKConf_Virtual, "SelectWeightedSequence");
+	prep.Param(SDKType_PlainOldData, SDKPass_Plain);
+	prep.Return(SDKType_PlainOldData, SDKPass_Plain);
+	prep.End(g_hSDK_SelectWeightedSequence);
+
+	/** Native_GetSequencesForActivity*/
+	prep.Start(SDKCall_Raw, SDKConf_Signature, "CStudioHdr::CActivityToSequenceMapping::FindMapping");
+	prep.Return(SDKType_PlainOldData, SDKPass_Plain);
+	prep.End(g_hSDK_FindActivityToSequenceMapper);
+
+	prep.Start(SDKCall_Static, SDKConf_Signature, "HashInt");
+	prep.Param(SDKType_PlainOldData, SDKPass_Plain);
+	prep.Return(SDKType_PlainOldData, SDKPass_Plain);
+	prep.End(g_hSDK_HashInt);
+
+	/** Native_GetSequenceDuration */
+	prep.Start(SDKCall_Entity, SDKConf_Signature, "CBaseAnimating::SequenceDuration");
+	prep.Param(SDKType_PlainOldData, SDKPass_Plain);
+	prep.Param(SDKType_PlainOldData, SDKPass_Plain);
+	prep.Return(SDKType_Float, SDKPass_Plain);
+	prep.End(g_hSDK_SequenceDuration);
 
 	/** Native_SpawnSpecial */
 	prep.Start(SDKCall_Raw, SDKConf_Signature, "ZombieManager::SpawnSpecial");

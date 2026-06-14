@@ -230,6 +230,12 @@ void RegisterNatives()
 	CreateNative("GetZoomLevel", Native_GetZoomLevel);
 	CreateNative("SetFOV", Native_SetFOV);
 	CreateNative("IsAmmoTypeInfinite", Native_IsAmmoTypeInfinite);
+	CreateNative("RemoveAmmo", Native_RemoveAmmo);
+	CreateNative("GetDeployActivity", Native_GetDeployActivity);
+	CreateNative("SelectWeightedSequence", Native_SelectWeightedSequence);
+	CreateNative("GetSequencesForActivity", Native_GetSequencesForActivity);
+	CreateNative("GetSequences", Native_GetSequences);
+	CreateNative("GetSequenceDuration", Native_GetSequenceDuration);
 }
 
 /******************
@@ -1295,6 +1301,74 @@ public any Native_GetServerOS(Handle hPlugin, int iNumParams)
 	{
 		AmmoType ammoType = GetNativeCell(1);
 		return SDKCall(g_hSDK_CanCarryInfiniteAmmo, g_pAmmoDef, ammoType);
+	}
+
+	public void Native_RemoveAmmo(Handle hPlugin, int iNumParams)
+	{
+		int iClient = GetNativeCell(1);
+		int iAmount = GetNativeCell(2);
+		AmmoType ammoType = GetNativeCell(3);
+
+		SDKCall(g_hSDK_RemoveAmmo, iClient, iAmount, ammoType);
+	}
+
+	public any Native_GetDeployActivity(Handle hPlugin, int iNumParams)
+	{
+		int iWeapon = GetNativeCell(1);
+
+		int iViewModelActivity = SDKCall(g_hSDK_GetDeployActivity, iWeapon);
+		return SDKCall(g_hSDK_TranslateViewModelActivity, iWeapon, iViewModelActivity);
+	}
+
+	public any Native_SelectWeightedSequence(Handle hPlugin, int iNumParams)
+	{
+		int iEntity = GetNativeCell(1);
+		int iActivity = GetNativeCell(2);
+
+		return SDKCall(g_hSDK_SelectWeightedSequence, iEntity, iActivity);
+	}
+
+	public any Native_GetSequencesForActivity(Handle hPlugin, int iNumParams)
+	{
+		int iEntity = GetNativeCell(1);
+		int iActivity = GetNativeCell(2);
+
+		StudioHdr studio = Util_GetStudioHdr(iEntity);
+		if (!studio)
+			ThrowNativeError(SP_ERROR_INVALID_ADDRESS, "Can't get StudioHdr for entity %i!", iEntity);
+
+		int iSeqTotal;
+		int iWeightTotal;
+		SequenceTupleList list =
+			studio.activityToSequenceMapper.GetSequencesForActivity(iActivity, iSeqTotal, iWeightTotal);
+
+		SetNativeCellRef(3, iSeqTotal);
+		SetNativeCellRef(4, iWeightTotal);
+		return list;
+	}
+
+	public any Native_GetSequences(Handle hPlugin, int iNumParams)
+	{
+		int iEntity = GetNativeCell(1);
+
+		StudioHdr studio = Util_GetStudioHdr(iEntity);
+		if (!studio)
+			ThrowNativeError(SP_ERROR_INVALID_ADDRESS, "Can't get StudioHdr for entity %i!", iEntity);
+
+		int iSeqTotal;
+		SequenceTupleList list = studio.activityToSequenceMapper.GetSequences(iSeqTotal);
+
+		SetNativeCellRef(2, iSeqTotal);
+		return list;
+	}
+
+	public any Native_GetSequenceDuration(Handle hPlugin, int iNumParams)
+	{
+		int iEntity = GetNativeCell(1);
+		int iSequence = GetNativeCell(2);
+		StudioHdr studio = Util_GetStudioHdr(iEntity);
+
+		return SDKCall(g_hSDK_SequenceDuration, iEntity, studio, iSequence);
 	}
 
 /** InternalKeyValues methodmap */

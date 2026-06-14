@@ -300,7 +300,6 @@ void InitEntityHooks()
 
 		if (result == Plugin_Changed)
 		{
-			DebugPrint("setting to %i (%N)", iTarget, iTarget);
 			hParams.Set(1, GetEntityAddress(iTarget));
 			return MRES_ChangedHandled;
 		}

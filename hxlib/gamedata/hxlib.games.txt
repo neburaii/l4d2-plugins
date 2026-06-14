@@ -1112,6 +1112,24 @@
 				"windows"	"275"
 			}
 
+			"GetDeployActivity"
+			{
+				"linux"		"407"
+				"windows"	"406"
+			}
+
+			"TranslateViewmodelActivity"
+			{
+				"linux"		"431"
+				"windows"	"430"
+			}
+
+			"SelectWeightedSequence"
+			{
+				"linux"		"208"
+				"windows"	"207"
+			}
+
 			/*****************
 			 * various offsets
 			 *****************/
@@ -1318,6 +1336,72 @@
 			{
 				"linux"		"185209"
 				"windows"	"185217"
+			}
+
+			"CBaseAnimating::sudioHdr"
+			{
+				"linux"		"5088"
+				"windows"	"5072"
+			}
+
+			"CStudioHdr::m_pActivityToSequence"
+			{
+				"linux"		"84"
+				"windows"	"84"
+			}
+
+			"CActivityToSequenceMapping::m_pSequenceTuples"
+			{
+				"linux"		"0"
+				"windows"	"0"
+			}
+
+			"CActivityToSequenceMapping::m_iSequenceTuplesCount"
+			{
+				"linux"		"4"
+				"windows"	"4"
+			}
+
+			"CActivityToSequenceMapping::m_ActToSeqHash"
+			{
+				"linux"		"8"
+				"windows"	"8"
+			}
+
+			"HashValueType::activity"
+			{
+				"linux"		"0"
+				"windows"	"0"
+			}
+
+			"HashValueType::startingIdx"
+			{
+				"linux"		"4"
+				"windows"	"4"
+			}
+
+			"HashValueType::count"
+			{
+				"linux"		"8"
+				"windows"	"8"
+			}
+
+			"HashValueType::totalWeight"
+			{
+				"linux"		"12"
+				"windows"	"12"
+			}
+
+			"CUtlHash::m_bPowerOfTwo"
+			{
+				"linux"		"22"
+				"windows"	"22"
+			}
+
+			"CUtlHash::m_ModMask"
+			{
+				"linux"		"24"
+				"windows"	"24"
 			}
 
 			/*****************
@@ -2781,6 +2865,30 @@
 				"linux"		"@_ZN20CBaseCombatCharacter12SetAmmoCountEii"
 				"windows"	"\x55\x8B\xEC\x8B\x45\x2A\x56\x57\x8B\x7D\x2A\x39\xBC"
 				/** 55 8B EC 8B 45 ? 56 57 8B 7D ? 39 BC */
+			}
+
+			"CBaseAnimating::SequenceDuration"
+			{
+				"library"	"server"
+				"linux"		"@_ZN14CBaseAnimating16SequenceDurationEP10CStudioHdri"
+				"windows"	"\x55\x8B\xEC\x56\x8B\x75\x2A\x57\x8B\xF9\x85\xF6\x75\x2A\x8B\x47"
+				/** 55 8B EC 56 8B 75 ? 57 8B F9 85 F6 75 ? 8B 47 */
+			}
+
+			"CStudioHdr::CActivityToSequenceMapping::FindMapping"
+			{
+				"library"	"server"
+				"linux"		"@_ZN10CStudioHdr26CActivityToSequenceMapping11FindMappingEPKS_"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x5C\xA1\x2A\x2A\x2A\x2A\x33\xC5\x89\x45\x2A\x56\x8B\x75"
+				/** 55 8B EC 83 EC 5C A1 ? ? ? ? 33 C5 89 45 ? 56 8B 75 */
+			}
+
+			"HashInt"
+			{
+				"library"	"server"
+				"linux"		"@_Z7HashInti"
+				"windows"	"\x56\x8B\xC1\xC1\xE8\x08\x25\xFF\x00\x00\x00\x8B\xD1\x8B\xF1\xC1\xEA\x18\x33\x14\x85\x2A\x2A\x2A\x2A\xC1\xEE\x10\x81\xE6\xFF\x00\x00\x00\x33\x34\x95\x2A\x2A\x2A\x2A\x81\xE1\xFF\x00\x00\x00\x8B\x14\xB5\x2A\x2A\x2A\x2A\x33\xD0\x8B\x04\x95\x2A\x2A\x2A\x2A\x33\xC8\xC1\xE0\x08\x0B\x04\x8D\x2A\x2A\x2A\x2A\x5E\xC3\xCC\xCC"
+				/** 56 8B C1 C1 E8 08 25 FF 00 00 00 8B D1 8B F1 C1 EA 18 33 14 85 ? ? ? ? C1 EE 10 81 E6 FF 00 00 00 33 34 95 ? ? ? ? 81 E1 FF 00 00 00 8B 14 B5 ? ? ? ? 33 D0 8B 04 95 ? ? ? ? 33 C8 C1 E0 08 0B 04 8D ? ? ? ? 5E C3 CC CC */
 			}
 		}
 	}
