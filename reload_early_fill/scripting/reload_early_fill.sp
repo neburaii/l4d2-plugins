@@ -22,90 +22,175 @@ bool	g_bPluginStarted;
 ConVar	g_hConVar_ExploitDuration;
 float	g_fExploitDuration;
 
-ReloadManager g_reload;
+DeployDurationManager g_deployDuration;
+EarlyFillTracker g_earlyFill;
 
-enum struct ReloadManager
+enum struct DeployDurationManager
 {
 	int entref[MAXEDICTS];
-	Handle timer[MAXEDICTS];
-	float deployDuration[MAXEDICTS];
+	float time[MAXEDICTS];
 
-	bool Verify(int iWeapon)
-	{
-		return EntIndexToEntRef(iWeapon) == this.entref[iWeapon];
-	}
-
-	void Init(int iWeapon)
-	{
-		this.SetDeployDuration(iWeapon);
-		this.entref[iWeapon] = EntIndexToEntRef(iWeapon);
-	}
-
-	void SetDeployDuration(int iWeapon)
+	void Set(int iWeapon)
 	{
 		int iActivity = GetDeployActivity(iWeapon);
 
 		int iSeqTotal;
 		SequenceTupleList list = GetSequencesForActivity(iWeapon, iActivity, iSeqTotal);
 
-		float fDurationRecord = 0.0;
+		float fShortest = 0.0;
 		float fDuration;
 		for (int i = 0; i < iSeqTotal; i++)
 		{
 			fDuration = GetSequenceDuration(iWeapon, list.Get(i).sequence);
 
-			if (!i || fDuration < fDurationRecord)
-				fDurationRecord = fDuration;
+			if (fShortest <= 0.0 || fDuration < fShortest)
+				fShortest = fDuration;
 		}
 
-		if (fDurationRecord < 0.0)
-			fDurationRecord = 0.0;
+		if (fShortest < 0.0)
+			this.time[iWeapon] = 0.0;
+		else this.time[iWeapon] = fShortest;
 
-		this.deployDuration[iWeapon] = fDurationRecord;
+		this.entref[iWeapon] = EntIndexToEntRef(iWeapon);
 	}
 
-	void Start(int iWeapon)
+	float Get(int iWeapon)
 	{
-		if (this.timer[iWeapon])
-			delete this.timer[iWeapon];
+		/** sequence durations will never be 0.0, so that means we failed to find sequences last time */
+		if (!this.time[iWeapon] || EntIndexToEntRef(iWeapon) != this.entref[iWeapon])
+			this.Set(iWeapon);
 
-		if (!this.Verify(iWeapon))
-			this.Init(iWeapon);
+		return this.time[iWeapon];
+	}
+}
 
-		/** shouldn't be 0 if sequences were found last time */
-		else if (!this.deployDuration[iWeapon])
-			this.SetDeployDuration(iWeapon);
+enum struct EarlyFillTracker
+{
+	int entref[MAXEDICTS];
+	bool filled[MAXEDICTS];
 
-		if (!this.deployDuration[iWeapon] && !g_fExploitDuration)
-			return;
-
-		if (IsWeaponSingleReloadOnly(iWeapon))
-			return;
-
-		float fNow = GetGameTime();
-		float fThreshold = GetReloadEndTimestamp(iWeapon) - this.deployDuration[iWeapon] - g_fExploitDuration;
-
-		float fDiff = fThreshold - fNow;
-		if (fDiff < 0.1) return;
-
-		// CreateTimer
+	void Reset(int iWeapon)
+	{
+		this.Set(iWeapon, false);
 	}
 
-	void End(int iWeapon)
+	void SetFilled(int iWeapon)
 	{
-		this.timer[iWeapon] = null;
+		this.Set(iWeapon, true);
+	}
+
+	void Set(int iWeapon, bool bValue)
+	{
+		this.filled[iWeapon] = bValue;
+		this.entref[iWeapon] = EntIndexToEntRef(iWeapon);
+	}
+
+	bool HasFilled(int iWeapon)
+	{
 		if (EntIndexToEntRef(iWeapon) != this.entref[iWeapon])
-			return;
+			this.Reset(iWeapon);
 
-		if (!IsWeaponReloading(iWeapon))
-			return;
-
-		int iOwner = GetOwnerEntity(iWeapon);
-		if (!IsValidClient(iOwner))
-			return;
-
-		EarlyFill(iWeapon, iOwner);
+		return this.filled[iWeapon];
 	}
+}
+
+public APLRes AskPluginLoad2(Handle hMyself, bool bLate, char[] sError, int iErrMax)
+{
+	g_bLateLoaded = true;
+	return APLRes_Success;
+}
+
+public void OnPluginStart()
+{
+	g_hConVar_ExploitDuration = CreateConVar(
+		"reload_early_fill_exploit_duration", "0.0",
+		"aditionally subtract this many seconds from reload durations after subtracting time to swap to that item",
+		CVAR_FLAGS, true, 0.0);
+	g_hConVar_ExploitDuration.AddChangeHook(ConVarChanged_Update);
+
+	g_fExploitDuration = g_hConVar_ExploitDuration.FloatValue;
+
+	if (g_bLateLoaded && LibraryExists(HXLIB_LIBRARY))
+		StartPlugin();
+}
+
+void ConVarChanged_Update(ConVar hConVar, const char[] sOldValue, const char[] sNewValue)
+{
+	g_fExploitDuration = g_hConVar_ExploitDuration.FloatValue;
+}
+
+public void OnAllPluginsLoaded()
+{
+	if (!g_bPluginStarted && LibraryExists(HXLIB_LIBRARY))
+		StartPlugin();
+}
+
+public void OnLibraryAdded(const char[] sName)
+{
+	if (!g_bPluginStarted && strcmp(sName, HXLIB_LIBRARY) == 0)
+		StartPlugin();
+}
+
+void StartPlugin()
+{
+	g_bPluginStarted = true;
+
+	for (int i = 1; i <= MaxClients; i++)
+	{
+		if (!IsClientInGame(i))
+			continue;
+
+		SDKHook(i, SDKHook_PostThinkPost, OnClientThink);
+	}
+
+	for (int i = MaxClients + 1; i < MAXEDICTS; i++)
+	{
+		if (!IsValidEdict(i)
+			|| !IsTerrorGun(i))
+			continue;
+
+		SDKHook(i, SDKHook_Reload, OnReloadStart);
+	}
+}
+
+public void OnClientPutInServer(int iClient)
+{
+	if (!g_bPluginStarted)
+		return;
+
+	SDKHook(iClient, SDKHook_PostThinkPost, OnClientThink);
+}
+
+public void OnEntityCreated(int iEntity, const char[] sClass)
+{
+	if (!g_bPluginStarted || !IsTerrorGun(iEntity))
+		return;
+
+	SDKHook(iEntity, SDKHook_Reload, OnReloadStart);
+}
+
+Action OnReloadStart(int iWeapon)
+{
+	g_earlyFill.Reset(iWeapon);
+	return Plugin_Continue;
+}
+
+void OnClientThink(int iClient)
+{
+	int iWeapon = GetCurrentWeapon(iClient);
+	if (!IsValidEdict(iWeapon) || !IsTerrorGun(iWeapon))
+		return;
+
+	if (!IsWeaponReloading(iWeapon)
+		|| g_earlyFill.HasFilled(iWeapon)
+		|| IsWeaponSingleReloadOnly(iWeapon))
+		return;
+
+	float fNow = GetGameTime();
+	float fThreshold = GetReloadEndTimestamp(iWeapon) - g_deployDuration.Get(iWeapon) - g_fExploitDuration;
+
+	if (fNow > fThreshold)
+		EarlyFill(iWeapon, iClient);
 }
 
 void EarlyFill(int iWeapon, int iOwner)
@@ -130,11 +215,8 @@ void EarlyFill(int iWeapon, int iOwner)
 
 	RemoveAmmo(iOwner, iFill, ammoType);
 	SetMagazineAmmo(iWeapon, iMagazine + iFill);
+	g_earlyFill.SetFilled(iWeapon);
 }
-
-/*********
- * helpers
- *********/
 
 int GetClientAmmo(int iClient, AmmoType ammoType)
 {

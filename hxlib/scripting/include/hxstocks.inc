@@ -597,6 +597,18 @@ stock bool IsReloading(int client)
 }
 
 /**
+ * is this weapon in reload?
+ *
+ * @param weapon		entity index of weapon to check
+ *
+ * @return				true if in reload, false otherwise
+ */
+stock bool IsWeaponReloading(int weapon)
+{
+	return GetEntProp(weapon, Prop_Send, "m_bInReload");
+}
+
+/**
  * get the integer a character represents in text
  *
  * @param character		character to derive integer from
