@@ -25,6 +25,8 @@ so now when we switch to absolute display, it will also switch to the blinking d
 the low ammo audio warning relies on the game removing ammo from your reserve pool naturally.
 using a script such as [this](https://steamcommunity.com/sharedfiles/filedetails/?id=3339719078) will break the feature.
 
+i made an alternative plugin to the above script that is compatible with this: [reload_early_fill](../reload_early_fill/README.md)
+
 ## Requirements
 - [hxlib](../hxlib/README.md)
 - [sendproxy](https://github.com/jensewe/Left4SendProxy)
