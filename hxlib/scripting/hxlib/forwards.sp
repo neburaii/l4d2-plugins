@@ -374,7 +374,7 @@ PrivateForward InitPrivateForward(EntityHook type, HookMode mode)
 				ET_Event, Param_Cell, Param_Cell, Param_Cell, Param_Cell, Param_CellByRef, Param_Cell, Param_Array, Param_Array);
 
 			case Hook_Post: return CreateForward(
-				ET_Ignore, Param_Cell, Param_Cell, Param_Cell, Param_Cell, Param_Cell, Param_Cell, Param_Cell, Param_Array, Param_Array, Param_Cell);
+				ET_Ignore, Param_Cell, Param_Cell, Param_Cell, Param_Cell, Param_Cell, Param_Cell, Param_Array, Param_Array, Param_Cell);
 		}
 
 		case EntityHook_EventKilled: switch (mode)

@@ -41,7 +41,7 @@
 				"offset"	"CreateRagdollEntity"
 				"callconv"	"thiscall"
 				"hooktype"	"entity"
-				"return"	"int"
+				"return"	"void"
 				"this"		"entity"
 
 				"arguments"

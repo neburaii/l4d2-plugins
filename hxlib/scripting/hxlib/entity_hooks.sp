@@ -133,7 +133,7 @@ void InitEntityHooks()
 /** EntityHook_CreateRagdollEntity */
 	static bool	g_bHandled_CreateRagdollEntity;
 
-	MRESReturn DHook_CreateRagdollEntity_Pre(int pThis, DHookReturn hReturn, DHookParam hParams)
+	MRESReturn DHook_CreateRagdollEntity_Pre(int pThis, DHookParam hParams)
 	{
 		TakeDamageInfo info = hParams.Get(1);
 		float vDamageForce[3];
@@ -159,7 +159,6 @@ void InitEntityHooks()
 		if (result == Plugin_Handled)
 		{
 			g_bHandled_CreateRagdollEntity = true;
-			hReturn.Value = 0;
 			return MRES_Supercede;
 		}
 
@@ -171,20 +170,16 @@ void InitEntityHooks()
 		return MRES_Ignored;
 	}
 
-	MRESReturn DHook_CreateRagdollEntity_Post(int pThis, DHookReturn hReturn, DHookParam hParams)
+	MRESReturn DHook_CreateRagdollEntity_Post(int pThis, DHookParam hParams)
 	{
 		TakeDamageInfo info = hParams.Get(1);
 		float vDamageForce[3];
 		float vDamagePos[3];
-		int iRagdoll = hReturn.Value;
 
 		info.GetDamageForce(vDamageForce);
 		info.GetDamagePos(vDamagePos);
-		if (iRagdoll != INVALID_ENT_REFERENCE)
-			iRagdoll &= 0xFFF;
 
 		Call_StartForward_EntityHook(pThis, EntityHook_CreateRagdollEntity, Hook_Post);
-		Call_PushCell(iRagdoll);
 		Call_PushCell(pThis);
 		Call_PushCell(info.attacker);
 		Call_PushCell(info.inflictor);

@@ -610,7 +610,6 @@ typeset EntityHookCB
 
 	/** EntityHook_CreateRagdollEntity, EHook_Post
 	 *
-	 * @param ragdoll		entity index of the ragdoll created
 	 * @param victim		client who died, and who this ragdoll will substitute
 	 * @param attacker		entity responsible for the victim's death
 	 * @param inflictor
@@ -621,7 +620,7 @@ typeset EntityHookCB
 	 * @param damagePos
 	 * @param handled		true if the pre-hook for this victim returned Plugin_Handled
 	 */
-	function void (int ragdoll, int victim, int attacker, int inflictor, float damage, int damageType, int weapon, const float damageForce[3], const float damagePos[3], bool handled);
+	function void (int victim, int attacker, int inflictor, float damage, int damageType, int weapon, const float damageForce[3], const float damagePos[3], bool handled);
 
 	/** EntityHook_EventKilled, EHook_Pre
 	 *
