@@ -2662,6 +2662,24 @@ native SequenceTupleList GetSequences(int entity, int &seqTotal = 0);
  */
 native float GetSequenceDuration(int entity, int sequence);
 
+/**
+ * get the time remaining for the director's scenario restart timer, if one is pending
+ *
+ * @return				time remaining
+ *
+ * @note				if there's no pending restart, it will just be some negative number
+ */
+native float GetScenarioRestartTime();
+
+/**
+ * set the time remaining for the director's scenario restart timer
+ *
+ * @param value			new time remaining
+ *
+ * @note				will queue a restart if one isn't already pending
+ */
+native void SetScenarioRestartTime(float value = 0.0);
+
 /**************
  * Methodmaps
  *************/
@@ -4209,5 +4227,7 @@ public SharedPlugin __pl_hxlib =
 		MarkNativeAsOptional("GetSequencesForActivity");
 		MarkNativeAsOptional("GetSequences");
 		MarkNativeAsOptional("GetSequenceDuration");
+		MarkNativeAsOptional("GetScenarioRestartTime");
+		MarkNativeAsOptional("SetScenarioRestartTime");
 	}
 #endif

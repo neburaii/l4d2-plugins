@@ -236,6 +236,8 @@ void RegisterNatives()
 	CreateNative("GetSequencesForActivity", Native_GetSequencesForActivity);
 	CreateNative("GetSequences", Native_GetSequences);
 	CreateNative("GetSequenceDuration", Native_GetSequenceDuration);
+	CreateNative("GetScenarioRestartTime", Native_GetScenarioRestartTime);
+	CreateNative("SetScenarioRestartTime", Native_SetScenarioRestartTime);
 }
 
 /******************
@@ -1369,6 +1371,17 @@ public any Native_GetServerOS(Handle hPlugin, int iNumParams)
 		StudioHdr studio = Util_GetStudioHdr(iEntity);
 
 		return SDKCall(g_hSDK_SequenceDuration, iEntity, studio, iSequence);
+	}
+
+	public any Native_GetScenarioRestartTime(Handle hPlugin, int iNumParams)
+	{
+		return g_ScenarioRestartTimer.GetRemaining();
+	}
+
+	public void Native_SetScenarioRestartTime(Handle hPlugin, int iNumParams)
+	{
+		float fSet = GetNativeCell(1);
+		g_ScenarioRestartTimer.Set(fSet);
 	}
 
 /** InternalKeyValues methodmap */

@@ -1621,6 +1621,12 @@
 				"windows"	"924"
 			}
 
+			"CDirector::scenarioRestartTimer"
+			{
+				"linux"		"616"
+				"windows"	"616"
+			}
+
 			/***********************************
 			 * Scripted Event Manager structure
 			 **********************************/

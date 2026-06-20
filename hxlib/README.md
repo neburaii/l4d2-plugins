@@ -36,6 +36,10 @@ None of the stocks in this file require anything from the main [hxlib.inc](./scr
 # Changelog
 this focuses on core hxlib. hxstocks updates go undocumented.
 
+### 1.14
+- added natives `GetScenarioRestartTime` and `SetScenarioRestartTime`
+- fix incorrect addresses for director related timers (tempo, panic stage, mob)
+
 ### 1.13.1
 - **parameters for EntityHook_CreateRagdollEntity, EHook_Post changed!!**
 	- it originally exposed the entity index to the ragdoll created. but what i thought was a consistent return value of the function was actually just garbage data that happened to be the ragdoll entity in most cases. you can still infer the created ragdoll by pairing these hooks with an entity create hook looking for "cs_ragdoll" entities

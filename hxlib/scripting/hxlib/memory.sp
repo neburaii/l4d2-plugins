@@ -16,6 +16,7 @@ CUtlVector g_pSavedSurvivorBots;
 CountdownTimer g_MobTimer;
 CountdownTimer g_TempoTimer;
 CountdownTimer g_PanicDelayTimer;
+CountdownTimer g_ScenarioRestartTimer;
 
 Address g_pDirectorTacticalServices;
 Address g_pL4DGameStats;
@@ -441,17 +442,19 @@ void InitAddresses()
 
 	/** address + offset */
 	g_challengeMode =
-		LoadAddressOffset(g_director, "CDirectorChallengeMode");
+		LoadAddressOffset(g_director, "CDirectorChallengeMode", true);
 	g_scriptedEventManager =
-		LoadAddressOffset(g_director, "CDirectorScriptedEventManager");
+		LoadAddressOffset(g_director, "CDirectorScriptedEventManager", true);
 	g_pDirectorTacticalServices =
-		LoadAddressOffset(g_director, "CDirectorTacticalServices");
+		LoadAddressOffset(g_director, "CDirectorTacticalServices", true);
 	g_MobTimer =
 		LoadAddressOffset(g_director, "CDirector::mobTimer");
 	g_TempoTimer =
 		LoadAddressOffset(g_director, "CDirector::tempoTimer");
 	g_PanicDelayTimer =
 		LoadAddressOffset(g_scriptedEventManager, "CDirectorScriptedEventManager::panicStageDelayTimer");
+	g_ScenarioRestartTimer =
+		LoadAddressOffset(g_director, "CDirector::scenarioRestartTimer");
 }
 
 void InitMemoryPatches()

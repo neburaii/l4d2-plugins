@@ -49,11 +49,15 @@ any LoadAddress(const char[] sKey)
  *
  * @return			address at addr + offset
  */
-any LoadAddressOffset(any addr, const char[] sKey)
+any LoadAddressOffset(any addr, const char[] sKey, bool bDereference = false)
 {
 	int offset = LoadOffset(sKey);
 
-	Address result = LoadFromAddress(addr + view_as<Address>(offset), NumberType_Int32);
+	Address result;
+	if (bDereference)
+		result = LoadFromAddress(addr + view_as<Address>(offset), NumberType_Int32);
+	else result = addr + view_as<Address>(offset);
+
 	if (result == Address_Null)
 		SetFailState("[LoadAddressOffset] failed to load 0x%X + %i", addr, offset);
 
