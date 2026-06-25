@@ -1696,31 +1696,19 @@ native float GetTempoFlowStamp();
  */
 native void SetTempoFlowStamp(float value);
 
-/**
- * to transition out of any state EXCEPT PEAK_FADE, a timer is among the transition
- * conditions. this native will return this timer's remaining time.
- *
- * in the case of BUILD_UP, this timer is just a required duration for the state. it will
- * continue to be BUILD_UP until its other transition condition becomes true (high survivor intensity)
- *
- * if it returns a negative number, it's either because tempo is in PEAK_FADE or the
- * it's the scenario with the BUILD_UP state described above. a timer elapses at 0.0
- * time remaining, so negative can be interpreted as "time since timer elapsed"
- *
- * @return					time remaining
- */
+#pragma deprecated Use GetTempoTimer() instead
 native float GetTempoRemainingTime();
 
-/**
- * to transition out of any state EXCEPT PEAK_FADE, a timer is among the transition
- * conditions. this native will set this timer's remaining time.
- *
- * in the case of BUILD_UP, this timer is just a required duration for the state. it will
- * continue to be BUILD_UP until its other transition condition becomes true (high survivor intensity)
- *
- * @param value				new time remaining
- */
+#pragma deprecated Use GetTempoTimer() instead
 native void SetTempoRemainingTime(float value);
+
+/**
+ * delays related to tempo state transitions. to transition out of any state
+ * except PEAK_FADE, this timer needing to elapse is among the conditions.
+ *
+ * @return					CountdownTimer methodmap
+ */
+native CountdownTimer GetTempoTimer();
 
 /**
  * get the client index of the survivor furthest along the flow
@@ -1884,14 +1872,15 @@ native void ResetMobTimer();
  */
 native void StartMobTimer();
 
-/**
- * return the remaining time until the next mob spawns. it's possible to be <= 0.0 since mob spawns
- * can be blocked from other things. if it is <= 0.0, then that means it will spawn the moment
- * circumstances let it
- *
- * @return 				time remaining
- */
+#pragma deprecated Use GetMobTimer() instead
 native float GetTimeUntilNextMob();
+
+/**
+ * get the CountdownTimer for the director's mob spawning timer
+ *
+ * @return 				CountdownTimer methodmap
+ */
+native CountdownTimer GetMobTimer();
 
 /**
  * mob recharging is a mechanic where the size of the next mob gradually increases the more
@@ -2432,22 +2421,20 @@ native HitGroup GetLastHitGroup(int character);
  */
 native void Vocalize(int client, const char[] gameSound, float cooldown = 0.0, float durationAI = 0.0);
 
-/**
- * get remaining time of a player's vocalize cooldown
- *
- * @param client		client index of player to check
- *
- * @return				time remaining. value <= 0.0 means duration elapsed
- */
+#pragma deprecated Use GetVocalizeTimer() instead
 native float GetVocalizeCooldown(int client);
 
-/**
- * set remaining time of a player's vocalize cooldown
- *
- * @param client		client index of player to set for
- * @param cooldown		duration in seconds
- */
+#pragma deprecated Use GetVocalizeTimer() instead
 native void SetVocalizeCooldown(int client, float cooldown);
+
+/**
+ * timer used for delaying some voice sounds on clients
+ *
+ * @param client		client to get timer of
+ *
+ * @return				CountdownTimer methodmap
+ */
+native CountdownTimer GetVocalizeTimer(int client);
 
 /**
  * spawn a special infected of any class at the pos/angles
@@ -2662,23 +2649,18 @@ native SequenceTupleList GetSequences(int entity, int &seqTotal = 0);
  */
 native float GetSequenceDuration(int entity, int sequence);
 
-/**
- * get the time remaining for the director's scenario restart timer, if one is pending
- *
- * @return				time remaining
- *
- * @note				if there's no pending restart, it will just be some negative number
- */
+#pragma deprecated Use GetScenarioRestartTimer() instead
 native float GetScenarioRestartTime();
 
-/**
- * set the time remaining for the director's scenario restart timer
- *
- * @param value			new time remaining
- *
- * @note				will queue a restart if one isn't already pending
- */
+#pragma deprecated Use GetScenarioRestartTimer() instead
 native void SetScenarioRestartTime(float value = 0.0);
+
+/**
+ * if this timer is started, the director will restart the scenario when it's elapsed
+ *
+ * @return				CountdownTimer methodmap
+ */
+native CountdownTimer GetScenarioRestartTimer();
 
 /**************
  * Methodmaps
@@ -3451,6 +3433,25 @@ methodmap Inferno
 		public native get();
 	}
 
+	/** damage tick interval */
+	property CountdownTimer damageTimer
+	{
+		public native get();
+	}
+
+	/** multiply damage by damageRampTimer.GetElapsedRatio */
+	property CountdownTimer damageRampTimer
+	{
+		public native get();
+	}
+
+	/**
+	 * get the lifetime flames will be created with
+	 *
+	 * @return				duration in seconds
+	 */
+	public native float GetFlameLifetime();
+
 	/**
 	 * origin of where the inferno started burning
 	 *
@@ -3518,25 +3519,23 @@ methodmap Flame
 	}
 
 	/**
-	 * this flame can only spread if this duration is > 0.0
+	 * how long we attempt to spawn new fires
 	 */
-	property float spreadDuration
+	property CountdownTimer spawnLifetime
 	{
 		public native get();
-		public native set(float value);
 	}
 
 	/**
-	 * how long until this flame fades away
+	 * lifetime of this fire
 	 *
 	 * @note			changing it can cause visual bugs due to clients
 	 * 					expecting the original lifetime, but server side
 	 * 					it will change.
 	 */
-	property float lifetime
+	property CountdownTimer lifetime
 	{
 		public native get();
-		public native set(float value);
 	}
 
 	/**
@@ -4085,14 +4084,15 @@ public SharedPlugin __pl_hxlib =
 		MarkNativeAsOptional("Inferno.flameCount.get");
 		MarkNativeAsOptional("Inferno.GetFlame");
 		MarkNativeAsOptional("Inferno.GetOrigin");
+		MarkNativeAsOptional("Inferno.damageTimer.get");
+		MarkNativeAsOptional("Inferno.damageRampTimer.get");
+		MarkNativeAsOptional("Inferno.GetFlameLifetime");
 
 		MarkNativeAsOptional("Flame.depth.get");
 		MarkNativeAsOptional("Flame.depth.set");
 		MarkNativeAsOptional("Flame.parent.get");
-		MarkNativeAsOptional("Flame.spreadDuration.get");
-		MarkNativeAsOptional("Flame.spreadDuration.set");
+		MarkNativeAsOptional("Flame.spawnLifetime.get");
 		MarkNativeAsOptional("Flame.lifetime.get");
-		MarkNativeAsOptional("Flame.lifetime.set");
 		MarkNativeAsOptional("Flame.GetOrigin");
 		MarkNativeAsOptional("Flame.GetDirection");
 
@@ -4119,7 +4119,6 @@ public SharedPlugin __pl_hxlib =
 		MarkNativeAsOptional("CollectSpawnAreas");
 		MarkNativeAsOptional("ResetMobTimer");
 		MarkNativeAsOptional("StartMobTimer");
-		MarkNativeAsOptional("GetTimeUntilNextMob");
 		MarkNativeAsOptional("ResetMobRecharge");
 		MarkNativeAsOptional("GetMobRechargeSize");
 		MarkNativeAsOptional("SetMobRechargeSize");
@@ -4153,8 +4152,6 @@ public SharedPlugin __pl_hxlib =
 		MarkNativeAsOptional("SetTempo");
 		MarkNativeAsOptional("GetTempoFlowStamp");
 		MarkNativeAsOptional("SetTempoFlowStamp");
-		MarkNativeAsOptional("GetTempoRemainingTime");
-		MarkNativeAsOptional("SetTempoRemainingTime");
 		MarkNativeAsOptional("GetHighestFlowSurvivor");
 		MarkNativeAsOptional("GetPlayerFlow");
 		MarkNativeAsOptional("GetActiveSet");
@@ -4184,8 +4181,6 @@ public SharedPlugin __pl_hxlib =
 		MarkNativeAsOptional("IsEntityAlive");
 		MarkNativeAsOptional("GetLastHitGroup");
 		MarkNativeAsOptional("Vocalize");
-		MarkNativeAsOptional("GetVocalizeCooldown");
-		MarkNativeAsOptional("SetVocalizeCooldown");
 		MarkNativeAsOptional("SpawnSpecial");
 		MarkNativeAsOptional("SpawnCommon");
 		MarkNativeAsOptional("GetScriptValueInt");
@@ -4227,7 +4222,17 @@ public SharedPlugin __pl_hxlib =
 		MarkNativeAsOptional("GetSequencesForActivity");
 		MarkNativeAsOptional("GetSequences");
 		MarkNativeAsOptional("GetSequenceDuration");
+		MarkNativeAsOptional("GetMobTimer");
+		MarkNativeAsOptional("GetTempoTimer");
+		MarkNativeAsOptional("GetScenarioRestartTimer");
+
+		/** deprecated */
+		MarkNativeAsOptional("GetTimeUntilNextMob");
+		MarkNativeAsOptional("GetTempoRemainingTime");
+		MarkNativeAsOptional("SetTempoRemainingTime");
 		MarkNativeAsOptional("GetScenarioRestartTime");
 		MarkNativeAsOptional("SetScenarioRestartTime");
+		MarkNativeAsOptional("GetVocalizeCooldown");
+		MarkNativeAsOptional("SetVocalizeCooldown");
 	}
 #endif

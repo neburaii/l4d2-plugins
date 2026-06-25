@@ -93,14 +93,15 @@ void RegisterNatives()
 	CreateNative("Inferno.flameCount.get", Native_Inferno_flameCount_get);
 	CreateNative("Inferno.GetFlame", Native_Inferno_GetFlame);
 	CreateNative("Inferno.GetOrigin", Native_Inferno_GetOrigin);
+	CreateNative("Inferno.damageTimer.get", Native_Inferno_damageTimer_get);
+	CreateNative("Inferno.damageRampTimer.get", Native_Inferno_damageRampTimer_get);
+	CreateNative("Inferno.GetFlameLifetime", Native_Inferno_GetFlameLifetime);
 
 	CreateNative("Flame.depth.get", Native_Flame_depth_get);
 	CreateNative("Flame.depth.set", Native_Flame_depth_set);
 	CreateNative("Flame.parent.get", Native_Flame_parent_get);
-	CreateNative("Flame.spreadDuration.get", Native_Flame_spreadDuration_get);
-	CreateNative("Flame.spreadDuration.set", Native_Flame_spreadDuration_set);
+	CreateNative("Flame.spawnLifetime.get", Native_Flame_spawnLifetime_get);
 	CreateNative("Flame.lifetime.get", Native_Flame_lifetime_get);
-	CreateNative("Flame.lifetime.set", Native_Flame_lifetime_set);
 	CreateNative("Flame.GetOrigin", Native_Flame_GetOrigin);
 	CreateNative("Flame.GetDirection", Native_Flame_GetDirection);
 
@@ -147,7 +148,6 @@ void RegisterNatives()
 	CreateNative("CollectSpawnAreas", Native_CollectSpawnAreas);
 	CreateNative("ResetMobTimer", Native_ResetMobTimer);
 	CreateNative("StartMobTimer", Native_StartMobTimer);
-	CreateNative("GetTimeUntilNextMob", Native_GetTimeUntilNextMob);
 	CreateNative("ResetMobRecharge", Native_ResetMobRecharge);
 	CreateNative("GetMobRechargeSize", Native_GetMobRechargeSize);
 	CreateNative("SetMobRechargeSize", Native_SetMobRechargeSize);
@@ -181,8 +181,6 @@ void RegisterNatives()
 	CreateNative("SetTempo", Native_SetTempo);
 	CreateNative("GetTempoFlowStamp", Native_GetTempoFlowStamp);
 	CreateNative("SetTempoFlowStamp", Native_SetTempoFlowStamp);
-	CreateNative("GetTempoRemainingTime", Native_GetTempoRemainingTime);
-	CreateNative("SetTempoRemainingTime", Native_SetTempoRemainingTime);
 	CreateNative("GetHighestFlowSurvivor", Native_GetHighestFlowSurvivor);
 	CreateNative("GetPlayerFlow", Native_GetPlayerFlow);
 	CreateNative("GetActiveSet", Native_GetActiveSet);
@@ -212,8 +210,6 @@ void RegisterNatives()
 	CreateNative("IsEntityAlive", Native_IsEntityAlive);
 	CreateNative("GetLastHitGroup", Native_GetLastHitGroup);
 	CreateNative("Vocalize", Native_Vocalize);
-	CreateNative("GetVocalizeCooldown", Native_GetVocalizeCooldown);
-	CreateNative("SetVocalizeCooldown", Native_SetVocalizeCooldown);
 	CreateNative("SpawnSpecial", Native_SpawnSpecial);
 	CreateNative("SpawnCommon", Native_SpawnCommon);
 	CreateNative("GetScriptValueFloat", Native_GetScriptValueFloat);
@@ -236,8 +232,19 @@ void RegisterNatives()
 	CreateNative("GetSequencesForActivity", Native_GetSequencesForActivity);
 	CreateNative("GetSequences", Native_GetSequences);
 	CreateNative("GetSequenceDuration", Native_GetSequenceDuration);
+	CreateNative("GetMobTimer", Native_GetMobTimer);
+	CreateNative("GetTempoTimer", Native_GetTempoTimer);
+	CreateNative("GetScenarioRestartTimer", Native_GetScenarioRestartTimer);
+	CreateNative("GetVocalizeTimer", Native_GetVocalizeTimer);
+
+	/** deprecated */
+	CreateNative("GetTimeUntilNextMob", Native_GetTimeUntilNextMob);
+	CreateNative("GetTempoRemainingTime", Native_GetTempoRemainingTime);
+	CreateNative("SetTempoRemainingTime", Native_SetTempoRemainingTime);
 	CreateNative("GetScenarioRestartTime", Native_GetScenarioRestartTime);
 	CreateNative("SetScenarioRestartTime", Native_SetScenarioRestartTime);
+	CreateNative("GetVocalizeCooldown", Native_GetVocalizeCooldown);
+	CreateNative("SetVocalizeCooldown", Native_SetVocalizeCooldown);
 }
 
 /******************
@@ -430,7 +437,7 @@ public any Native_GetServerOS(Handle hPlugin, int iNumParams)
 	 */
 	public void Native_EndPanicEvent(Handle hPlugin, int iNumParams)
 	{
-		g_PanicDelayTimer.timestamp = -1.0;
+		g_PanicDelayTimer.Invalidate();
 		g_scriptedEventManager.panicStage = PanicStage_Done;
 		g_scriptedEventManager.crescendoOngoing = false;
 
@@ -473,11 +480,6 @@ public any Native_GetServerOS(Handle hPlugin, int iNumParams)
 	public void Native_StartMobTimer(Handle hPlugin, int iNumParams)
 	{
 		g_director.StartMobTimer();
-	}
-
-	public any Native_GetTimeUntilNextMob(Handle hPlugin, int iNumParams)
-	{
-		return g_MobTimer.GetRemaining();
 	}
 
 	public void Native_ResetMobRecharge(Handle hPlugin, int iNumParams)
@@ -767,7 +769,7 @@ public any Native_GetServerOS(Handle hPlugin, int iNumParams)
 				case Tempo_BuildUp:
 				{
 					float fMinInterval = g_director.GetScriptValueFloat("BuildUpMinInterval", g_fConVar_DirectorBuildUpMinInterval);
-					g_TempoTimer.Set(fMinInterval);
+					g_TempoTimer.Start(fMinInterval);
 				}
 
 				case Tempo_SustainPeak:
@@ -776,7 +778,7 @@ public any Native_GetServerOS(Handle hPlugin, int iNumParams)
 					float fMax = g_director.GetScriptValueFloat("SustainPeakMaxTime", g_fConVar_DirectorSustainPeakMaxTime);
 
 					float fSet = GetRandomFloat(fMin, fMax);
-					g_TempoTimer.Set(fSet);
+					g_TempoTimer.Start(fSet);
 
 					/** clear population density from all nav areas in survivor active sets.
 					 * triggers OnSustainPeakPopulationClear forward
@@ -795,7 +797,7 @@ public any Native_GetServerOS(Handle hPlugin, int iNumParams)
 					float fMax = g_director.GetScriptValueFloat("RelaxMaxInterval", g_fConVar_DirectorRelaxMaxInterval);
 
 					float fSet = GetRandomFloat(fMin, fMax);
-					g_TempoTimer.Set(fSet);
+					g_TempoTimer.Start(fSet);
 
 					g_director.RenewRelaxStartFlow();
 
@@ -814,17 +816,6 @@ public any Native_GetServerOS(Handle hPlugin, int iNumParams)
 	{
 		float fValue = GetNativeCell(1);
 		g_director.relaxStartFlow = fValue;
-	}
-
-	public any Native_GetTempoRemainingTime(Handle hPlugin, int iNumParams)
-	{
-		return g_TempoTimer.GetRemaining();
-	}
-
-	public void Native_SetTempoRemainingTime(Handle hPlugin, int iNumParams)
-	{
-		float fSet = GetNativeCell(1);
-		g_TempoTimer.Set(fSet);
 	}
 
 	public any Native_GetHighestFlowSurvivor(Handle hPlugin, int iNumParams)
@@ -1083,23 +1074,6 @@ public any Native_GetServerOS(Handle hPlugin, int iNumParams)
 		float fDurationAI = GetNativeCell(4);
 
 		SDKCall(g_hSDK_Vocalize, iClient, sGameSound, fCooldown, fDurationAI);
-	}
-
-	public any Native_GetVocalizeCooldown(Handle hPlugin, int iNumParams)
-	{
-		int iClient = GetNativeCell(1);
-		CountdownTimer cooldown = Util_GetVocalizeCooldown(iClient);
-
-		return cooldown.GetRemaining();
-	}
-
-	public void Native_SetVocalizeCooldown(Handle hPlugin, int iNumParams)
-	{
-		int iClient = GetNativeCell(1);
-		CountdownTimer cooldown = Util_GetVocalizeCooldown(iClient);
-		float fDuration = GetNativeCell(2);
-
-		cooldown.Set(fDuration);
 	}
 
 	public any Native_SpawnSpecial(Handle hPlugin, int iNumParams)
@@ -1373,15 +1347,25 @@ public any Native_GetServerOS(Handle hPlugin, int iNumParams)
 		return SDKCall(g_hSDK_SequenceDuration, iEntity, studio, iSequence);
 	}
 
-	public any Native_GetScenarioRestartTime(Handle hPlugin, int iNumParams)
+	public any Native_GetMobTimer(Handle hPlugin, int iNumParams)
 	{
-		return g_ScenarioRestartTimer.GetRemaining();
+		return g_MobTimer;
 	}
 
-	public void Native_SetScenarioRestartTime(Handle hPlugin, int iNumParams)
+	public any Native_GetTempoTimer(Handle hPlugin, int iNumParams)
 	{
-		float fSet = GetNativeCell(1);
-		g_ScenarioRestartTimer.Set(fSet);
+		return g_TempoTimer;
+	}
+
+	public any Native_GetScenarioRestartTimer(Handle hPlugin, int iNumParams)
+	{
+		return g_ScenarioRestartTimer;
+	}
+
+	public any Native_GetVocalizeTimer(Handle hPlugin, int iNumParams)
+	{
+		Address addr = GetEntityAddress(GetNativeCell(1));
+		return addr + view_as<Address>(g_iOffset_VocalizeCooldown);
 	}
 
 /** InternalKeyValues methodmap */
@@ -2640,6 +2624,24 @@ public any Native_GetServerOS(Handle hPlugin, int iNumParams)
 		SetNativeArray(2, vBuffer, sizeof(vBuffer));
 	}
 
+	public any Native_Inferno_damageTimer_get(Handle hPlugin, int iNumParams)
+	{
+		Address inferno = GetNativeCell(1);
+		return inferno + view_as<Address>(g_iOffset_Inferno_damageTimer);
+	}
+
+	public any Native_Inferno_damageRampTimer_get(Handle hPlugin, int iNumParams)
+	{
+		Address inferno = GetNativeCell(1);
+		return inferno + view_as<Address>(g_iOffset_Inferno_damageRampTimer);
+	}
+
+	public any Native_Inferno_GetFlameLifetime(Handle hPlugin, int iNumParams)
+	{
+		Address inferno = GetNativeCell(1);
+		return SDKCall(g_hSDK_GetFlameLifetime, inferno);
+	}
+
 /** Flame methodmap */
 	public any Native_Flame_depth_get(Handle hPlugin, int iNumParams)
 	{
@@ -2660,36 +2662,16 @@ public any Native_GetServerOS(Handle hPlugin, int iNumParams)
 		return LoadFromAddress(flame + view_as<Address>(g_iOffset_Flame_parent), NumberType_Int32);
 	}
 
-	public any Native_Flame_spreadDuration_get(Handle hPlugin, int iNumParams)
+	public any Native_Flame_spawnLifetime_get(Handle hPlugin, int iNumParams)
 	{
 		Address flame = GetNativeCell(1);
-		CountdownTimer timer = Util_Flame_GetSpreadDuration(flame);
-
-		return timer.GetRemaining();
-	}
-	public any Native_Flame_spreadDuration_set(Handle hPlugin, int iNumParams)
-	{
-		Address flame = GetNativeCell(1);
-		CountdownTimer timer = Util_Flame_GetSpreadDuration(flame);
-		float fValue = GetNativeCell(2);
-
-		return timer.Set(fValue);
+		return flame + view_as<Address>(g_iOffset_Flame_spawnLifetime);
 	}
 
 	public any Native_Flame_lifetime_get(Handle hPlugin, int iNumParams)
 	{
 		Address flame = GetNativeCell(1);
-		CountdownTimer timer = Util_Flame_GetLifetime(flame);
-
-		return timer.GetRemaining();
-	}
-	public any Native_Flame_lifetime_set(Handle hPlugin, int iNumParams)
-	{
-		Address flame = GetNativeCell(1);
-		CountdownTimer timer = Util_Flame_GetLifetime(flame);
-		float fValue = GetNativeCell(2);
-
-		return timer.Set(fValue);
+		return flame + view_as<Address>(g_iOffset_Flame_lifetime);
 	}
 
 	public void Native_Flame_GetOrigin(Handle hPlugin, int iNumParams)
@@ -2725,4 +2707,52 @@ public any Native_GetServerOS(Handle hPlugin, int iNumParams)
 	{
 		CUtlVector savedPlayers = GetNativeCell(1);
 		return savedPlayers.count;
+	}
+
+/** deprecated */
+
+	public any Native_GetTimeUntilNextMob(Handle hPlugin, int iNumParams)
+	{
+		return g_MobTimer.GetRemainingTime();
+	}
+
+	public any Native_GetTempoRemainingTime(Handle hPlugin, int iNumParams)
+	{
+		return g_TempoTimer.GetRemainingTime();
+	}
+
+	public void Native_SetTempoRemainingTime(Handle hPlugin, int iNumParams)
+	{
+		float fSet = GetNativeCell(1);
+		g_TempoTimer.Start(fSet);
+	}
+
+	public any Native_GetScenarioRestartTime(Handle hPlugin, int iNumParams)
+	{
+		return g_ScenarioRestartTimer.GetRemainingTime();
+	}
+
+	public void Native_SetScenarioRestartTime(Handle hPlugin, int iNumParams)
+	{
+		float fSet = GetNativeCell(1);
+		g_ScenarioRestartTimer.Start(fSet);
+	}
+
+	public any Native_GetVocalizeCooldown(Handle hPlugin, int iNumParams)
+	{
+		Address addr = GetEntityAddress(GetNativeCell(1));
+		CountdownTimer cooldown = view_as<CountdownTimer>(
+			addr + view_as<Address>(g_iOffset_VocalizeCooldown));
+
+		return cooldown.GetRemainingTime();
+	}
+
+	public void Native_SetVocalizeCooldown(Handle hPlugin, int iNumParams)
+	{
+		Address addr = GetEntityAddress(GetNativeCell(1));
+		CountdownTimer cooldown = view_as<CountdownTimer>(
+			addr + view_as<Address>(g_iOffset_VocalizeCooldown));
+		float fDuration = GetNativeCell(2);
+
+		cooldown.Start(fDuration);
 	}

@@ -125,51 +125,109 @@ enum struct RegisteredMsgHook
  * Hook constructors
  ********************/
 
-/**
- * register a DynamicDetour, whose enabled status is managed by the plugin's framework
- *
- * @param	sFunction		"Function" from the gamedata file to use for creating the detour
- * @param	callback_pre	callback for the pre-hook
- * @param	callback_post	callback for the post-hook
- * @param	fwd				forwards to link this detour to.
- * @param	bForced			always enable this detour
- *
- * @note					if bForced is false, the detour will only be enabled if one of the
- * 							forwards in the fwd array is used by another plugin
- * @note					use the forward enum identifiers found in hxlib/forwards.sp, and
- * 							end the array with the sentinel value -1
- */
-void CreateDetour(const char[] sFunction, DHookCallback callback_pre = INVALID_FUNCTION, DHookCallback callback_post = INVALID_FUNCTION, any[] fwd = {-1}, bool bForced = false)
+enum struct DetourPrep
 {
-	RegisteredDetour detour;
+	DynamicDetour handle;
+	bool failed;
 
-	detour.handle = DynamicDetour.FromConf(g_hGameData, sFunction);
-	if (detour.handle == null)
+	/**
+	 * call either this or FromAddress first.
+	 * intitializes DynamicDetour handle through a Functions key in gamedata
+	 *
+	 * @param sFunction			key name from "Functions" section in gamedata
+	 */
+	void FromFunction(const char[] sFunction)
 	{
-		LogError("failed to create detour for '%s': gamedata could not be read", sFunction);
-		delete detour.handle;
-		return;
+		this.failed = false;
+
+		this.handle = DynamicDetour.FromConf(g_hGameData, sFunction);
+		if (this.handle == null)
+		{
+			LogError("failed to create detour from function '%s': gamedata could not be read", sFunction);
+			delete this.handle;
+			this.failed = true;
+			return;
+		}
+
+		#if DEBUG
+			DebugPrint("[CreateDetour] gamedata function: %s", sFunction);
+		#endif
 	}
 
-	detour.callback[EHook_Pre] = callback_pre;
-	detour.callback[EHook_Post] = callback_post;
-	detour.forced = bForced;
-
-	int detourIndex = g_hArrayDetours.Length;
-
-	#if DEBUG
-		DebugPrint("[CreateDetour] gamedata function: %s | forced: %s", sFunction, bForced ? "true" : "false");
-	#endif
-
-	for (int i = 0; i < Forward_MAX; i++)
+	/**
+	 * call either this or FromFunction first.
+	 * initializes DynamicDetour handle through an Addresses key in gamedata
+	 *
+	 * @param sAddress			key name from "Addresses" section in gamedata
+	 * @param callConv			calling convention of the function
+	 * @param returnType		type of the return value
+	 * @param thisType			Type of this pointer or ignore (ignore can be used if not needed)
+	 */
+	void FromAddress(const char[] sAddress, CallingConvention callConv, ReturnType returnType = ReturnType_Void, ThisPointerType thisType = ThisPointer_Ignore)
 	{
-		if (fwd[i] < 0 || fwd[i] >= Forward_MAX)
-			break;
+		this.failed = false;
 
-		g_forward[fwd[i]].LinkDetour(detourIndex);
+		this.handle = new DynamicDetour(LoadAddress(sAddress), callConv, returnType, thisType);
+		if (this.handle == null)
+		{
+			LogError("failed to create detour from address '%s': gamedata could not be read", sAddress);
+			delete this.handle;
+			this.failed = true;
+			return;
+		}
+
+		#if DEBUG
+			DebugPrint("[CreateDetour] gamedata address: %s", sAddress);
+		#endif
 	}
 
-	g_hArrayDetours.PushArray(detour);
+	/**
+	 * add param for detours created with FromAddress
+	 *
+	 * @param type				Parameter type
+	 */
+	void Param(HookParamType type)
+	{
+		if (this.failed) return;
+		this.handle.AddParam(type);
+	}
+
+	/**
+	 * called last. register into framework for managing enabled status
+	 *
+	 * @param	callback_pre	callback for the pre-hook
+	 * @param	callback_post	callback for the post-hook
+	 * @param	fwd				forwards to link this detour to.
+	 * @param	bForced			always enable this detour
+	 *
+	 * @note					if bForced is false, the detour will only be enabled if one of the
+	 * 							forwards in the fwd array is used by another plugin
+	 * @note					use the forward enum identifiers found in hxlib/forwards.sp, and
+	 * 							end the array with the sentinel value -1
+	 */
+	void Register(DHookCallback callback_pre = INVALID_FUNCTION, DHookCallback callback_post, any[] fwd = {-1}, bool bForced = false)
+	{
+		if (this.failed) return;
+
+		RegisteredDetour detour;
+
+		detour.handle = this.handle;
+		detour.callback[EHook_Pre] = callback_pre;
+		detour.callback[EHook_Post] = callback_post;
+		detour.forced = bForced;
+
+		int detourIndex = g_hArrayDetours.Length;
+
+		for (int i = 0; i < Forward_MAX; i++)
+		{
+			if (fwd[i] < 0 || fwd[i] >= Forward_MAX)
+				break;
+
+			g_forward[fwd[i]].LinkDetour(detourIndex);
+		}
+
+		g_hArrayDetours.PushArray(detour);
+	}
 }
 
 /**

@@ -325,25 +325,9 @@ float Util_GetPlayerFlow(int iPlayer, FlowType type)
 	return NULL_FLOW;
 }
 
-CountdownTimer Util_GetVocalizeCooldown(int iClient)
-{
-	Address addr = GetEntityAddress(iClient);
-	return view_as<CountdownTimer>(addr + view_as<Address>(g_iOffset_VocalizeCooldown));
-}
-
 /******************
  * Inferno + Flame
  *****************/
-
-CountdownTimer Util_Flame_GetSpreadDuration(Address flame)
-{
-	return view_as<CountdownTimer>(flame + view_as<Address>(g_iOffset_Flame_spreadDuration));
-}
-
-CountdownTimer Util_Flame_GetLifetime(Address flame)
-{
-	return view_as<CountdownTimer>(flame + view_as<Address>(g_iOffset_Flame_lifetime));
-}
 
 int Util_Inferno_GetFlameCount(Address inferno)
 {
@@ -528,51 +512,6 @@ methodmap CUtlVectorUltraConservative < Address
 		}
 
 		return iWritten;
-	}
-}
-
-methodmap CountdownTimer < Address
-{
-	property float time
-	{
-		public get()
-		{
-			return LoadFromAddress(this + view_as<Address>(
-				g_iOffset_CountdownTimer_time), NumberType_Int32);
-		}
-		public set(float value)
-		{
-			StoreToAddress(this + view_as<Address>(
-				g_iOffset_CountdownTimer_timestamp), value, NumberType_Int32);
-		}
-	}
-
-	property float timestamp
-	{
-		public get()
-		{
-			return LoadFromAddress(this + view_as<Address>(
-				g_iOffset_CountdownTimer_timestamp), NumberType_Int32);
-		}
-		public set(float value)
-		{
-			StoreToAddress(this + view_as<Address>(
-				g_iOffset_CountdownTimer_timestamp), value, NumberType_Int32);
-		}
-	}
-
-	public float GetRemaining()
-	{
-		float fNow = GetGameTime();
-		return this.timestamp - fNow;
-	}
-
-	public void Set(float value)
-	{
-		float fNow = GetGameTime();
-
-		this.time = value;
-		this.timestamp = fNow + value;
 	}
 }
 

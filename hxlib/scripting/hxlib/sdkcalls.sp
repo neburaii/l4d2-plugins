@@ -89,6 +89,7 @@ Handle g_hSDK_SequenceDuration;
 Handle g_hSDK_FindActivityToSequenceMapper;
 Handle g_hSDK_HashInt;
 Handle g_hSDK_RemoveAmmo;
+Handle g_hSDK_GetFlameLifetime;
 
 void InitSDKCalls()
 {
@@ -508,6 +509,11 @@ void InitSDKCalls()
 	prep.Param(SDKType_PlainOldData, SDKPass_Plain);
 	prep.Param(SDKType_PlainOldData, SDKPass_Plain);
 	prep.End(g_hSDK_RemoveAmmo);
+
+	/** Native_Inferno_GetFlameLifetime */
+	prep.Start(SDKCall_Raw, SDKConf_Virtual, "GetFlameLifetime");
+	prep.Return(SDKType_Float, SDKPass_Plain);
+	prep.End(g_hSDK_GetFlameLifetime);
 
 	/** Native_GetDeployActivity */
 	prep.Start(SDKCall_Entity, SDKConf_Virtual, "GetDeployActivity");

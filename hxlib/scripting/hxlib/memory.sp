@@ -42,8 +42,6 @@ int		g_iOffset_FinaleTrigger_FinaleType;
 int		g_iOffset_ZombieManager_SpawnAreaSets;
 int		g_iOffset_EntityTeam;
 int		g_iOffset_Player_ActiveSet;
-int		g_iOffset_CountdownTimer_time;
-int		g_iOffset_CountdownTimer_timestamp;
 int		g_iOffset_IntervalTimer_timestamp;
 int		g_iOffset_Player_punchAngle;
 int		g_iOffset_Player_character;
@@ -137,11 +135,13 @@ int		g_iOffset_Inferno_maxBounds;
 int		g_iOffset_Inferno_flameCount;
 int		g_iOffset_Inferno_flameList;
 int		g_iOffset_Inferno_Origin;
+int		g_iOffset_Inferno_damageTimer;
+int		g_iOffset_Inferno_damageRampTimer;
 
 /** FlameInfo */
 int		g_iOffset_Flame_depth;
 int		g_iOffset_Flame_parent;
-int		g_iOffset_Flame_spreadDuration;
+int		g_iOffset_Flame_spawnLifetime;
 int		g_iOffset_Flame_lifetime;
 int		g_iOffset_Flame_origin;
 int		g_iOffset_Flame_direction;
@@ -183,10 +183,6 @@ void InitOffsets()
 		LoadOffset("CBaseEntity::teamNumber");
 	g_iOffset_Player_ActiveSet =
 		LoadOffset("CTerrorPlayer::activeSet");
-	g_iOffset_CountdownTimer_time =
-		LoadOffset("CountdownTimer::time");
-	g_iOffset_CountdownTimer_timestamp =
-		LoadOffset("CountdownTimer::timestamp");
 	g_iOffset_IntervalTimer_timestamp =
 		LoadOffset("IntervalTimer::timestamp");
 	g_iOffset_Player_punchAngle =
@@ -358,13 +354,17 @@ void InitOffsets()
 		LoadOffset("CInferno::flameList");
 	g_iOffset_Inferno_Origin =
 		LoadOffset("CInferno::origin");
+	g_iOffset_Inferno_damageTimer =
+		LoadOffset("CInferno::damageTimer");
+	g_iOffset_Inferno_damageRampTimer =
+		LoadOffset("CInferno::damageRampTimer");
 
 	/** FireInfo */
 	g_iOffset_Flame_depth =
 		LoadOffset("FireInfo::depth");
 	g_iOffset_Flame_parent =
 		LoadOffset("FireInfo::parent");
-	g_iOffset_Flame_spreadDuration =
+	g_iOffset_Flame_spawnLifetime =
 		LoadOffset("FireInfo::spreadDuration");
 	g_iOffset_Flame_lifetime =
 		LoadOffset("FireInfo::lifetime");

@@ -3,137 +3,144 @@
 
 void InitDetours()
 {
-	CreateDetour("HX::Intensity::Increase",
-		Detour_IntensityIncrease_Pre, Detour_IntensityIncrease_Post,
+	DetourPrep prep;
+
+	prep.FromFunction("HX::Intensity::Increase");
+	prep.Register(Detour_IntensityIncrease_Pre, Detour_IntensityIncrease_Post,
 		{Forward_OnIncreaseSurvivorIntensity, Forward_OnIncreaseSurvivorIntensity_Post, -1});
 
-	CreateDetour("HX::CDirectorScriptedEventManager::OnMapInvokedPanicEventNonVirtual",
-		Detour_OnMapInvokedPanicEventNonVirtual_Pre, Detour_OnMapInvokedPanicEventNonVirtual_Post,
+	prep.FromFunction("HX::CDirectorScriptedEventManager::OnMapInvokedPanicEventNonVirtual");
+	prep.Register(Detour_OnMapInvokedPanicEventNonVirtual_Pre, Detour_OnMapInvokedPanicEventNonVirtual_Post,
 		{Forward_OnMapInvokedPanicEvent, Forward_OnMapInvokedPanicEvent_Post, -1});
 
-	CreateDetour("HX::CDirectorScriptedEventManager::StartPanicEvent",
-		Detour_OnStartPanicEvent_Pre, Detour_OnStartPanicEvent_Post,
+	prep.FromFunction("HX::CDirectorScriptedEventManager::StartPanicEvent");
+	prep.Register(Detour_OnStartPanicEvent_Pre, Detour_OnStartPanicEvent_Post,
 		{Forward_OnStartPanicEvent, Forward_OnStartPanicEvent_Post, -1});
 
-	CreateDetour("HX::CDirector::PostRunScript",
-		_, Detour_DirectorPostRunScript_Post,
+	prep.FromFunction("HX::CDirector::PostRunScript");
+	prep.Register(_, Detour_DirectorPostRunScript_Post,
 		{Forward_OnGetDirectorOptions, -1});
 
-	CreateDetour("HX::CDirector::BeginLocalScript",
-		Detour_BeginLocalScript_Pre, Detour_BeginLocalScript_Post,
+	prep.FromFunction("HX::CDirector::BeginLocalScript");
+	prep.Register(Detour_BeginLocalScript_Pre, Detour_BeginLocalScript_Post,
 		{Forward_OnBeginLocalScript, Forward_OnBeginLocalScript_Post, -1});
 
-	CreateDetour("HX::CDirector::EndLocalScript",
-		Detour_EndLocalScript_Pre, Detour_EndLocalScript_Post,
+	prep.FromFunction("HX::CDirector::EndLocalScript");
+	prep.Register(Detour_EndLocalScript_Pre, Detour_EndLocalScript_Post,
 		{Forward_OnEndLocalScript, Forward_OnEndLocalScript_Post, -1});
 
-	CreateDetour("HX::CFinaleTrigger::StartFinale",
-		Detour_StartFinale_Pre, Detour_StartFinale_Post,
+	prep.FromFunction("HX::CFinaleTrigger::StartFinale");
+	prep.Register(Detour_StartFinale_Pre, Detour_StartFinale_Post,
 		{Forward_OnStartFinale, Forward_OnStartFinale_Post, -1});
 
-	CreateDetour("HX::ZombieManager::GetRandomPZSpawnPosition",
-		Detour_GetRandomPZSpawnPosition_Pre, Detour_GetRandomPZSpawnPosition_Post,
+	prep.FromFunction("HX::ZombieManager::GetRandomPZSpawnPosition");
+	prep.Register(Detour_GetRandomPZSpawnPosition_Pre, Detour_GetRandomPZSpawnPosition_Post,
 		{Forward_OnGetRandomPZSpawnPosition, Forward_OnGetRandomPZSpawnPosition_Override, Forward_OnGetRandomPZSpawnPosition_Post, -1});
 
-	CreateDetour("HX::ZombieManager::CollectSpawnAreas",
-		Detour_CollectSpawnAreas_Pre, Detour_CollectSpawnAreas_Post,
+	prep.FromFunction("HX::ZombieManager::CollectSpawnAreas");
+	prep.Register(Detour_CollectSpawnAreas_Pre, Detour_CollectSpawnAreas_Post,
 		{Forward_OnCollectSpawnAreas, Forward_OnCollectSpawnAreas_Post, -1});
 
-	CreateDetour("HX::CDirector::ResetMobTimer",
-		Detour_ResetMobTimer_Pre, Detour_ResetMobTimer_Post,
+	prep.FromFunction("HX::CDirector::ResetMobTimer");
+	prep.Register(Detour_ResetMobTimer_Pre, Detour_ResetMobTimer_Post,
 		{Forward_OnResetMobTimer, Forward_OnResetMobTimer_Post, -1});
 
-	CreateDetour("HX::CDirector::OnMobRushStart",
-		Detour_OnMobRushStart_Pre, Detour_OnMobRushStart_Post,
+	prep.FromFunction("HX::CDirector::OnMobRushStart");
+	prep.Register(Detour_OnMobRushStart_Pre, Detour_OnMobRushStart_Post,
 		{Forward_OnStartMobTimer, Forward_OnStartMobTimer_Post, -1});
 
-	CreateDetour("HX::CDirector::ResetSpecialTimers",
-		Detour_ResetSpecialTimers_Pre, Detour_ResetSpecialTimers_Post,
+	prep.FromFunction("HX::CDirector::ResetSpecialTimers");
+	prep.Register(Detour_ResetSpecialTimers_Pre, Detour_ResetSpecialTimers_Post,
 		{Forward_OnResetSpecialTimers, Forward_OnResetSpecialTimers_Post, -1});
 
-	CreateDetour("HX::ZombieManager::CanZombieSpawnHere",
-		Detour_CanZombieSpawnHere_Pre, Detour_CanZombieSpawnHere_Post,
+	prep.FromFunction("HX::ZombieManager::CanZombieSpawnHere");
+	prep.Register(Detour_CanZombieSpawnHere_Pre, Detour_CanZombieSpawnHere_Post,
 		{Forward_OnCanZombieSpawnHere, Forward_OnCanZombieSpawnHere_Override, Forward_OnCanZombieSpawnHere_Post, -1});
 
-	CreateDetour("HX::CDirector::UpdateTempo",
-		Detour_UpdateTempo_Pre, Detour_UpdateTempo_Post,
+	prep.FromFunction("HX::CDirector::UpdateTempo");
+	prep.Register(Detour_UpdateTempo_Pre, Detour_UpdateTempo_Post,
 		{Forward_OnUpdateTempo, Forward_OnUpdateTempo_Post, -1});
 
-	CreateDetour("HX::TerrorNavMesh::RemoveWanderersInActiveAreaSet",
-		Detour_RemoveWanderersInActiveAreaSet_Pre, Detour_RemoveWanderersInActiveAreaSet_Post,
-		{Forward_OnSustainPeakPopulationClear, Forward_OnSustainPeakPopulationClear_Post, -1});
-
-	CreateDetour("HX::CTerrorPlayer::GoAwayFromKeyboard",
-		Detour_GoAwayFromKeyboard_Pre, Detour_GoAwayFromKeyboard_Post,
+	prep.FromFunction("HX::CTerrorPlayer::GoAwayFromKeyboard");
+	prep.Register(Detour_GoAwayFromKeyboard_Pre, Detour_GoAwayFromKeyboard_Post,
 		{Forward_OnGoAwayFromKeyboard, Forward_OnGoAwayFromKeyboard_Post, -1});
 
-	CreateDetour("HX::CSpitterProjectile::Create",
-		Detour_SpitterProjectileCreate_Pre, Detour_SpitterProjectileCreate_Post,
+	prep.FromFunction("HX::CSpitterProjectile::Create");
+	prep.Register(Detour_SpitterProjectileCreate_Pre, Detour_SpitterProjectileCreate_Post,
 		{Forward_OnCreateSpitterProjectile, Forward_OnCreateSpitterProjectile_Post, -1});
 
-	CreateDetour("HX::CInferno::CreateFire",
-		Detour_CreateFire_Pre, Detour_CreateFire_Post,
+	prep.FromFunction("HX::CInferno::CreateFire");
+	prep.Register(Detour_CreateFire_Pre, Detour_CreateFire_Post,
 		{Forward_OnCreateFlame, Forward_OnCreateFlame_Post, -1});
 
-	CreateDetour("HX::CBasePlayer::SetPunchAngle",
-		Detour_SetPunchAngle_Pre, Detour_SetPunchAngle_Post,
+	prep.FromFunction("HX::CBasePlayer::SetPunchAngle");
+	prep.Register(Detour_SetPunchAngle_Pre, Detour_SetPunchAngle_Post,
 		{Forward_OnSetPunchAngle, Forward_OnSetPunchAngle_Post, -1});
 
-	CreateDetour("HX::CTerrorGun::DoViewPunch",
-		Detour_GunDoViewPunch_Pre, Detour_GunDoViewPunch_Post,
+	prep.FromFunction("HX::CTerrorGun::DoViewPunch");
+	prep.Register(Detour_GunDoViewPunch_Pre, Detour_GunDoViewPunch_Post,
 		{Forward_OnGunViewPunch, Forward_OnGunViewPunch_Post, -1});
 
-	CreateDetour("HX::CInsectSwarm::GetFlameLifetime",
-		_, Detour_SpitGetFlameLifetime_Post,
+	prep.FromFunction("HX::CInsectSwarm::GetFlameLifetime");
+	prep.Register(_, Detour_SpitGetFlameLifetime_Post,
 		{Forward_OnGetSpitLifetime_Override, Forward_OnGetSpitLifetime_Post, -1});
 
-	CreateDetour("HX::CBaseServer::ProcessConnectionlessPacket",
-		Detour_ProcessConnectionlessPacket_Pre, Detour_ProcessConnectionlessPacket_Post,
+	prep.FromFunction("HX::CBaseServer::ProcessConnectionlessPacket");
+	prep.Register(Detour_ProcessConnectionlessPacket_Pre, Detour_ProcessConnectionlessPacket_Post,
 		{Forward_OnConnectionlessPacket, Forward_OnConnectionlessPacket_Post, -1});
 
-	CreateDetour("HX::CBaseServer::SetReservationCookie",
-		_, Detour_SetReservationCookie_Post,
+	prep.FromFunction("HX::CBaseServer::SetReservationCookie");
+	prep.Register(_, Detour_SetReservationCookie_Post,
 		{Forward_OnSetReservationCookie_Post, -1});
 
-	CreateDetour("HX::CCSPlayer::ShowMOTD",
-		Detour_ShowMOTD_Pre, Detour_ShowMOTD_Post,
+	prep.FromFunction("HX::CCSPlayer::ShowMOTD");
+	prep.Register(Detour_ShowMOTD_Pre, Detour_ShowMOTD_Post,
 		{Forward_OnShowMOTD, Forward_OnShowMOTD_Post, -1});
 
-	CreateDetour("HX::CTerrorPlayer::ShowHostDetails",
-		Detour_ShowHostDetails_Pre, Detour_ShowHostDetails_Post,
+	prep.FromFunction("HX::CTerrorPlayer::ShowHostDetails");
+	prep.Register(Detour_ShowHostDetails_Pre, Detour_ShowHostDetails_Post,
 		{Forward_OnShowHostBanner, Forward_OnShowHostBanner_Post, -1});
 
-	CreateDetour("HX::CBaseServer::GetFreeClientInternal",
-		Detour_GetFreeClientInternal_Pre, Detour_GetFreeClientInternal_Post,
+	prep.FromFunction("HX::CBaseServer::GetFreeClientInternal");
+	prep.Register(Detour_GetFreeClientInternal_Pre, Detour_GetFreeClientInternal_Post,
 		{Forward_OnGetFreeClient, Forward_OnGetFreeClient_Post, -1});
 
-	CreateDetour("HX::CTerrorPlayer::Vocalize",
-		Detour_Vocalize_Pre, Detour_Vocalize_Post,
+	prep.FromFunction("HX::CTerrorPlayer::Vocalize");
+	prep.Register(Detour_Vocalize_Pre, Detour_Vocalize_Post,
 		{Forward_OnVocalize, Forward_OnVocalize_Post, -1});
 
-	CreateDetour("HX::CDirector::CheckForDeadPlayers",
-		Detour_CheckForDeadPlayers_Pre, Detour_CheckForDeadPlayers_Post,
+	prep.FromFunction("HX::CDirector::CheckForDeadPlayers");
+	prep.Register(Detour_CheckForDeadPlayers_Pre, Detour_CheckForDeadPlayers_Post,
 		{Forward_OnScenarioCheckForDeadPlayers, Forward_OnScenarioCheckForDeadPlayers_Post, -1});
 
-	CreateDetour("HX::CSurvivorDeathModel::Create",
-		Detour_SurvivorDeathModelCreate_Pre, Detour_SurvivorDeathModelCreate_Post,
+	prep.FromFunction("HX::CSurvivorDeathModel::Create");
+	prep.Register(Detour_SurvivorDeathModelCreate_Pre, Detour_SurvivorDeathModelCreate_Post,
 		{Forward_OnCreateSurvivorDeathModel, Forward_OnCreateSurvivorDeathModel_Post, -1});
 
-	CreateDetour("HX::CTerrorPlayer::OnIncapacitatedAsSurvivor",
-		Detour_OnIncapacitatedAsSurvivor_Pre, Detour_OnIncapacitatedAsSurvivor_Post,
+	prep.FromFunction("HX::CTerrorPlayer::OnIncapacitatedAsSurvivor");
+	prep.Register(Detour_OnIncapacitatedAsSurvivor_Pre, Detour_OnIncapacitatedAsSurvivor_Post,
 		{Forward_OnIncapacitatedAsSurvivor, Forward_OnIncapacitatedAsSurvivor_Post, -1});
 
-	CreateDetour("HX::CTerrorPlayer::OnIncapacitatedAsTank",
-		Detour_OnIncapacitatedAsTank_Pre, Detour_OnIncapacitatedAsTank_Post,
+	prep.FromFunction("HX::CTerrorPlayer::OnIncapacitatedAsTank");
+	prep.Register(Detour_OnIncapacitatedAsTank_Pre, Detour_OnIncapacitatedAsTank_Post,
 		{Forward_OnIncapacitatedAsTank, Forward_OnIncapacitatedAsTank_Post, -1});
 
-	CreateDetour("HX::CTerrorGun::CycleZoom",
-		Detour_CycleZoom_Pre, Detour_CycleZoom_Post,
+	prep.FromFunction("HX::CTerrorGun::CycleZoom");
+	prep.Register(Detour_CycleZoom_Pre, Detour_CycleZoom_Post,
 		{Forward_OnCycleZoom, Forward_OnCycleZoom_Post, -1});
 
-	CreateDetour("HX::CBaseCombatCharacter::SetAmmoCount",
-		Detour_SetAmmoCount_Pre, Detour_SetAmmoCount_Post,
+	prep.FromFunction("HX::CBaseCombatCharacter::SetAmmoCount");
+	prep.Register(Detour_SetAmmoCount_Pre, Detour_SetAmmoCount_Post,
 		{Forward_OnSetReserveAmmo, Forward_OnSetReserveAmmo_Post, -1});
+
+	if (g_OS == OS_Windows)
+	{
+		prep.FromAddress("CALL::TerrorNavMesh::RemoveWanderersInActiveAreaSet",
+			CallConv_CDECL);
+	}
+	else prep.FromFunction("HX::TerrorNavMesh::RemoveWanderersInActiveAreaSet");
+	prep.Register(Detour_RemoveWanderersInActiveAreaSet_Pre, Detour_RemoveWanderersInActiveAreaSet_Post,
+		{Forward_OnSustainPeakPopulationClear, Forward_OnSustainPeakPopulationClear_Post, -1});
 }
 
 /************
@@ -664,7 +671,7 @@ void InitDetours()
 
 		if (!g_bHandled_StartMobTimer)
 		{
-			fTime = g_MobTimer.time;
+			fTime = g_MobTimer.duration;
 			float fNewTime = fTime;
 
 			Call_StartForward(g_forward[Forward_OnStartMobTimer_Override].handle);
@@ -676,7 +683,7 @@ void InitDetours()
 				if (result == Plugin_Handled)
 					fNewTime = -1.0;
 
-				g_MobTimer.Set(fNewTime);
+				g_MobTimer.Start(fNewTime);
 				fTime = fNewTime;
 			}
 		}

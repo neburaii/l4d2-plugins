@@ -36,6 +36,14 @@ None of the stocks in this file require anything from the main [hxlib.inc](./scr
 # Changelog
 this focuses on core hxlib. hxstocks updates go undocumented.
 
+### 1.15
+- Inferno methodmap additions:
+	- `GetFlameLifeTime`
+	- property `damageTimer`
+	- property `damageRampTimer`
+- natives getting remaining durations of CountdownTimer addresses deprecated in favour of one getting the CountdownTimer address. hxstocks has a methodmap for CountdownTimer
+- fixed missing windows support for `OnSustainPeakPopulationClear` forward (thanks "Harry Potter" for reporting)
+
 ### 1.14
 - added natives `GetScenarioRestartTime` and `SetScenarioRestartTime`
 - fix incorrect addresses for director related timers (tempo, panic stage, mob)

@@ -883,3 +883,139 @@ stock bool IsAudible(int client, const float source[3], int level)
 	float distance = GetVectorDistance(source, listenerPos);
 	return distance <= maxAudible;
 }
+
+/** Address */
+methodmap CountdownTimer
+{
+	/** time between timer's start and target time */
+	property float duration
+	{
+		public get()
+		{
+			return LoadFromAddress(view_as<Address>(this) + view_as<Address>(4), NumberType_Int32);
+		}
+		public set(float value)
+		{
+			StoreToAddress(view_as<Address>(this) + view_as<Address>(4), value, NumberType_Int32);
+		}
+	}
+
+	/** target time when timer will have elapsed */
+	property float timestamp
+	{
+		public get()
+		{
+			return LoadFromAddress(view_as<Address>(this) + view_as<Address>(8), NumberType_Int32);
+		}
+		public set(float value)
+		{
+			StoreToAddress(view_as<Address>(this) + view_as<Address>(8), value, NumberType_Int32);
+		}
+	}
+
+	/**
+	 * start the timer over using the last started duration
+	 */
+	public void Reset()
+	{
+		this.timestamp = GetGameTime() + this.duration;
+	}
+
+	/**
+	 * start a new timer from current time
+	 *
+	 * @param duration		timer will end this many seconds from now
+	 */
+	public void Start(float duration)
+	{
+		this.timestamp = GetGameTime() + duration;
+		this.duration = duration;
+	}
+
+	/**
+	 * start a new timer from a custom start time
+	 *
+	 * @param startTime		timestamp to start timer from
+	 * @param duration		duration of the timer
+	 */
+	public void StartFromTime(float startTime, float duration)
+	{
+		this.timestamp = startTime + duration;
+		this.duration = duration;
+	}
+
+	public void Invalidate()
+	{
+		this.timestamp = -1.0;
+	}
+
+	/**
+	 * check if timer is valid/started. some code depend on it being started to use it.
+	 */
+	public bool HasStarted()
+	{
+		return this.timestamp > 0.0;
+	}
+
+	/**
+	 * check if timer elapsed
+	 *
+	 * @return		true if elapsed, false if not
+	 */
+	public bool IsElapsed()
+	{
+		return GetGameTime() > this.timestamp;
+	}
+
+	/**
+	 * get how many seconds has passed since the timer started
+	 */
+	public float GetElapsedTime()
+	{
+		return GetGameTime() - this.timestamp + this.duration;
+	}
+
+	/**
+	 * get how many seconds remain until the target time
+	 */
+	public float GetRemainingTime()
+	{
+		return this.timestamp - GetGameTime();
+	}
+
+	/**
+	 * ratio (0.0 through 1.0) of how much time of the duration is remaining
+	 *
+	 * @return		0.0 if at timer end, 1.0 if at timer start
+	 */
+	public float GetRemainingRatio()
+	{
+		if (this.timestamp <= 0.0)
+			return 0.0;
+
+		float remaining = this.GetRemainingTime() / this.duration;
+		if (remaining < 0.0)
+			return 0.0;
+		if (remaining > 1.0)
+			return 1.0;
+		return remaining;
+	}
+
+	/**
+	 * ratio (0.0 through 1.0) of how much of the duration was elapsed
+	 *
+	 * @return		0.0 if at timer start, 1.0 if at timer end
+	 */
+	public float GetElapsedRatio()
+	{
+		if (this.timestamp <= 0.0)
+			return 0.0;
+
+		float elapsed = this.GetElapsedTime() / this.duration;
+		if (elapsed < 0.0)
+			return 0.0;
+		if (elapsed > 1.0)
+			return 1.0;
+		return elapsed;
+	}
+}

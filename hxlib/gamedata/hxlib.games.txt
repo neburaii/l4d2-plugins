@@ -372,6 +372,7 @@
 				}
 			}
 
+			/** linux only. windows from address CALL::TerrorNavMesh::RemoveWanderersInActiveAreaSet */
 			"HX::TerrorNavMesh::RemoveWanderersInActiveAreaSet"
 			{
 				"signature"	"TerrorNavMesh::RemoveWanderersInActiveAreaSet"
@@ -1130,6 +1131,12 @@
 				"windows"	"207"
 			}
 
+			"GetFlameLifetime"
+			{
+				"linux"		"206"
+				"windows"	"205"
+			}
+
 			/*****************
 			 * various offsets
 			 *****************/
@@ -1402,21 +1409,6 @@
 			{
 				"linux"		"24"
 				"windows"	"24"
-			}
-
-			/*****************
-			 * CountdownTimer
-			 ****************/
-
-			"CountdownTimer::time"
-			{
-				"linux"		"4"
-				"windows"	"4"
-			}
-			"CountdownTimer::timestamp"
-			{
-				"linux"		"8"
-				"windows"	"8"
 			}
 
 			/************
@@ -1745,6 +1737,18 @@
 			{
 				"linux"		"2956"
 				"windows"	"2936"
+			}
+
+			"CInferno::damageTimer"
+			{
+				"linux"		"2920"
+				"windows"	"2900"
+			}
+
+			"CInferno::damageRampTimer"
+			{
+				"linux"		"2932"
+				"windows"	"2912"
 			}
 
 			/***********
