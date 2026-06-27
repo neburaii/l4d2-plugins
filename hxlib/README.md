@@ -36,6 +36,12 @@ None of the stocks in this file require anything from the main [hxlib.inc](./scr
 # Changelog
 this focuses on core hxlib. hxstocks updates go undocumented.
 
+### 1.15.1
+- fix AcceptInput hook causing windows to crash (thanks "Harry Potter" for reporting)
+- minor changes to inc
+	- VariantType enum completely renamed
+	- Variant methodmap is now an enum struct
+
 ### 1.15
 - Inferno methodmap additions:
 	- `GetFlameLifeTime`

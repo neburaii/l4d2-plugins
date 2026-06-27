@@ -6,19 +6,6 @@ void RegisterNatives()
 	CreateNative("AddEntityHook", Native_AddEntityHook);
 	CreateNative("RemoveEntityHook", Native_RemoveEntityHook);
 
-	CreateNative("Variant.~Variant", Native_Variant_Delete);
-	CreateNative("Variant.GetCell", Native_Variant_GetCell);
-	CreateNative("Variant.SetCell", Native_Variant_SetCell);
-	CreateNative("Variant.GetString", Native_Variant_GetString);
-	CreateNative("Variant.SetString", Native_Variant_SetString);
-	CreateNative("Variant.GetVector", Native_Variant_GetVector);
-	CreateNative("Variant.SetVector", Native_Variant_SetVector);
-	CreateNative("Variant.cell.get", Native_Variant_cell_get);
-	CreateNative("Variant.cell.set", Native_Variant_cell_set);
-	CreateNative("Variant.type.get", Native_Variant_type_get);
-	CreateNative("Variant.type.set", Native_Variant_type_set);
-	CreateNative("Variant.address.get", Native_Variant_address_get);
-
 	CreateNative("NavLadder.entity.get", Native_NavLadder_entity_get);
 	CreateNative("NavLadder.team.get", Native_NavLadder_team_get);
 	CreateNative("NavLadder.length.get", Native_NavLadder_length_get);
@@ -1646,102 +1633,6 @@ public any Native_GetServerOS(Handle hPlugin, int iNumParams)
 		GetNativeString(2, sPath, iLen);
 
 		return SDKCall(g_hSDK_KeyValues_SaveToFile, kv, g_pBaseFileSystem, sPath, 0);
-	}
-
-/** Variant methodmap */
-	public void Native_Variant_Delete(Handle hPlugin, int iNumParams)
-	{
-		Address pThis = GetNativeCell(1);
-		Util_DeleteStringMemoryBlock(pThis);
-	}
-
-	public any Native_Variant_GetCell(Handle hPlugin, int iNumParams)
-	{
-		Address pThis = GetNativeCell(1);
-
-		return LoadFromAddress(pThis, NumberType_Int32);
-	}
-	public void Native_Variant_SetCell(Handle hPlugin, int iNumParams)
-	{
-		Address pThis = GetNativeCell(1);
-		any value = GetNativeCell(2);
-
-		StoreToAddress(pThis, value, NumberType_Int32);
-	}
-
-	public any Native_Variant_GetString(Handle hPlugin, int iNumParams)
-	{
-		Address pThis = GetNativeCell(1);
-		int iBufferSize = GetNativeCell(3);
-		char[] sBuffer = new char[iBufferSize];
-		GetNativeString(2, sBuffer, iBufferSize);
-
-		int iWritten = LoadStringFromPointer(pThis, sBuffer, iBufferSize);
-
-		SetNativeString(2, sBuffer, iBufferSize);
-
-		return iWritten;
-	}
-	public void Native_Variant_SetString(Handle hPlugin, int iNumParams)
-	{
-		Address pThis = GetNativeCell(1);
-		int iLength = GetNativeStringLengthFull(2);
-		char[] sValue = new char[iLength];
-		GetNativeString(2, sValue, iLength);
-
-		Util_StoreToStringPtr(pThis, sValue);
-	}
-
-	public void Native_Variant_GetVector(Handle hPlugin, int iNumParams)
-	{
-		Address pThis = GetNativeCell(1);
-		float vBuffer[3];
-		GetNativeArray(2, vBuffer, sizeof(vBuffer));
-
-		LoadVectorFromAddress(pThis, vBuffer);
-	}
-	public void Native_Variant_SetVector(Handle hPlugin, int iNumParams)
-	{
-		Address pThis = GetNativeCell(1);
-		float vValue[3];
-		GetNativeArray(2, vValue, sizeof(vValue));
-
-		StoreVectorToAddress(pThis, vValue);
-	}
-
-	public any Native_Variant_cell_get(Handle hPlugin, int iNumParams)
-	{
-		Address pThis = GetNativeCell(1);
-
-		return LoadFromAddress(pThis, NumberType_Int32);
-	}
-	public void Native_Variant_cell_set(Handle hPlugin, int iNumParams)
-	{
-		Address pThis = GetNativeCell(1);
-		any value = GetNativeCell(2);
-
-		StoreToAddress(pThis, value, NumberType_Int32);
-	}
-
-	public any Native_Variant_type_get(Handle hPlugin, int iNumParams)
-	{
-		Address pThis = GetNativeCell(1);
-
-		return LoadFromAddress(pThis + view_as<Address>(g_iOffset_VariantType), NumberType_Int32);
-	}
-	public void Native_Variant_type_set(Handle hPlugin, int iNumParams)
-	{
-		Address pThis = GetNativeCell(1);
-		VariantType type = GetNativeCell(2);
-
-		StoreToAddress(pThis + view_as<Address>(g_iOffset_VariantType), type, NumberType_Int32);
-	}
-
-	public any Native_Variant_address_get(Handle hPlugin, int iNumParams)
-	{
-		Address pThis = GetNativeCell(1);
-
-		return pThis;
 	}
 
 /** NavLadder methodmap */

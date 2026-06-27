@@ -356,10 +356,10 @@ PrivateForward InitPrivateForward(EntityHook type, HookMode mode)
 		case EntityHook_AcceptInput: switch (mode)
 		{
 			case Hook_Pre: return CreateForward(
-				ET_Event, Param_Cell, Param_String, Param_CellByRef, Param_CellByRef, Param_Cell);
+				ET_Event, Param_Cell, Param_String, Param_CellByRef, Param_CellByRef, Param_Array);
 
 			case Hook_Post: return CreateForward(
-				ET_Ignore, Param_Cell, Param_String, Param_Cell, Param_Cell, Param_Cell, Param_Cell);
+				ET_Ignore, Param_Cell, Param_String, Param_Cell, Param_Cell, Param_Array, Param_Cell);
 		}
 
 		case EntityHook_OnNavAreaChanged: switch (mode)

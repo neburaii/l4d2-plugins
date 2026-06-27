@@ -4,6 +4,42 @@
 	{
 		"Functions"
 		{
+			/** variant_t buffer passed as non-pointer in windows */
+			"HX::AcceptInput_win"
+			{
+				"offset"	"AcceptInput"
+				"callconv"	"thiscall"
+				"hooktype"	"entity"
+				"return"	"bool"
+				"this"		"entity"
+
+				"arguments"
+				{
+					"input"
+					{
+						"type"	"charptr"
+					}
+					"activator"
+					{
+						"type"	"int"	// CBaseEntity
+					}
+					"source"
+					{
+						"type"	"int"	// CBaseEntity
+					}
+					"params"
+					{
+						"type"	"object"
+						"size"	"20"
+						// "flags"	"byval/odtor/octor/oassignop"
+					}
+					"outputID"
+					{
+						"type"	"int"
+					}
+				}
+			}
+
 			"HX::AcceptInput"
 			{
 				"offset"	"AcceptInput"
@@ -28,10 +64,11 @@
 					}
 					"params"
 					{
+						"type"	"objectptr"
+					}
+					"outputID"
+					{
 						"type"	"int"
-						// "type"	"object" // variant_t
-						// "size"	"20"
-						// "flags"	"byval/odtor/octor/oassignop"
 					}
 				}
 			}

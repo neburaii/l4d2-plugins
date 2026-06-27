@@ -9,6 +9,7 @@
 #define HXLIB_LIBRARY	"hxlib"
 
 #include <hxstocks>
+#include <sourcescramble>
 
 /** if something clips into the ground, try again this much higher. 18.0 is what the game itself often likes to use */
 #define GROUND_CLIP_UPLIFT	18.0
@@ -95,20 +96,42 @@ enum DirectorTempo
 };
 
 /** data type for a variant_t buffer */
-enum VariantType
+enum FieldType
 {
-	VariantType_Void = 0,
-	VariantType_Float = 1,
-	VariantType_String = 2,
-	VariantType_Vector = 3,
-	VariantType_Int = 5,
-	VariantType_Bool = 6,
-	VariantType_Short = 7,
-	VariantType_Char = 8,
-	VariantType_Color32 = 9,
-	VariantType_ClassPtr = 12,
-	VariantType_EHandle = 13,
-	VariantType_PosVector = 15
+	FieldType_Void,
+
+	FieldType_Float,
+	FieldType_String,
+	FieldType_Vector,
+	FieldType_Quaternion,
+	FieldType_Int,
+	FieldType_Bool,
+	FieldType_Short,
+	FieldType_Char,
+	FieldType_Color32,
+	FieldType_Embedded,
+	FieldType_Custom,
+	FieldType_ClassPtr,
+	FieldType_EHandle,
+	FieldType_Edict,
+	FieldType_PosVector,
+	FieldType_Time,
+	FieldType_Tick,
+	FieldType_ModelName,
+	FieldType_SoundName,
+	FieldType_Input,
+	FieldType_Function,
+	FieldType_VMatrix,
+	FieldType_VMatrixWorldspace,
+	FieldType_Matrix3X4Worldspace,
+	FieldType_Interval,
+	FieldType_ModelIndex,
+	FieldType_MaterialIndex,
+	FieldType_Vector2D,
+	FieldType_Int64,
+	FieldType_Vector4D,
+
+	FieldType_MAX
 };
 
 /** for flags param in GetNearestNavArea* and GetNavArea* natives */
@@ -496,8 +519,8 @@ stock const char g_sWeapon[WeaponID][] =
 	"weapon_gnome",					// 27
 	"weapon_cola_bottles",			// 28
 	"weapon_fireworkcrate",			// 29
-	"weapon_upgradepack_incendiary",	// 30
-	"weapon_upgradepack_explosive",		// 31
+	"weapon_upgradepack_incendiary",// 30
+	"weapon_upgradepack_explosive",	// 31
 	"weapon_pistol_magnum",			// 32
 	"weapon_smg_mp5",				// 33
 	"weapon_rifle_sg552",			// 34
@@ -524,6 +547,82 @@ stock const char g_sWeapon[WeaponID][] =
 	"upgrade_item",					// 55
 	""
 };
+
+/** interface for variant_t buffers. */
+enum struct Variant
+{
+	any value[3];
+	char string[128];
+
+	FieldType type;
+
+	/**
+	 * get a cell of data
+	 *
+	 * @return			any single cell data
+	 */
+	any GetCell()
+	{
+		return this.value[0];
+	}
+
+	/**
+	 * set a cell of data
+	 *
+	 * @param value		any single cell data
+	 */
+	void SetCell(any value)
+	{
+		this.value[0] = value;
+	}
+
+	/**
+	 * get a string value
+	 *
+	 * @param buffer	buffer to store returned string to
+	 * @param length	size of the buffer
+	 *
+	 * @return 			how many bytes were written to the buffer
+	 */
+	int GetString(char[] buffer, int length)
+	{
+		return strcopy(buffer, length, this.string);
+	}
+
+	/**
+	 * sets a string value
+	 *
+	 * @param value		string value
+	 */
+	void SetString(const char[] value)
+	{
+		strcopy(this.string, sizeof(this.string), value);
+	}
+
+	/**
+	 * get a vector value
+	 *
+	 * @param buffer	buffer to store returned vector
+	 *
+	 * @warning			assumes the data stored in the buffer is a vector
+	 */
+	void GetVector(float buffer[3])
+	{
+		for (int i = 0; i < 3; i++)
+			buffer[i] = this.value[i];
+	}
+
+	/**
+	 * set a vector value
+	 *
+	 * @param value		vector value
+	 */
+	void SetVector(const float value[3])
+	{
+		for (int i = 0; i < 3; i++)
+			this.value[i] = value[i];
+	}
+}
 
 /************
  * EntityHooks
@@ -569,6 +668,7 @@ typeset EntityHookCB
 	 * 						still recommended since that triggers it to cleanup any allocated
 	 * 						memory blocks from Variant.SetString
 	 */
+	function Action (int receiver, char[] input, int &activator, int &source, Variant params);
 	function Action (int receiver, char[] input, int &activator, int &source, Variant params);
 
 	/** EntityHook_AcceptInput, EHook_Post
@@ -2707,88 +2807,6 @@ methodmap SequenceTuple
 	}
 }
 
-/** interface for variant_t buffers. */
-methodmap Variant
-{
-	/**
-	 * deletes memory blocks allocated by this.SetString
-	 */
-	public native ~Variant();
-
-	/**
-	 * get a cell of data
-	 *
-	 * @return			any single cell data
-	 */
-	public native any GetCell();
-
-	/**
-	 * set a cell of data
-	 *
-	 * @param value		any single cell data
-	 */
-	public native void SetCell(any value);
-
-	/**
-	 * get a string value
-	 *
-	 * @param buffer	buffer to store returned string to
-	 * @param length	size of the buffer
-	 *
-	 * @return 			how many bytes were written to the buffer
-	 */
-	public native int GetString(char[] buffer, int length);
-
-	/**
-	 * sets a string value
-	 *
-	 * @param value		string value
-	 */
-	public native void SetString(const char[] value);
-
-	/**
-	 * get a vector value
-	 *
-	 * @param buffer	buffer to store returned vector
-	 *
-	 * @warning			assumes the data stored in the buffer is a vector
-	 */
-	public native void GetVector(float buffer[3]);
-
-	/**
-	 * set a vector value
-	 *
-	 * @param value		vector value
-	 */
-	public native void SetVector(const float value[3]);
-
-	/**
-	 * data in buffer
-	 */
-	property any cell
-	{
-		public native get();
-		public native set(any value);
-	}
-
-	/**
-	 * type used to determine how to read the buffer's data
-	 */
-	property VariantType type
-	{
-		public native get();
-		public native set(VariantType value);
-	}
-
-	/**
-	 * address of this variant_t instance
-	 */
-	property Address address
-	{
-		public native get();
-	}
-}
-
 methodmap NavLadder
 {
 	/**
@@ -3996,19 +4014,6 @@ public SharedPlugin __pl_hxlib =
 	{
 		MarkNativeAsOptional("AddEntityHook");
 		MarkNativeAsOptional("RemoveEntityHook");
-
-		MarkNativeAsOptional("Variant.~Variant");
-		MarkNativeAsOptional("Variant.GetCell");
-		MarkNativeAsOptional("Variant.SetCell");
-		MarkNativeAsOptional("Variant.GetString");
-		MarkNativeAsOptional("Variant.SetString");
-		MarkNativeAsOptional("Variant.GetVector");
-		MarkNativeAsOptional("Variant.SetVector");
-		MarkNativeAsOptional("Variant.cell.get");
-		MarkNativeAsOptional("Variant.cell.set");
-		MarkNativeAsOptional("Variant.type.get");
-		MarkNativeAsOptional("Variant.type.set");
-		MarkNativeAsOptional("Variant.address.get");
 
 		MarkNativeAsOptional("NavLadder.entity.get");
 		MarkNativeAsOptional("NavLadder.team.get");

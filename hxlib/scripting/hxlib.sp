@@ -21,7 +21,7 @@ public Plugin myinfo =
 	name = "hxlib",
 	author = "Neburai",
 	description = "library providing natives, forwards, and stocks to be used by other plugins",
-	version = "1.15",
+	version = "1.15.1",
 	url = "https://github.com/neburaii/l4d2-plugins/tree/main/hxlib"
 };
 
@@ -55,6 +55,7 @@ methodmap Address {}
 #include "hxlib/util/nav.sp"
 #include "hxlib/util/director.sp"
 #include "hxlib/util/animation.sp"
+#include "hxlib/util/variant.sp"
 
 #include "hxlib/forwards.sp"			// global forwards, EntityHookCB typeset
 #include "hxlib/usermsg.sp"				// create UserMessage hooks, MsgHook/MsgPostHook callbacks
@@ -97,8 +98,6 @@ public void OnPluginStart()
 
 	g_hArrayDetours = new ArrayList(sizeof(RegisteredDetour));
 	g_hArrayMsgHooks = new ArrayList(sizeof(RegisteredMsgHook));
-
-	Util_InitStringMemory();
 
 	InitConVars();
 	InitOffsets();

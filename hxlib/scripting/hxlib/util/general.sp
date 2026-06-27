@@ -344,56 +344,6 @@ Address Util_Inferno_GetFlame(Address inferno, int iIndex)
  * Memory
  *************/
 
-StringMap g_hStringMapMemoryBlocks;
-
-void Util_InitStringMemory()
-{
-	g_hStringMapMemoryBlocks = new StringMap();
-}
-
-void Util_StoreToStringPtr(Address pStringPtr, const char[] sBuffer)
-{
-	MemoryBlock hString = Util_CreateStringMemoryBlock(pStringPtr, sBuffer);
-	StoreToAddress(pStringPtr, hString.Address, NumberType_Int32);
-}
-
-bool Util_LookupStringMemoryBlock(Address pStringPtr, char sBuffer[16], MemoryBlock &hMemory)
-{
-	FormatEx(sBuffer, sizeof(sBuffer), "%X", pStringPtr);
-	return g_hStringMapMemoryBlocks.GetValue(sBuffer, hMemory);
-}
-
-void Util_DeleteStringMemoryBlock(Address pStringPtr)
-{
-	static char sHash[16];
-	MemoryBlock hMemory;
-
-	if (Util_LookupStringMemoryBlock(pStringPtr, sHash, hMemory))
-	{
-		delete hMemory;
-		g_hStringMapMemoryBlocks.Remove(sHash);
-	}
-}
-
-MemoryBlock Util_CreateStringMemoryBlock(Address pStringPtr, const char[] sBuffer)
-{
-	static char sHash[16];
-	MemoryBlock hMemory;
-
-	if (Util_LookupStringMemoryBlock(pStringPtr, sHash, hMemory))
-		delete hMemory;
-
-	int iLength = strlen(sBuffer);
-	hMemory = new MemoryBlock(iLength + 1);
-
-	for (int i = 0; i < iLength; i++)
-		hMemory.StoreToOffset(i, sBuffer[i], NumberType_Int8);
-
-	g_hStringMapMemoryBlocks.SetValue(sHash, hMemory);
-
-	return hMemory;
-}
-
 int Util_GetEntityFromAddress(Address entity)
 {
 	return LoadEntityFromHandleAddress(entity + view_as<Address>(g_iOffset_EHandle));

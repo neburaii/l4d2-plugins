@@ -37,7 +37,6 @@ MemoryPatch g_hMemPatch_CheckForDeadSkipClamp;
 int		g_iOffset_EHandle;
 int		g_iOffset_Intensity;
 int		g_iOffset_DirectorChallengeModeAllowVars;
-int		g_iOffset_VariantType;
 int		g_iOffset_FinaleTrigger_FinaleType;
 int		g_iOffset_ZombieManager_SpawnAreaSets;
 int		g_iOffset_EntityTeam;
@@ -173,8 +172,6 @@ void InitOffsets()
 		LoadOffset("EHandle");
 	g_iOffset_DirectorChallengeModeAllowVars =
 		LoadOffset("CDirectorChallengeMode::allow_script_variables");
-	g_iOffset_VariantType =
-		LoadOffset("variant_t::type");
 	g_iOffset_FinaleTrigger_FinaleType =
 		LoadOffset("CFinaleTrigger::finaleType");
 	g_iOffset_ZombieManager_SpawnAreaSets =

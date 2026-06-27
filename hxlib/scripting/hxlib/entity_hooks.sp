@@ -3,9 +3,6 @@
 
 void InitEntityHooks()
 {
-	CreateEntityHook(EntityHook_AcceptInput,
-		"HX::AcceptInput", DHook_AcceptInput_Pre, DHook_AcceptInput_Post);
-
 	CreateEntityHook(EntityHook_OnNavAreaChanged,
 		"HX::OnNavAreaChanged", _, DHook_OnNavAreaChanged_Post);
 
@@ -23,6 +20,15 @@ void InitEntityHooks()
 
 	CreateEntityHook(EntityHook_RemoveAmmo,
 		"HX::RemoveAmmo", DHook_RemoveAmmo_Pre, DHook_RemoveAmmo_Post);
+
+	if (g_OS == OS_Windows) {
+		CreateEntityHook(EntityHook_AcceptInput,
+			"HX::AcceptInput_win", DHook_AcceptInput_Pre, DHook_AcceptInput_Post);
+	}
+	else {
+		CreateEntityHook(EntityHook_AcceptInput,
+			"HX::AcceptInput", DHook_AcceptInput_Pre, DHook_AcceptInput_Post);
+	}
 }
 
 /************
@@ -49,14 +55,15 @@ void InitEntityHooks()
 		else iSource = Util_GetEntityFromAddress(view_as<Address>(iSource));
 
 		/** param 5 */
-		Variant variantObject = hParams.Get(4);
+		Variant params;
+		Util_ReadVariant(hParams, 4, params);
 
 		Call_StartForward_EntityHook(iReceiver, EntityHook_AcceptInput, Hook_Pre);
 		Call_PushCell(iReceiver);
 		Call_PushStringEx(sInput, sizeof(sInput), SM_PARAM_STRING_COPY, SM_PARAM_COPYBACK);
 		Call_PushCellRef(iActivator);
 		Call_PushCellRef(iSource);
-		Call_PushCell(variantObject);
+		Call_PushArrayEx(params, sizeof(params), SM_PARAM_COPYBACK);
 
 		Action result = Plugin_Continue;
 		Call_Finish(result);
@@ -74,6 +81,8 @@ void InitEntityHooks()
 			hParams.SetString(1, sInput);
 			hParams.Set(2, GetEntityAddress(iActivator));
 			hParams.Set(3, GetEntityAddress(iSource));
+			Util_WriteVariant(hParams, 4, params);
+
 			return MRES_ChangedHandled;
 		}
 
@@ -97,20 +106,19 @@ void InitEntityHooks()
 		else iSource = Util_GetEntityFromAddress(view_as<Address>(iSource));
 
 		/** param 5 */
-		Variant variantObject = hParams.Get(4);
+		Variant params;
+		Util_ReadVariant(hParams, 4, params);
 
 		Call_StartForward_EntityHook(iReceiver, EntityHook_AcceptInput, Hook_Post);
 		Call_PushCell(iReceiver);
 		Call_PushString(sInput);
 		Call_PushCell(iActivator);
 		Call_PushCell(iSource);
-		Call_PushCell(variantObject);
+		Call_PushArray(params, sizeof(params));
 		Call_PushCell(g_bHandled_AcceptInput);
 		Call_Finish();
 
 		g_bHandled_AcceptInput = false;
-
-		delete variantObject;
 
 		return MRES_Ignored;
 	}
