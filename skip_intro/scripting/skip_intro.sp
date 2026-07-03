@@ -15,7 +15,7 @@ public Plugin myinfo =
 	name = "Skip Intro Cutscenes",
 	author = "Neburai",
 	description = "reliably skips intro cutscenes for all maps not in a whitelist",
-	version = "1.5",
+	version = "1.6",
 	url = "https://github.com/neburaii/l4d2-plugins/tree/main/skip_intro"
 };
 
@@ -24,11 +24,13 @@ bool	g_bInIntro;
 bool	g_bIntroSequenceStripped;
 bool	g_bRoundStarted;
 bool	g_bIntroOccurred;
+bool	g_bAllowMovement;
 
 bool	g_bLateLoaded;
-bool	g_bHookingEnabled;
+bool	g_bPluginStarted;
 
 Handle	g_hTimer_DelayEndIntro;
+Handle	g_hTimer_SetAllowMovement;
 
 ConVar	g_hConVar_DelayPost;
 float	g_fDelayPost;
@@ -65,9 +67,10 @@ public void OnPluginStart()
 
 	if (g_bLateLoaded)
 	{
-		OnMapStart();
+		ReadBlacklist();
+
 		if (LibraryExists(HXLIB_LIBRARY))
-			EnableHooking();
+			StartPlugin();
 	}
 }
 
@@ -84,62 +87,153 @@ void ReadConVars()
 
 public void OnAllPluginsLoaded()
 {
-	if (!g_bHookingEnabled && LibraryExists(HXLIB_LIBRARY))
-		EnableHooking();
+	if (!g_bPluginStarted && LibraryExists(HXLIB_LIBRARY))
+		StartPlugin();
 }
 
 public void OnLibraryAdded(const char[] sName)
 {
 	if (strcmp(sName, HXLIB_LIBRARY) == 0)
-		EnableHooking();
+		StartPlugin();
 }
 
 public void OnLibraryRemoved(const char[] sName)
 {
 	if (strcmp(sName, HXLIB_LIBRARY) == 0)
-		g_bHookingEnabled = false;
+		g_bPluginStarted = false;
 }
 
-void EnableHooking()
+/**********
+ * hooking
+ **********/
+
+void StartPlugin()
 {
-	g_bHookingEnabled = true;
+	g_bPluginStarted = true;
 
-	int iEntity = -1;
+	for (int i = 1; i <= MaxClients; i++)
+	{
+		if (!IsClientInGame(i))
+			continue;
 
-	while ((iEntity = FindEntityByClassname(iEntity, "info_director")) != -1)
-		AddEntityHook(iEntity, EntityHook_AcceptInput, EHook_Pre, OnAcceptInput_InfoDirector);
+		HookClient(i);
+	}
 
-	while ((iEntity = FindEntityByClassname(iEntity, "point_viewcontrol_multiplayer")) != -1)
-		AddEntityHook(iEntity, EntityHook_AcceptInput, EHook_Pre, OnAcceptInput_PointViewcontrol);
+	char sClass[32];
+	for (int i = MaxClients + 1; i < MAXENTITIES; i++)
+	{
+		if (!IsValidEntity(i))
+			continue;
 
-	while ((iEntity = FindEntityByClassname(iEntity, "point_viewcontrol_survivor")) != -1)
-		AddEntityHook(iEntity, EntityHook_AcceptInput, EHook_Pre, OnAcceptInput_PointViewcontrol);
-
-	while ((iEntity = FindEntityByClassname(iEntity, "env_fade")) != -1)
-		AddEntityHook(iEntity, EntityHook_AcceptInput, EHook_Pre, OnAcceptInput_EnvFade);
+		GetEntityClassname(i, sClass, sizeof(sClass));
+		HookEntity(i, sClass);
+	}
 }
 
 public void OnPluginEnd()
 {
-	if (g_bHookingEnabled)
+	if (!g_bPluginStarted)
+		return;
+
+	for (int i = 1; i <= MaxClients; i++)
 	{
-		int iEntity = -1;
+		if (!IsClientInGame(i))
+			continue;
 
-		while ((iEntity = FindEntityByClassname(iEntity, "info_director")) != -1)
-			RemoveEntityHook(iEntity, EntityHook_AcceptInput, EHook_Pre, OnAcceptInput_InfoDirector);
+		UnhookClient(i);
+	}
 
-		while ((iEntity = FindEntityByClassname(iEntity, "point_viewcontrol_multiplayer")) != -1)
-			RemoveEntityHook(iEntity, EntityHook_AcceptInput, EHook_Pre, OnAcceptInput_PointViewcontrol);
+	char sClass[32];
+	for (int i = MaxClients + 1; i < MAXENTITIES; i++)
+	{
+		if (!IsValidEntity(i))
+			continue;
 
-		while ((iEntity = FindEntityByClassname(iEntity, "point_viewcontrol_survivor")) != -1)
-			RemoveEntityHook(iEntity, EntityHook_AcceptInput, EHook_Pre, OnAcceptInput_PointViewcontrol);
-
-		while ((iEntity = FindEntityByClassname(iEntity, "env_fade")) != -1)
-			RemoveEntityHook(iEntity, EntityHook_AcceptInput, EHook_Pre, OnAcceptInput_EnvFade);
+		GetEntityClassname(i, sClass, sizeof(sClass));
+		UnhookEntity(i, sClass);
 	}
 }
 
+public void OnClientPutInServer(int iClient)
+{
+	if (g_bPluginStarted)
+		HookClient(iClient);
+}
+
+public void OnEntityCreated(int iEntity, const char[] sClass)
+{
+	if (g_bPluginStarted)
+		HookEntity(iEntity, sClass);
+}
+
+void HookClient(int iClient)
+{
+	AddEntityHook(iClient, EntityHook_AcceptInput, EHook_Pre, OnAcceptInput_Player);
+}
+
+void UnhookClient(int iClient)
+{
+	RemoveEntityHook(iClient, EntityHook_AcceptInput, EHook_Pre, OnAcceptInput_Player);
+}
+
+void HookEntity(int iEntity, const char[] sClass)
+{
+	switch (sClass[0])
+	{
+		case 'i':
+		{
+			if (strcmp(sClass, "info_director") == 0)
+				AddEntityHook(iEntity, EntityHook_AcceptInput, EHook_Pre, OnAcceptInput_InfoDirector);
+		}
+
+		case 'p':
+		{
+			if (StrContains(sClass, "point_viewcontrol_") == 0)
+				AddEntityHook(iEntity, EntityHook_AcceptInput, EHook_Pre, OnAcceptInput_PointViewcontrol);
+		}
+
+		case 'e':
+		{
+			if (strcmp(sClass, "env_fade") == 0)
+				AddEntityHook(iEntity, EntityHook_AcceptInput, EHook_Pre, OnAcceptInput_EnvFade);
+		}
+	}
+}
+
+void UnhookEntity(int iEntity, const char[] sClass)
+{
+	switch (sClass[0])
+	{
+		case 'i':
+		{
+			if (strcmp(sClass, "info_director") == 0)
+				RemoveEntityHook(iEntity, EntityHook_AcceptInput, EHook_Pre, OnAcceptInput_InfoDirector);
+		}
+
+		case 'p':
+		{
+			if (StrContains(sClass, "point_viewcontrol_") == 0)
+				RemoveEntityHook(iEntity, EntityHook_AcceptInput, EHook_Pre, OnAcceptInput_PointViewcontrol);
+		}
+
+		case 'e':
+		{
+			if (strcmp(sClass, "env_fade") == 0)
+				RemoveEntityHook(iEntity, EntityHook_AcceptInput, EHook_Pre, OnAcceptInput_EnvFade);
+		}
+	}
+}
+
+/****************
+ * manage states
+ ****************/
+
 public void OnMapStart()
+{
+	ReadBlacklist();
+}
+
+public void ReadBlacklist()
 {
 	g_bMapAllowIntro = false;
 
@@ -182,6 +276,10 @@ void Event_RoundStartPreEntity(Event hEvent, const char[] sName, bool bDontBroad
 	g_bRoundStarted = false;
 	g_bInIntro = true;
 	g_bIntroOccurred = false;
+	g_bAllowMovement = false;
+
+	if (g_hTimer_DelayEndIntro) delete g_hTimer_DelayEndIntro;
+	if (g_hTimer_SetAllowMovement) delete g_hTimer_SetAllowMovement;
 }
 
 void Event_PlayerTeam(Event hEvent, const char[] sName, bool bDontBroadcast)
@@ -232,44 +330,62 @@ public void L4D_OnFirstSurvivorLeftSafeArea_Post(int iClient)
 	}
 }
 
-/*********
- * hooks
- *********/
-
-public void OnEntityCreated(int iEntity, const char[] sClassname)
+void SetEndIntroDelay(float fDelay)
 {
-	if (g_bHookingEnabled)
+	if (g_hTimer_DelayEndIntro)
+		delete g_hTimer_DelayEndIntro;
+
+	if (fDelay > 0.0)
+		g_hTimer_DelayEndIntro = CreateTimer(fDelay, EndIntro);
+}
+
+void EndIntro(Handle hTimer)
+{
+	g_hTimer_DelayEndIntro = null;
+	g_bInIntro = false;
+}
+
+/**************
+ * AcceptInput
+ **************/
+
+public Action OnAcceptInput_Player(int iReceiver, char[] sInput, int &iActivator, int &iSource, Variant params)
+{
+	if (CanSkipIntro())
 	{
-		if (strcmp(sClassname, "info_director") == 0)
-			AddEntityHook(iEntity, EntityHook_AcceptInput, EHook_Pre, OnAcceptInput_InfoDirector);
+		if (strcmp(sInput, "TeleportToSurvivorPosition") == 0)
+		{
+			if (g_bAllowMovement)
+				return Plugin_Handled;
 
-		else if (StrContains(sClassname, "point_viewcontrol_") == 0)
-			AddEntityHook(iEntity, EntityHook_AcceptInput, EHook_Pre, OnAcceptInput_PointViewcontrol);
-
-		else if (strcmp(sClassname, "env_fade") == 0)
-			AddEntityHook(iEntity, EntityHook_AcceptInput, EHook_Pre, OnAcceptInput_EnvFade);
+			StripIntroSequence();
+			RequestFrame(ReleaseFromSurvivorPosition, EntIndexToEntRef(iReceiver));
+		}
 	}
+
+	return Plugin_Continue;
 }
 
 public Action OnAcceptInput_InfoDirector(int iReceiver, char[] sInput, int &iActivator, int &iSource, Variant params)
 {
     if (CanSkipIntro())
     {
-		/** aside from locking movement, ForceSurvivorPositions is also
-		 * responsible for teleporting survivors to their destined info_survivor_position,
-		 * which some custom maps rely on to have survivors start in the intended spot.
-		 * because of this, blocking the input is a bad idea
-		 */
         if (strcmp(sInput, "ForceSurvivorPositions") == 0)
 		{
+			if (g_bAllowMovement)
+				return Plugin_Handled;
+
 			StripIntroSequence();
-			RequestFrame(ReleaseSurvivorPositions, iReceiver);
+			RequestFrame(ReleaseSurvivorPositions, EntIndexToEntRef(iReceiver));
 		}
 
 		else if (strcmp(sInput, "StartIntro") == 0)
 		{
 			if (g_hTimer_DelayEndIntro) delete g_hTimer_DelayEndIntro;
 			g_bIntroOccurred = true;
+
+			if (g_hTimer_SetAllowMovement) delete g_hTimer_SetAllowMovement;
+			g_hTimer_SetAllowMovement = CreateTimer(0.1, Timer_SetAllowMovement);
 			return Plugin_Handled;
 		}
 
@@ -302,33 +418,33 @@ public Action OnAcceptInput_EnvFade(int iReceiver, char[] sInput, int &iActivato
     return Plugin_Continue;
 }
 
-/*****************
- * Local functions
- *****************/
-
 bool CanSkipIntro()
 {
 	return (g_bInIntro || !L4D_HasAnySurvivorLeftSafeArea()) && !g_bMapAllowIntro;
 }
 
-void SetEndIntroDelay(float fDelay)
+void Timer_SetAllowMovement(Handle hTimer)
 {
-	if (g_hTimer_DelayEndIntro)
-		delete g_hTimer_DelayEndIntro;
-
-	if (fDelay > 0.0)
-		g_hTimer_DelayEndIntro = CreateTimer(fDelay, EndIntro);
+	g_hTimer_SetAllowMovement = null;
+	g_bAllowMovement = true;
 }
 
-void EndIntro(Handle hTimer)
+void ReleaseSurvivorPositions(int iEntRef)
 {
-	g_hTimer_DelayEndIntro = null;
-	g_bInIntro = false;
-}
+	int iDirector = EntRefToEntIndex(iEntRef);
+	if (iDirector == INVALID_ENT_REFERENCE)
+		return;
 
-void ReleaseSurvivorPositions(int iDirector)
-{
 	AcceptEntityInput(iDirector, "ReleaseSurvivorPositions");
+}
+
+void ReleaseFromSurvivorPosition(int iEntRef)
+{
+	int iPlayer = EntRefToEntIndex(iEntRef);
+	if (iPlayer == INVALID_ENT_REFERENCE)
+		return;
+
+	AcceptEntityInput(iPlayer, "ReleaseFromSurvivorPosition");
 }
 
 /** prevent survivor models from playing animations due to ForceSurvivorPositions input triggering the sequence from destined info_survivor_position */
