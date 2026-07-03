@@ -77,10 +77,16 @@ void InitEntityHooks()
 
 		if (result == Plugin_Changed)
 		{
-			/** changes to Variant param happen directly to memory */
 			hParams.SetString(1, sInput);
-			hParams.Set(2, GetEntityAddress(iActivator));
-			hParams.Set(3, GetEntityAddress(iSource));
+
+			if (IsValidEntity(iActivator))
+				hParams.Set(2, GetEntityAddress(iActivator));
+			else hParams.Set(2, 0);
+
+			if (IsValidEntity(iSource))
+				hParams.Set(3, GetEntityAddress(iSource));
+			else hParams.Set(3, 0);
+
 			Util_WriteVariant(hParams, 4, params);
 
 			return MRES_ChangedHandled;

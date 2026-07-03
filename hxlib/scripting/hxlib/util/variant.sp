@@ -10,56 +10,68 @@
 enum VariantType
 {
 	VariantType_None,
-	VariantType_Value,
+	VariantType_Bool,
+	VariantType_Int,
+	VariantType_Float,
+	VariantType_Vector,
+	VariantType_EVal,
 	VariantType_String
 };
 
 void Util_ReadVariant(DHookParam hParams, int iParamNum, Variant output)
 {
 	output.type = hParams.GetObjectVar(iParamNum, VARIANT_TYPE, ObjectValueType_Int);
+	VariantType variantType = GetVariantType(output.type);
 
-	int iSize = GetFieldTypeSize(output.type);
-	VariantType structType = GetVariantType(output.type, iSize);
-
-	switch (structType)
+	switch (variantType)
 	{
 		case VariantType_None:
-		{
 			output.type = FieldType_Void;
-		}
 
-		case VariantType_Value:
-		{
-			for (int i = 0; i < iSize; i++)
-				output.value[i] = hParams.GetObjectVar(iParamNum, VARIANT_UNION, ObjectValueType_Int);
-		}
+		case VariantType_Bool:
+			output.value[0] = hParams.GetObjectVar(iParamNum, VARIANT_UNION, ObjectValueType_Bool);
+
+		case VariantType_Int:
+			output.value[0] = hParams.GetObjectVar(iParamNum, VARIANT_UNION, ObjectValueType_Int);
+
+		case VariantType_Float:
+			output.value[0] = hParams.GetObjectVar(iParamNum, VARIANT_UNION, ObjectValueType_Float);
+
+		case VariantType_Vector:
+			hParams.GetObjectVarVector(iParamNum, VARIANT_UNION, ObjectValueType_Vector, output.value);
+
+		case VariantType_EVal:
+			output.value[0] = hParams.GetObjectVar(iParamNum, VARIANT_EVAL, ObjectValueType_Int);
 
 		case VariantType_String:
-		{
-			Address addr = hParams.GetObjectVar(iParamNum, VARIANT_UNION, ObjectValueType_Int);
-			LoadStringFromAddress(addr, output.string, sizeof(output.string));
-		}
+			hParams.GetObjectVarString(iParamNum, VARIANT_UNION, ObjectValueType_CharPtr, output.string, sizeof(output.string));
 	}
 }
 
 void Util_WriteVariant(DHookParam hParams, int iParamNum, Variant input)
 {
 	hParams.SetObjectVar(iParamNum, VARIANT_TYPE, ObjectValueType_Int, input.type);
+	VariantType variantType = GetVariantType(input.type);
 
-	int iSize = GetFieldTypeSize(input.type);
-	VariantType structType = GetVariantType(input.type, iSize);
-
-	switch (structType)
+	switch (variantType)
 	{
-		case VariantType_Value:
-		{
-			for (int i = 0; i < iSize; i++)
-				hParams.SetObjectVar(iParamNum, VARIANT_UNION, ObjectValueType_Int, input.value[i]);
-		}
+		case VariantType_Bool:
+			hParams.SetObjectVar(iParamNum, VARIANT_UNION, ObjectValueType_Bool, input.value[0]);
+
+		case VariantType_Int:
+			hParams.SetObjectVar(iParamNum, VARIANT_UNION, ObjectValueType_Int, input.value[0]);
+
+		case VariantType_Float:
+			hParams.SetObjectVar(iParamNum, VARIANT_UNION, ObjectValueType_Float, input.value[0]);
+
+		case VariantType_Vector:
+			hParams.SetObjectVarVector(iParamNum, VARIANT_UNION, ObjectValueType_Vector, input.value);
+
+		case VariantType_EVal:
+			hParams.SetObjectVar(iParamNum, VARIANT_EVAL, ObjectValueType_Int, input.value[0]);
 
 		case VariantType_String:
 		{
-			/** cleared at start of next frame. idk if this could cause problems or not */
 			Address pString = CreateStringPointer(input.string);
 			hParams.SetObjectVar(iParamNum, VARIANT_UNION, ObjectValueType_Int, pString);
 		}
@@ -70,89 +82,30 @@ void Util_WriteVariant(DHookParam hParams, int iParamNum, Variant input)
  * helpers
  *********/
 
-static VariantType GetVariantType(FieldType fieldType, int iSize)
-{
-	if (fieldType == FieldType_String)
-		return VariantType_String;
-
-	/** object can only have 0xc bytes at most.
-	 * any type exceeding this size should not be encountered. */
-	if (iSize <= 0 || iSize > 0xc)
-		return VariantType_None;
-
-	return VariantType_Value;
-}
-
-/** in bytes */
-static int GetFieldTypeSize(FieldType fieldType)
+static VariantType GetVariantType(FieldType fieldType)
 {
 	switch (fieldType)
 	{
-		case FieldType_Void:
-			return 0x0;
-		case FieldType_Float:
-			return 0x4;
-		case FieldType_String:
-			return 0x4;
-		case FieldType_Vector:
-			return 0xc;
-		case FieldType_Quaternion:
-			return 0x10;
-		case FieldType_Int:
-			return 0x4;
 		case FieldType_Bool:
-			return 0x1;
-		case FieldType_Short:
-			return 0x2;
-		case FieldType_Char:
-			return 0x1;
-		case FieldType_Color32:
-			return 0x4;
-		case FieldType_Embedded:
-			return 0x0; // unknown
-		case FieldType_Custom:
-			return 0x0; // unknown
-		case FieldType_ClassPtr:
-			return 0x4;
-		case FieldType_EHandle:
-			return 0x4;
-		case FieldType_Edict:
-			return 0x4;
-		case FieldType_PosVector:
-			return 0xc;
-		case FieldType_Time:
-			return 0x4;
-		case FieldType_Tick:
-			return 0x4;
-		case FieldType_ModelName:
-			return 0x4;
-		case FieldType_SoundName:
-			return 0x4;
-		case FieldType_Input:
-			return 0x4;
-		case FieldType_Function:
-			return (g_OS == OS_Windows) ? 0x4 : 0x8;
-		case FieldType_VMatrix:
-			return 0x40;
-		case FieldType_VMatrixWorldspace:
-			return 0x40;
-		case FieldType_Matrix3X4Worldspace:
-			return 0x24;
-		case FieldType_Interval:
-			return 0x8;
-		case FieldType_ModelIndex:
-			return 0x4;
-		case FieldType_MaterialIndex:
-			return 0x4;
-		case FieldType_Vector2D:
-			return 0x8;
-		case FieldType_Int64:
-			return 0x8;
-		case FieldType_Vector4D:
-			return 0x10;
+			return VariantType_Bool;
 
-		default: return 0x0;
+		case FieldType_Char, FieldType_Short, FieldType_Int, FieldType_Color32:
+			return VariantType_Int;
+
+		case FieldType_Float:
+			return VariantType_Float;
+
+		case FieldType_Vector, FieldType_PosVector:
+			return VariantType_Vector;
+
+		case FieldType_EHandle, FieldType_ClassPtr:
+			return VariantType_EVal;
+
+		case FieldType_String:
+			return VariantType_String;
 	}
+
+	return VariantType_None;
 }
 
 static Address CreateStringPointer(const char[] sValue)

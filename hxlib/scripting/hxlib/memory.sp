@@ -13,10 +13,10 @@ GameRules g_gameRules;
 CUtlVector g_pSavedPlayers;
 CUtlVector g_pSavedSurvivorBots;
 
-CountdownTimer g_MobTimer;
-CountdownTimer g_TempoTimer;
-CountdownTimer g_PanicDelayTimer;
-CountdownTimer g_ScenarioRestartTimer;
+HX_CountdownTimer g_MobTimer;
+HX_CountdownTimer g_TempoTimer;
+HX_CountdownTimer g_PanicDelayTimer;
+HX_CountdownTimer g_ScenarioRestartTimer;
 
 Address g_pDirectorTacticalServices;
 Address g_pL4DGameStats;

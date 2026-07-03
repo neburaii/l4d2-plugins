@@ -885,7 +885,7 @@ stock bool IsAudible(int client, const float source[3], int level)
 }
 
 /** Address */
-methodmap CountdownTimer
+methodmap HX_CountdownTimer
 {
 	/** time between timer's start and target time */
 	property float duration

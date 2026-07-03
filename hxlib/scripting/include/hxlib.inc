@@ -1808,7 +1808,7 @@ native void SetTempoRemainingTime(float value);
  *
  * @return					CountdownTimer methodmap
  */
-native CountdownTimer GetTempoTimer();
+native HX_CountdownTimer GetTempoTimer();
 
 /**
  * get the client index of the survivor furthest along the flow
@@ -1980,7 +1980,7 @@ native float GetTimeUntilNextMob();
  *
  * @return 				CountdownTimer methodmap
  */
-native CountdownTimer GetMobTimer();
+native HX_CountdownTimer GetMobTimer();
 
 /**
  * mob recharging is a mechanic where the size of the next mob gradually increases the more
@@ -2534,7 +2534,7 @@ native void SetVocalizeCooldown(int client, float cooldown);
  *
  * @return				CountdownTimer methodmap
  */
-native CountdownTimer GetVocalizeTimer(int client);
+native HX_CountdownTimer GetVocalizeTimer(int client);
 
 /**
  * spawn a special infected of any class at the pos/angles
@@ -2760,7 +2760,7 @@ native void SetScenarioRestartTime(float value = 0.0);
  *
  * @return				CountdownTimer methodmap
  */
-native CountdownTimer GetScenarioRestartTimer();
+native HX_CountdownTimer GetScenarioRestartTimer();
 
 /**************
  * Methodmaps
@@ -3452,13 +3452,13 @@ methodmap Inferno
 	}
 
 	/** damage tick interval */
-	property CountdownTimer damageTimer
+	property HX_CountdownTimer damageTimer
 	{
 		public native get();
 	}
 
 	/** multiply damage by damageRampTimer.GetElapsedRatio */
-	property CountdownTimer damageRampTimer
+	property HX_CountdownTimer damageRampTimer
 	{
 		public native get();
 	}
@@ -3539,7 +3539,7 @@ methodmap Flame
 	/**
 	 * how long we attempt to spawn new fires
 	 */
-	property CountdownTimer spawnLifetime
+	property HX_CountdownTimer spawnLifetime
 	{
 		public native get();
 	}
@@ -3551,7 +3551,7 @@ methodmap Flame
 	 * 					expecting the original lifetime, but server side
 	 * 					it will change.
 	 */
-	property CountdownTimer lifetime
+	property HX_CountdownTimer lifetime
 	{
 		public native get();
 	}

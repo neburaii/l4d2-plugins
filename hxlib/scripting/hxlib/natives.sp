@@ -2632,7 +2632,7 @@ public any Native_GetServerOS(Handle hPlugin, int iNumParams)
 	public any Native_GetVocalizeCooldown(Handle hPlugin, int iNumParams)
 	{
 		Address addr = GetEntityAddress(GetNativeCell(1));
-		CountdownTimer cooldown = view_as<CountdownTimer>(
+		HX_CountdownTimer cooldown = view_as<HX_CountdownTimer>(
 			addr + view_as<Address>(g_iOffset_VocalizeCooldown));
 
 		return cooldown.GetRemainingTime();
@@ -2641,7 +2641,7 @@ public any Native_GetServerOS(Handle hPlugin, int iNumParams)
 	public void Native_SetVocalizeCooldown(Handle hPlugin, int iNumParams)
 	{
 		Address addr = GetEntityAddress(GetNativeCell(1));
-		CountdownTimer cooldown = view_as<CountdownTimer>(
+		HX_CountdownTimer cooldown = view_as<HX_CountdownTimer>(
 			addr + view_as<Address>(g_iOffset_VocalizeCooldown));
 		float fDuration = GetNativeCell(2);
 
