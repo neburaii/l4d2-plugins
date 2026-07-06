@@ -19,7 +19,8 @@ Action Command_Set(int iClient, int iArgs)
 	{
 		case 0: CmdOpenMenuRoot(iClient);
 		case 1: CmdSearchCookies(iClient);
-		case 2: CmdSetCookie(iClient, iArgs, "#tag_cmd_set");
+		case 2: CmdSetCookie(iClient, "#tag_cmd_set");
+		default: CmdSetCookieFromMultiArg(iClient, "#tag_cmd_set");
 	}
 
 	return Plugin_Handled;
@@ -31,7 +32,8 @@ Action Command_Cookies(int iClient, int iArgs)
 	{
 		case 0: PrintCookiesToConsole(iClient, "#tag_cmd_cookies");
 		case 1: CmdPrintCookieValue(iClient, "#tag_cmd_cookies");
-		default: CmdSetCookie(iClient, iArgs, "#tag_cmd_cookies");
+		case 2: CmdSetCookie(iClient, "#tag_cmd_cookies");
+		default: CmdSetCookieFromMultiArg(iClient, "#tag_cmd_cookies");
 	}
 
 	return Plugin_Handled;
@@ -65,7 +67,7 @@ void CmdSearchCookies(int iClient)
 	else g_clientPanel[iClient].OpenNew(Panel_Special, Special_Search);
 }
 
-void CmdSetCookie(int iClient, int iArgs, const char[] sTag)
+void CmdSetCookie(int iClient, const char[] sTag)
 {
 	if (!iClient)
 	{
@@ -92,23 +94,104 @@ void CmdSetCookie(int iClient, int iArgs, const char[] sTag)
 	}
 
 	static char sCookieValue[100];
-	static char sBuffer[100];
-	sCookieValue[0] = '\0';
-
-	for (int i = 2; i <= iArgs; i++)
-	{
-		GetCmdArg(i, sBuffer, sizeof(sBuffer));
-		if (StrCat(sCookieValue, sizeof(sCookieValue), sBuffer) == 0)
-			break;
-
-		if (i == iArgs) continue;
-		if (StrCat(sCookieValue, sizeof(sCookieValue), " ") == 0)
-			break;
-	}
-	sCookieValue[sizeof(sCookieValue) - 1] = '\0';
+	GetCmdArg(2, sCookieValue, sizeof(sCookieValue));
 
 	cookie.SetString(iClient, sCookieValue);
 	CReplyToCommand(iClient, "%t %t", sTag, "#cmd_set_success", sCookieName, sCookieValue);
+}
+
+void CmdSetCookieFromMultiArg(int iClient, const char[] sTag)
+{
+	static char sArgs[250];
+	int iRead;
+
+	GetCmdArgString(sArgs, sizeof(sArgs));
+
+	static char sCookieName[COOKIE_MAX_NAME_LENGTH];
+	int iRef;
+	iRead = GetNextToken(sArgs, 0, sCookieName, sizeof(sCookieName));
+
+	if (!g_hMap_Cookies.GetValue(sCookieName, iRef) && !FindAndRegisterUndefinedCookie(sCookieName, iRef))
+	{
+		CReplyToCommand(iClient, "%t %t", sTag, "#error_cookie_not_found", sCookieName);
+		return;
+	}
+
+	RegisteredCookie cookie;
+	g_hArray_Cookies.GetArray(iRef, cookie);
+	if (!cookie.Exists())
+	{
+		CReplyToCommand(iClient, "%t %t", sTag, "#error_cookie_not_found", sCookieName);
+		return;
+	}
+
+	static char sCookieValue[100];
+	bool bCheckLeadingWhitespace = true;
+	int iWrite = 0;
+
+	for (; iRead < sizeof(sArgs); iRead++)
+	{
+		if (bCheckLeadingWhitespace)
+		{
+			if (IsCharSpace(sArgs[iRead]))
+				continue;
+
+			bCheckLeadingWhitespace = false;
+		}
+
+		sCookieValue[iWrite++] = sArgs[iRead];
+		if (iWrite == sizeof(sCookieValue))
+		{
+			sCookieValue[iWrite - 1] = '\0';
+			break;
+		}
+
+		if (sArgs[iRead] == '\0')
+			break;
+	}
+
+	cookie.SetString(iClient, sCookieValue);
+	CReplyToCommand(iClient, "%t %t", sTag, "#cmd_set_success", sCookieName, sCookieValue);
+}
+
+int GetNextToken(const char[] sReadFrom, int iStartFrom, char[] sWriteTo, int iWriteMax)
+{
+	int iWrite = 0;
+
+	if (sReadFrom[0] == '\"')
+	{
+		for (int i = iStartFrom; i < 250; i++)
+		{
+			if (sReadFrom[i] == '\"' || sReadFrom[i] == '\0')
+			{
+				sReadFrom[iWrite] = '\0';
+				return iWrite;
+			}
+
+			sWriteTo[iWrite++] = sReadFrom[i];
+			if (iWrite == iWriteMax)
+			{
+				sReadFrom[iWrite - 1] = '\0';
+				return iWriteMax;
+			}
+		}
+	}
+
+	for (int i = iStartFrom; i < 250; i++)
+	{
+		if (sReadFrom[i] == '\"' || sReadFrom[i] <= ' ')
+			break;
+
+		sWriteTo[iWrite++] = sReadFrom[i];
+		if (iWrite == iWriteMax)
+		{
+			sReadFrom[iWrite - 1] = '\0';
+			return iWriteMax;
+		}
+	}
+
+	sWriteTo[iWrite] = '\0';
+	return iWrite;
 }
 
 void CmdPrintCookieValue(int iClient, const char[] sTag)
@@ -227,57 +310,3 @@ void PrintCookiesToConsole(int iClient, const char[] sTag)
 
 	delete hIterator;
 }
-
-// Action Command_Set_Backup(int iClient, int iArgs)
-// {
-// 	static char sName[COOKIE_MAX_NAME_LENGTH];
-// 	static char sDescription[COOKIE_MAX_DESCRIPTION_LENGTH];
-// 	static char sValue[100];
-
-// 	if (iArgs == 0)
-// 	{
-
-// 	}
-
-// 	GetCmdArg(1, sName, sizeof(sName));
-// 	Cookie hCookie = Cookie.Find(sName);
-
-// 	if (hCookie == null)
-// 	{
-// 		static char sBuffer[COOKIE_MAX_NAME_LENGTH];
-// 		static char sMatches[COOKIE_MAX_NAME_LENGTH][7];
-// 		int iMatchOrder[7];
-// 		float fMatchScore[7];
-// 		int iMatchTotal;
-// 		Handle hIterator = GetCookieIterator();
-// 		CookieAccess access;
-// 		float fScore;
-// 		int iWriteIndex;
-
-// 		while (ReadCookieIterator(hIterator, sBuffer, sizeof(sBuffer), access))
-// 		{
-// 			fScore = FuzzyMatch(sName, sBuffer);
-// 			if (fScore > FUZZY_MATCH_THRESHOLD)
-// 			{
-// 				iWriteIndex = 0;
-// 				for (int i = 0; i < iMatchTotal; i++)
-// 				{
-// 					if (fScore > fMatchScore[i])
-// 					{
-// 						for (int j = (iMatchTotal >= sizeof(iMatchOrder)) ? (sizeof(iMatchOrder) - 2) : (iMatchTotal - 1); j >= i; j++)
-// 						{
-// 							iMatchOrder[j + 1] = iMatchOrder[j];
-// 							fMatchScore[j + 1] = fMatchScore[j];
-// 						}
-// 						iWriteIndex = i;
-// 					}
-// 				}
-
-// 				iMatchOrder[iWriteIndex] = iMatchTotal;
-
-// 			}
-// 		}
-// 	}
-
-// 	return Plugin_Handled;
-// }

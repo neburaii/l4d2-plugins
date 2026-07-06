@@ -12,7 +12,7 @@ public Plugin myinfo =
 	name = "Cookie Manager",
 	author = "Neburai",
 	description = "Cookie interface for clients. Cookies can be searched, names/descriptions translated, and accept several types of Panel-driven input",
-	version = "1.0.2",
+	version = "1.0.3",
 	url = "https://github.com/neburaii/l4d2-plugins/tree/main/cookie_manager"
 };
 

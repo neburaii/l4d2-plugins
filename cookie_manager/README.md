@@ -86,5 +86,5 @@ an example is included. it's configured to have a search option, and a single di
 there are comments in the file explaining the formatting.
 
 # Changelog
-## v1.0
+### 1.0
 - initial release
