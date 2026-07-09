@@ -829,10 +829,21 @@ stock int GetIdlePlayer(int bot)
 	return GetClientOfUserId(GetEntProp(bot, Prop_Send, "m_humanSpectatorUserID"));
 }
 
-/** CBasePlayer */
-stock bool IsOnGround(int client)
+/** CBaseEntity */
+stock bool IsOnGround(int entity)
 {
-	return IsValidEntity(GetEntPropEnt(client, Prop_Send, "m_hGroundEntity"));
+	static int offset;
+	if (!offset)
+	{
+		offset = FindSendPropInfo("CBasePlayer", "m_hGroundEntity");
+		if (offset <= 0)
+		{
+			offset = 0;
+			return 0;
+		}
+	}
+
+	return IsValidEntity(GetEntDataEnt2(entity, offset));
 }
 
 stock int FilterClientsByAttenuation(int[] clients, int &numClients, const float source[3], int level)
@@ -882,6 +893,35 @@ stock bool IsAudible(int client, const float source[3], int level)
 
 	float distance = GetVectorDistance(source, listenerPos);
 	return distance <= maxAudible;
+}
+
+stock void GetNearestPos(const float mins[3], const float maxs[3], const float pos[3], float result[3])
+{
+	float dir[3];
+	for (int i = 0; i < 3; i++)
+		dir[i] = maxs[i] - mins[i];
+	float dirLen = NormalizeVector(dir, dir);
+
+	float dot =
+		(pos[0] - mins[0]) * dir[0]
+		+ (pos[1] - mins[1]) * dir[1]
+		+ (pos[2] - mins[2]) * dir[2];
+
+	if (dot < 0.0)
+	{
+		for (int i = 0; i < 3; i++)
+			result[i] = mins[i];
+	}
+	else if (dot > dirLen)
+	{
+		for (int i = 0; i < 3; i++)
+			result[i] = maxs[i];
+	}
+	else
+	{
+		for (int i = 0; i < 3; i++)
+			result[i] = mins[i] + (dir[i] * dot);
+	}
 }
 
 /** Address */

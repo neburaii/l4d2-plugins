@@ -36,6 +36,19 @@ None of the stocks in this file require anything from the main [hxlib.inc](./scr
 # Changelog
 this focuses on core hxlib. hxstocks updates go undocumented.
 
+### 1.16
+- added forwards:
+	- `OnIsEntityTouchingInferno` and `OnIsEntityTouchingInferno_Post`
+	- `OnIsBoundsTouchingInferno` and `OnIsBoundsTouchingInferno_Post`
+	- `OnIsNavAreaTouchingInferno` and `OnIsNavAreaTouchingInferno_Post`
+- added natives:
+	- `GetNearestPosOnEntity`
+	- `NavArea.GetNearestPos`
+	- `Flame.GetCenter`
+- added properties:
+	- `Inferno.radius`
+	- `Flame.waterHeight`
+
 ### 1.15.1
 - fix AcceptInput hook causing windows to crash (thanks "Harry Potter" for reporting)
 - minor changes to inc

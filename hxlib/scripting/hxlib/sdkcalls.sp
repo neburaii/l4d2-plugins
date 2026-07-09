@@ -90,6 +90,8 @@ Handle g_hSDK_FindActivityToSequenceMapper;
 Handle g_hSDK_HashInt;
 Handle g_hSDK_RemoveAmmo;
 Handle g_hSDK_GetFlameLifetime;
+Handle g_hSDK_CalcNearestPos;
+Handle g_hSDK_GetClosestPointOnArea;
 
 void InitSDKCalls()
 {
@@ -547,6 +549,18 @@ void InitSDKCalls()
 	prep.Param(SDKType_PlainOldData, SDKPass_Plain);
 	prep.Return(SDKType_Float, SDKPass_Plain);
 	prep.End(g_hSDK_SequenceDuration);
+
+	/** Native_GetNearestPos */
+	prep.Start(SDKCall_Raw, SDKConf_Signature, "CCollisionProperty::CalcNearestPoint");
+	prep.Param(SDKType_Vector, SDKPass_Pointer);
+	prep.Param(SDKType_Vector, SDKPass_ByRef, _, VENCODE_FLAG_COPYBACK);
+	prep.End(g_hSDK_CalcNearestPos);
+
+	/** Native_NavArea_GetNearestPos */
+	prep.Start(SDKCall_Raw, SDKConf_Signature, "CNavArea::GetClosestPointOnArea");
+	prep.Param(SDKType_Vector, SDKPass_Pointer);
+	prep.Param(SDKType_Vector, SDKPass_ByRef, _, VENCODE_FLAG_COPYBACK);
+	prep.End(g_hSDK_GetClosestPointOnArea);
 
 	/** Native_SpawnSpecial */
 	prep.Start(SDKCall_Raw, SDKConf_Signature, "ZombieManager::SpawnSpecial");

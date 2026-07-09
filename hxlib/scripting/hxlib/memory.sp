@@ -56,6 +56,7 @@ int		g_iOffset_ZombieManagerCommonSpawnCount;
 int		g_iOffset_GameRules_WaterSlowsMovement;
 int		g_iOffset_Server_ReservationCookie;
 int		g_iOffset_Server_HibernationStatus;
+int		g_iOffset_CollisionProperty;
 
 int		g_iOffset_StudioHdr;
 int		g_iOffset_ActivityToSequenceMapper;
@@ -136,6 +137,7 @@ int		g_iOffset_Inferno_flameList;
 int		g_iOffset_Inferno_Origin;
 int		g_iOffset_Inferno_damageTimer;
 int		g_iOffset_Inferno_damageRampTimer;
+int		g_iOffset_Inferno_radius;
 
 /** FlameInfo */
 int		g_iOffset_Flame_depth;
@@ -144,6 +146,8 @@ int		g_iOffset_Flame_spawnLifetime;
 int		g_iOffset_Flame_lifetime;
 int		g_iOffset_Flame_origin;
 int		g_iOffset_Flame_direction;
+int		g_iOffset_Flame_waterHeight;
+int		g_iOffset_Flame_center;
 
 /** netpacket_s */
 int		g_iOffset_NetAdr_type;
@@ -210,6 +214,8 @@ void InitOffsets()
 		LoadOffset("CBaseServer::reservationCookie");
 	g_iOffset_Server_HibernationStatus =
 		LoadOffset("CGameServer::hibernationStatus");
+	g_iOffset_CollisionProperty =
+		LoadOffset("CBaseEntity::m_Collision");
 
 	g_iOffset_StudioHdr =
 		LoadOffset("CBaseAnimating::sudioHdr");
@@ -355,6 +361,8 @@ void InitOffsets()
 		LoadOffset("CInferno::damageTimer");
 	g_iOffset_Inferno_damageRampTimer =
 		LoadOffset("CInferno::damageRampTimer");
+	g_iOffset_Inferno_radius =
+		LoadOffset("CInferno::radius");
 
 	/** FireInfo */
 	g_iOffset_Flame_depth =
@@ -369,6 +377,10 @@ void InitOffsets()
 		LoadOffset("FireInfo::origin");
 	g_iOffset_Flame_direction =
 		LoadOffset("FireInfo::direction");
+	g_iOffset_Flame_waterHeight =
+		LoadOffset("FireInfo::waterHeight");
+	g_iOffset_Flame_center =
+		LoadOffset("FireInfo::center");
 
 	/** netpacket_s */
 	g_iOffset_NetAdr_type =

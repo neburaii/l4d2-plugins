@@ -357,7 +357,9 @@ enum InfernoType
 {
 	Inferno_Fire,
 	Inferno_Spit,
-	Inferno_Firework
+	Inferno_Firework,
+
+	InfernoType_MAX
 };
 
 /** used in OnConnectionlessPacket* forwards. */
@@ -1222,7 +1224,7 @@ forward void OnCreateSpitterProjectile_Post(int spitter, int projectile, const f
  *
  * @return				Plugin_Continue to take no action. Plugin_Handled to block function. Plugin_Changed to apply changed params
  */
-forward Action OnCreateFlame(Inferno inferno, float origin[3], float direction[3], Flame parent, int &depth);
+forward Action OnCreateFlame(Inferno inferno, float origin[3], float direction[3], Flame &parent, int &depth);
 
 /**
  * called after an inferno created a flame
@@ -1570,6 +1572,87 @@ forward Action OnSetReserveAmmo(int client, int &amount, AmmoType &ammoType);
  * @param handled		true if OnSetReserveAmmo returned Plugin_Handled
  */
 forward void OnSetReserveAmmo_Post(int client, int amount, AmmoType ammoType, bool handled);
+
+/**
+ * called before it's checked if an entity's collision box is within a radius of the flames of an inferno.
+ *
+ * @param inferno			Inferno methodmap / CInferno address
+ * @param entity			check contact with this entity's collision
+ * @param radius			modified on Plugin_Changed: must be within this range from the origin of any flame to be true
+ * @param checkLos			modified on Plugin_Changed: should line of sight with a flame be required to be in contact with it?
+ *
+ * @param handledResult		modified on Plugin_Handled: override function's return value
+ *
+ * @return					Plugin_Continue to take no action, Plugin_Changed to override params, Plugin_Handled to skip and return handledResult
+ *
+ * @note					if it's spit, radius has an additional use. entities on the ground who are
+ * 							elevated by (radius / 3) over a flame will skip checking that flame.
+ */
+forward Action OnIsEntityTouchingInferno(Inferno inferno, int entity, float &radius, bool &checkLos, bool &handledResult);
+
+/**
+ * called after it's checked if an entity's collision box is within a radius of the flames of an inferno.
+ *
+ * @param inferno		Inferno methodmap / CInferno address
+ * @param entity		check contact with this entity's collision
+ * @param radius		must be within this range from the origin of any flame to be true
+ * @param checkLos		should line of sight with a flame be required to be in contact with it?
+ * @param result		true if entity was found to be touching the inferno
+ * @param handled		true if OnIsEntityTouchingInferno returned Plugin_Handled
+ */
+forward void OnIsEntityTouchingInferno_Post(Inferno inferno, int entity, float radius, bool checkLos, bool result, bool handled);
+
+/**
+ * called before it's checked if a bounds box overlaps with an inferno
+ *
+ * @param inferno			Inferno methodmap / CInferno address
+ * @param mins				min x/y/z of the volume/box to check for overlap
+ * @param maxs				max x/y/z of the volume/box to check for overlap
+ *
+ * @param handledContact	modified on Plugin_Handled: point of first contact found
+ * @param handledResult		modified on Plugin_Handled: override function's return value
+ *
+ * @return					Plugin_Continue to take no action, Plugin_Handled to skip and return handledResult
+ *
+ * @note					handledContact is a buffer for a returned "first found contact" point in the event that the function returns true.
+ * 							if calling code passed a null pointer for this buffer, then handledContact will be NULL_VECTOR. only change it if it's
+ * 							not null, and Plugin_Handled is returned, and handledResult is set to true.
+ */
+forward Action OnIsBoundsTouchingInferno(Inferno inferno, const float mins[3], const float maxs[3], float handledContact[3], bool &handledResult);
+
+/**
+ * called after it's checked if a bounds box overlaps with an inferno
+ *
+ * @param inferno		Inferno methodmap / CInferno address
+ * @param mins			min x/y/z of the volume/box to check for overlap
+ * @param maxs			max x/y/z of the volume/box to check for overlap
+ * @param contact		origin of the first flame found to be within the box
+ * @param result		true if box overlapped any flame of this inferno
+ * @param handled		true if OnIsBoundsTouchingInferno returned Plugin_Handled
+ */
+forward void OnIsBoundsTouchingInferno_Post(Inferno inferno, const float mins[3], const float maxs[3], const float contact[3], bool result, bool handled);
+
+/**
+ * called before it's checked if a NavArea overlaps with an inferno
+ *
+ * @param inferno			Inferno methodmap / CInferno address
+ * @param area				NavArea methodmap / CNavArea address to check
+ *
+ * @param handledResult		modified on Plugin_Handled: override function's return value
+ *
+ * @return					Plugin_Continue to take no action, Plugin_Handled to skip and return handledResult
+ */
+forward Action OnIsNavAreaTouchingInferno(Inferno inferno, NavArea area, bool &handledResult);
+
+/**
+ * called after it's checked if a NavArea overlaps with an inferno
+ *
+ * @param inferno		Inferno methodmap / CInferno address
+ * @param area			NavArea methodmap / CNavArea address to check
+ * @param result		true if the NavArea overlapped with any flame of this inferno
+ * @param handled		true if OnIsNavAreaTouchingInferno returned Plugin_Handled
+ */
+forward void OnIsNavAreaTouchingInferno_Post(Inferno inferno, NavArea area, bool result, bool handled);
 
 /***********
  * Natives
@@ -2762,6 +2845,15 @@ native void SetScenarioRestartTime(float value = 0.0);
  */
 native HX_CountdownTimer GetScenarioRestartTimer();
 
+/**
+ * get the position within an entity's collision closest to a given pos
+ *
+ * @param entity		entity index with the collision to check
+ * @param pos			nearest to this pos
+ * @param buffer		copy-back nearest pos to this buffer
+ */
+native void GetNearestPosOnEntity(int entity, const float pos[3], float buffer[3]);
+
 /**************
  * Methodmaps
  *************/
@@ -3107,6 +3199,14 @@ methodmap NavArea
 	 * @return				true if it's behind an active zombie border
 	 */
 	public native bool IsBehindZombieBorder();
+
+	/**
+	 * get the nearest point in this nav area to a given position
+	 *
+	 * @param pos			find nearest to this position
+	 * @param result		buffer to store nearest position
+	 */
+	public native void GetNearestPos(const float pos[3], float result[3]);
 
 	/******************************
 	 * Areas connected by elevator
@@ -3463,6 +3563,14 @@ methodmap Inferno
 		public native get();
 	}
 
+	/** radius of each flame.
+	 * @note	this is inconsistently used! may be multiplied by 2 in some usecases for example in hit detection */
+	property float radius
+	{
+		public native get();
+		public native set(float value);
+	}
+
 	/**
 	 * get the lifetime flames will be created with
 	 *
@@ -3537,6 +3645,14 @@ methodmap Flame
 	}
 
 	/**
+	 * if in water, how much was origin elevated to be above the water? 0.0 if not in water
+	 */
+	property float waterHeight
+	{
+		public native get();
+	}
+
+	/**
 	 * how long we attempt to spawn new fires
 	 */
 	property HX_CountdownTimer spawnLifetime
@@ -3560,6 +3676,11 @@ methodmap Flame
 	 * origin position of this flame
 	 */
 	public native void GetOrigin(float buffer[3]);
+
+	/**
+	 * center position of this flame. vanilla is origin but elevated by half the owning inferno entity's height
+	 */
+	public native void GetCenter(float buffer[3]);
 
 	/**
 	 * normalized vector
@@ -4066,6 +4187,7 @@ public SharedPlugin __pl_hxlib =
 		MarkNativeAsOptional("NavArea.IsBehindZombieBorder");
 		MarkNativeAsOptional("NavArea.populationDensity.get");
 		MarkNativeAsOptional("NavArea.populationDensity.set");
+		MarkNativeAsOptional("NavArea.GetNearestPos");
 
 		MarkNativeAsOptional("NavAreaSet.Get");
 		MarkNativeAsOptional("NavAreaSet.GetArrayList");
@@ -4092,6 +4214,8 @@ public SharedPlugin __pl_hxlib =
 		MarkNativeAsOptional("Inferno.damageTimer.get");
 		MarkNativeAsOptional("Inferno.damageRampTimer.get");
 		MarkNativeAsOptional("Inferno.GetFlameLifetime");
+		MarkNativeAsOptional("Inferno.radius.get");
+		MarkNativeAsOptional("Inferno.radius.set");
 
 		MarkNativeAsOptional("Flame.depth.get");
 		MarkNativeAsOptional("Flame.depth.set");
@@ -4099,7 +4223,9 @@ public SharedPlugin __pl_hxlib =
 		MarkNativeAsOptional("Flame.spawnLifetime.get");
 		MarkNativeAsOptional("Flame.lifetime.get");
 		MarkNativeAsOptional("Flame.GetOrigin");
+		MarkNativeAsOptional("Flame.GetCenter");
 		MarkNativeAsOptional("Flame.GetDirection");
+		MarkNativeAsOptional("Flame.waterHeight.get");
 
 		MarkNativeAsOptional("HXLibRescanForwards");
 		MarkNativeAsOptional("GetServerOS");
@@ -4230,6 +4356,7 @@ public SharedPlugin __pl_hxlib =
 		MarkNativeAsOptional("GetMobTimer");
 		MarkNativeAsOptional("GetTempoTimer");
 		MarkNativeAsOptional("GetScenarioRestartTimer");
+		MarkNativeAsOptional("GetNearestPosOnEntity");
 
 		/** deprecated */
 		MarkNativeAsOptional("GetTimeUntilNextMob");

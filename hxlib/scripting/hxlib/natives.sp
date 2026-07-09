@@ -57,6 +57,7 @@ void RegisterNatives()
 	CreateNative("NavArea.IsBehindZombieBorder", Native_NavArea_IsBehindZombieBorder);
 	CreateNative("NavArea.populationDensity.get", Native_NavArea_populationDensity_get);
 	CreateNative("NavArea.populationDensity.set", Native_NavArea_populationDensity_set);
+	CreateNative("NavArea.GetNearestPos", Native_NavArea_GetNearestPos);
 
 	CreateNative("NavAreaSet.Get", Native_NavAreaSet_Get);
 	CreateNative("NavAreaSet.GetArrayList", Native_NavAreaSet_GetArrayList);
@@ -83,6 +84,8 @@ void RegisterNatives()
 	CreateNative("Inferno.damageTimer.get", Native_Inferno_damageTimer_get);
 	CreateNative("Inferno.damageRampTimer.get", Native_Inferno_damageRampTimer_get);
 	CreateNative("Inferno.GetFlameLifetime", Native_Inferno_GetFlameLifetime);
+	CreateNative("Inferno.radius.get", Native_Inferno_radius_get);
+	CreateNative("Inferno.radius.set", Native_Inferno_radius_set);
 
 	CreateNative("Flame.depth.get", Native_Flame_depth_get);
 	CreateNative("Flame.depth.set", Native_Flame_depth_set);
@@ -90,7 +93,9 @@ void RegisterNatives()
 	CreateNative("Flame.spawnLifetime.get", Native_Flame_spawnLifetime_get);
 	CreateNative("Flame.lifetime.get", Native_Flame_lifetime_get);
 	CreateNative("Flame.GetOrigin", Native_Flame_GetOrigin);
+	CreateNative("Flame.GetCenter", Native_Flame_GetCenter);
 	CreateNative("Flame.GetDirection", Native_Flame_GetDirection);
+	CreateNative("Flame.waterHeight.get", Native_Flame_waterHeight_get);
 
 	CreateNative("InternalKeyValues.InternalKeyValues", Native_InternalKeyValues_New);
 	CreateNative("InternalKeyValues.DeleteThis", Native_InternalKeyValues_DeleteThis);
@@ -223,6 +228,7 @@ void RegisterNatives()
 	CreateNative("GetTempoTimer", Native_GetTempoTimer);
 	CreateNative("GetScenarioRestartTimer", Native_GetScenarioRestartTimer);
 	CreateNative("GetVocalizeTimer", Native_GetVocalizeTimer);
+	CreateNative("GetNearestPosOnEntity", Native_GetNearestPos);
 
 	/** deprecated */
 	CreateNative("GetTimeUntilNextMob", Native_GetTimeUntilNextMob);
@@ -1355,6 +1361,19 @@ public any Native_GetServerOS(Handle hPlugin, int iNumParams)
 		return addr + view_as<Address>(g_iOffset_VocalizeCooldown);
 	}
 
+	public void Native_GetNearestPos(Handle hPlugin, int iNumParams)
+	{
+		Address addr = GetEntityAddress(GetNativeCell(1));
+		addr += view_as<Address>(g_iOffset_CollisionProperty);
+
+		float vPos[3];
+		GetNativeArray(2, vPos, sizeof(vPos));
+
+		float vBuffer[3];
+		SDKCall(g_hSDK_CalcNearestPos, addr, vPos, vBuffer);
+		SetNativeArray(3, vBuffer, sizeof(vBuffer));
+	}
+
 /** InternalKeyValues methodmap */
 	public any Native_InternalKeyValues_New(Handle hPlugin, int iNumParams)
 	{
@@ -2322,6 +2341,17 @@ public any Native_GetServerOS(Handle hPlugin, int iNumParams)
 		return SDKCall(g_hSDK_GetNavAreaZ, nav, x, y);
 	}
 
+	public void Native_NavArea_GetNearestPos(Handle hPlugin, int iNumParams)
+	{
+		Address nav = GetNativeCell(1);
+		float vPos[3];
+		float vResult[3];
+		GetNativeArray(2, vPos, sizeof(vPos));
+
+		SDKCall(g_hSDK_GetClosestPointOnArea, nav, vPos, vResult);
+		SetNativeArray(3, vResult, sizeof(vResult));
+	}
+
 /** NavAreaSet methodmap */
 	public any Native_NavAreaSet_Get(Handle hPlugin, int iNumParams)
 	{
@@ -2533,6 +2563,21 @@ public any Native_GetServerOS(Handle hPlugin, int iNumParams)
 		return SDKCall(g_hSDK_GetFlameLifetime, inferno);
 	}
 
+	public any Native_Inferno_radius_get(Handle hPlugin, int iNumParams)
+	{
+		Address inferno = GetNativeCell(1);
+		return LoadFromAddress(inferno + view_as<Address>(
+			g_iOffset_Inferno_radius), NumberType_Int32);
+	}
+
+	public void Native_Inferno_radius_set(Handle hPlugin, int iNumParams)
+	{
+		Address inferno = GetNativeCell(1);
+		float fValue = GetNativeCell(2);
+		StoreToAddress(inferno + view_as<Address>(
+			g_iOffset_Inferno_radius), fValue, NumberType_Int32);
+	}
+
 /** Flame methodmap */
 	public any Native_Flame_depth_get(Handle hPlugin, int iNumParams)
 	{
@@ -2565,13 +2610,27 @@ public any Native_GetServerOS(Handle hPlugin, int iNumParams)
 		return flame + view_as<Address>(g_iOffset_Flame_lifetime);
 	}
 
+	public any Native_Flame_waterHeight_get(Handle hPlugin, int iNumParams)
+	{
+		Address flame = GetNativeCell(1);
+		return LoadFromAddress(flame + view_as<Address>(g_iOffset_Flame_waterHeight), NumberType_Int32);
+	}
+
 	public void Native_Flame_GetOrigin(Handle hPlugin, int iNumParams)
 	{
 		Address flame = GetNativeCell(1);
 		float vBuffer[3];
-		GetNativeArray(2, vBuffer, sizeof(vBuffer));
 
 		LoadVectorFromAddress(flame + view_as<Address>(g_iOffset_Flame_origin), vBuffer);
+		SetNativeArray(2, vBuffer, sizeof(vBuffer));
+	}
+
+	public void Native_Flame_GetCenter(Handle hPlugin, int iNumParams)
+	{
+		Address flame = GetNativeCell(1);
+		float vBuffer[3];
+
+		LoadVectorFromAddress(flame + view_as<Address>(g_iOffset_Flame_center), vBuffer);
 		SetNativeArray(2, vBuffer, sizeof(vBuffer));
 	}
 
@@ -2579,7 +2638,6 @@ public any Native_GetServerOS(Handle hPlugin, int iNumParams)
 	{
 		Address flame = GetNativeCell(1);
 		float vBuffer[3];
-		GetNativeArray(2, vBuffer, sizeof(vBuffer));
 
 		LoadVectorFromAddress(flame + view_as<Address>(g_iOffset_Flame_direction), vBuffer);
 		SetNativeArray(2, vBuffer, sizeof(vBuffer));

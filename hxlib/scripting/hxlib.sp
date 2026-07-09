@@ -21,7 +21,7 @@ public Plugin myinfo =
 	name = "hxlib",
 	author = "Neburai",
 	description = "library providing natives, forwards, and stocks to be used by other plugins",
-	version = "1.15.2",
+	version = "1.16",
 	url = "https://github.com/neburaii/l4d2-plugins/tree/main/hxlib"
 };
 

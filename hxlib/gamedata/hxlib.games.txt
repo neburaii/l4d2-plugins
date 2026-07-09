@@ -715,6 +715,74 @@
 					}
 				}
 			}
+
+			"HX::CInferno::IsTouching_Entity"
+			{
+				"signature"	"CInferno::IsTouching_Entity"
+				"callconv"	"thiscall"
+				"this"		"address"
+				"return"	"bool"
+
+				"arguments"
+				{
+					"entity"
+					{
+						"type"	"cbaseentity"
+					}
+
+					"radius"
+					{
+						"type"	"float"
+					}
+
+					"checkLOS"
+					{
+						"type"	"bool"
+					}
+				}
+			}
+
+			"HX::CInferno::IsTouching_Bounds"
+			{
+				"signature"	"CInferno::IsTouching_Bounds"
+				"callconv"	"thiscall"
+				"this"		"address"
+				"return"	"bool"
+
+				"arguments"
+				{
+					"mins"
+					{
+						"type"	"vectorptr"
+					}
+
+					"maxs"
+					{
+						"type"	"vectorptr"
+					}
+
+					"contact"
+					{
+						"type"	"vectorptr"
+					}
+				}
+			}
+
+			"HX::CInferno::IsTouching_NavArea"
+			{
+				"signature"	"CInferno::IsTouching_NavArea"
+				"callconv"	"thiscall"
+				"this"		"address"
+				"return"	"bool"
+
+				"arguments"
+				{
+					"nav"
+					{
+						"type"	"int"
+					}
+				}
+			}
 		}
 
 		"Addresses"
@@ -1448,6 +1516,12 @@
 				"windows"	"24"
 			}
 
+			"CBaseEntity::m_Collision"
+			{
+				"linux"		"404"
+				"windows"	"384"
+			}
+
 			/************
 			 * CNavLadder
 			 ************/
@@ -1788,6 +1862,12 @@
 				"windows"	"2912"
 			}
 
+			"CInferno::radius"
+			{
+				"linux"		"2888"
+				"windows"	"2868"
+			}
+
 			/***********
 			 * FireInfo
 			 ***********/
@@ -1822,10 +1902,22 @@
 				"windows"	"0"
 			}
 
+			"FireInfo::center"
+			{
+				"linux"		"12"
+				"windows"	"12"
+			}
+
 			"FireInfo::direction"
 			{
 				"linux"		"24"
 				"windows"	"24"
+			}
+
+			"FireInfo::waterHeight"
+			{
+				"linux"		"84"
+				"windows"	"84"
 			}
 
 			/***********
@@ -2936,6 +3028,46 @@
 				"linux"		"@_Z7HashInti"
 				"windows"	"\x56\x8B\xC1\xC1\xE8\x08\x25\xFF\x00\x00\x00\x8B\xD1\x8B\xF1\xC1\xEA\x18\x33\x14\x85\x2A\x2A\x2A\x2A\xC1\xEE\x10\x81\xE6\xFF\x00\x00\x00\x33\x34\x95\x2A\x2A\x2A\x2A\x81\xE1\xFF\x00\x00\x00\x8B\x14\xB5\x2A\x2A\x2A\x2A\x33\xD0\x8B\x04\x95\x2A\x2A\x2A\x2A\x33\xC8\xC1\xE0\x08\x0B\x04\x8D\x2A\x2A\x2A\x2A\x5E\xC3\xCC\xCC"
 				/** 56 8B C1 C1 E8 08 25 FF 00 00 00 8B D1 8B F1 C1 EA 18 33 14 85 ? ? ? ? C1 EE 10 81 E6 FF 00 00 00 33 34 95 ? ? ? ? 81 E1 FF 00 00 00 8B 14 B5 ? ? ? ? 33 D0 8B 04 95 ? ? ? ? 33 C8 C1 E0 08 0B 04 8D ? ? ? ? 5E C3 CC CC */
+			}
+
+			"CCollisionProperty::CalcNearestPoint"
+			{
+				"library"	"server"
+				"linux"		"@_ZNK18CCollisionProperty16CalcNearestPointERK6VectorPS0_"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x18\x56\x8B\xF1\x8B\x4D\x2A\x8D\x45\x2A\x50\x51\x8B\xCE\xE8\x2A\x2A\x2A\x2A\x8D\x55\x2A\x52\x8D\x45\x2A\x50\x8D\x4E\x2A\x51\x8D\x56"
+				/** 55 8B EC 83 EC 18 56 8B F1 8B 4D ? 8D 45 ? 50 51 8B CE E8 ? ? ? ? 8D 55 ? 52 8D 45 ? 50 8D 4E ? 51 8D 56 */
+			}
+
+			"CInferno::IsTouching_Entity"
+			{
+				"library"	"server"
+				"linux"		"@_ZNK8CInferno10IsTouchingEP11CBaseEntityfb"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x7C\xA1\x2A\x2A\x2A\x2A\x33\xC5\x89\x45\x2A\x53\x56\x8B\x75"
+				/** 55 8B EC 83 EC 7C A1 ? ? ? ? 33 C5 89 45 ? 53 56 8B 75 */
+			}
+
+			"CInferno::IsTouching_Bounds"
+			{
+				"library"	"server"
+				"linux"		"@_ZNK8CInferno10IsTouchingERK6VectorS2_PS0_"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x20\x83\xB9\x2A\x2A\x2A\x2A\x00"
+				/** 55 8B EC 83 EC 20 83 B9 ? ? ? ? 00 */
+			}
+
+			"CInferno::IsTouching_NavArea"
+			{
+				"library"	"server"
+				"linux"		"@_ZNK8CInferno10IsTouchingEPK8CNavArea"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x10\x83\x7D\x2A\x00\x53\x56\x57\x8B\xD9"
+				/** 55 8B EC 83 EC 10 83 7D ? 00 53 56 57 8B D9 */
+			}
+
+			"CNavArea::GetClosestPointOnArea"
+			{
+				"library"	"server"
+				"linux"		"@_ZNK8CNavArea21GetClosestPointOnAreaEPK6VectorPS0_"
+				"windows"	"\x55\x8B\xEC\x51\x8B\x45\x2A\xF3\x0F\x10\x00\xF3\x0F\x10\x49"
+				/** 55 8B EC 51 8B 45 ? F3 0F 10 00 F3 0F 10 49 */
 			}
 		}
 	}

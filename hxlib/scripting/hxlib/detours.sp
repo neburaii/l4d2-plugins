@@ -133,6 +133,18 @@ void InitDetours()
 	prep.Register(Detour_SetAmmoCount_Pre, Detour_SetAmmoCount_Post,
 		{Forward_OnSetReserveAmmo, Forward_OnSetReserveAmmo_Post, -1});
 
+	prep.FromFunction("HX::CInferno::IsTouching_Entity");
+	prep.Register(Detour_InfernoIsTouching_Entity_Pre, Detour_InfernoIsTouching_Entity_Post,
+		{Forward_OnIsEntityTouchingInferno, Forward_OnIsEntityTouchingInferno_Post, -1});
+
+	prep.FromFunction("HX::CInferno::IsTouching_Bounds");
+	prep.Register(Detour_InfernoIsTouching_Bounds_Pre, Detour_InfernoIsTouching_Bounds_Post,
+		{Forward_OnIsBoundsTouchingInferno, Forward_OnIsBoundsTouchingInferno_Post, -1});
+
+	prep.FromFunction("HX::CInferno::IsTouching_NavArea");
+	prep.Register(Detour_InfernoIsTouching_NavArea_Pre, Detour_InfernoIsTouching_NavArea_Post,
+		{Forward_OnIsNavAreaTouchingInferno, Forward_OnIsNavAreaTouchingInferno_Post, -1});
+
 	if (g_OS == OS_Windows)
 	{
 		prep.FromAddress("CALL::TerrorNavMesh::RemoveWanderersInActiveAreaSet",
@@ -1001,7 +1013,7 @@ void InitDetours()
 		Call_PushCell(pThis);
 		Call_PushArrayEx(vOrigin, sizeof(vOrigin), SM_PARAM_COPYBACK);
 		Call_PushArrayEx(vDirection, sizeof(vDirection), SM_PARAM_COPYBACK);
-		Call_PushCell(parentFlame);
+		Call_PushCellRef(parentFlame);
 		Call_PushCellRef(iDepth);
 		Action result = Plugin_Continue;
 		Call_Finish(result);
@@ -1017,6 +1029,7 @@ void InitDetours()
 		{
 			hParams.SetVector(1, vOrigin);
 			hParams.SetVector(2, vDirection);
+			hParams.Set(3, parentFlame);
 			hParams.Set(4, iDepth);
 			return MRES_ChangedHandled;
 		}
@@ -1742,3 +1755,168 @@ void InitDetours()
 		return MRES_Ignored;
 	}
 
+/** OnIsEntityTouchingInferno */
+	bool g_bHandled_InfernoIsTouching_Entity;
+
+	MRESReturn Detour_InfernoIsTouching_Entity_Pre(int pThis, DHookReturn hReturn, DHookParam hParams)
+	{
+		int iEntity = hParams.Get(1);
+		float fRadius = hParams.Get(2);
+		bool bCheckLOS = hParams.Get(3);
+
+		bool bHandledResult = false;
+
+		Call_StartForward(g_forward[Forward_OnIsEntityTouchingInferno].handle);
+		Call_PushCell(pThis);
+		Call_PushCell(iEntity);
+		Call_PushFloatRef(fRadius);
+		Call_PushCellRef(bCheckLOS);
+		Call_PushCellRef(bHandledResult);
+		Action result = Plugin_Continue;
+		Call_Finish(result);
+
+		if (result == Plugin_Handled)
+		{
+			g_bHandled_InfernoIsTouching_Entity = true;
+			hReturn.Value = bHandledResult;
+			return MRES_Supercede;
+		}
+
+		if (result == Plugin_Changed)
+		{
+			hParams.Set(2, fRadius);
+			hParams.Set(3, bCheckLOS);
+			return MRES_ChangedHandled;
+		}
+
+		return MRES_Ignored;
+	}
+
+	MRESReturn Detour_InfernoIsTouching_Entity_Post(int pThis, DHookReturn hReturn, DHookParam hParams)
+	{
+		int iEntity = hParams.Get(1);
+		float fRadius = hParams.Get(2);
+		bool bCheckLOS = hParams.Get(3);
+
+		Call_StartForward(g_forward[Forward_OnIsEntityTouchingInferno_Post].handle);
+		Call_PushCell(pThis);
+		Call_PushCell(iEntity);
+		Call_PushFloat(fRadius);
+		Call_PushCell(bCheckLOS);
+		Call_PushCell(hReturn.Value);
+		Call_PushCell(g_bHandled_InfernoIsTouching_Entity);
+		Call_Finish();
+
+		g_bHandled_InfernoIsTouching_Entity = false;
+		return MRES_Ignored;
+	}
+
+/** OnIsBoundsTouchingInferno */
+	bool g_bHandled_InfernoIsTouching_Bounds;
+
+	MRESReturn Detour_InfernoIsTouching_Bounds_Pre(int pThis, DHookReturn hReturn, DHookParam hParams)
+	{
+		float vMins[3];
+		float vMaxs[3];
+		hParams.GetVector(1, vMins);
+		hParams.GetVector(2, vMaxs);
+
+		bool bWantsContact = !hParams.IsNull(3);
+		float vHandledContact[3] = {0.0, 0.0, 0.0};
+		bool bHandledResult = false;
+
+		Call_StartForward(g_forward[Forward_OnIsBoundsTouchingInferno].handle);
+		Call_PushCell(pThis);
+		Call_PushArray(vMins, sizeof(vMins));
+		Call_PushArray(vMaxs, sizeof(vMaxs));
+
+		if (bWantsContact)
+			Call_PushArrayEx(vHandledContact, sizeof(vHandledContact), SM_PARAM_COPYBACK);
+		else Call_PushNullVector();
+
+		Call_PushCellRef(bHandledResult);
+
+		Action result = Plugin_Continue;
+		Call_Finish(result);
+
+		if (result == Plugin_Handled)
+		{
+			g_bHandled_InfernoIsTouching_Bounds = true;
+
+			if (bWantsContact)
+				hParams.SetVector(3, vHandledContact);
+			hReturn.Value = bHandledResult;
+
+			return MRES_Supercede;
+		}
+
+		return MRES_Ignored;
+	}
+
+	MRESReturn Detour_InfernoIsTouching_Bounds_Post(int pThis, DHookReturn hReturn, DHookParam hParams)
+	{
+		float vMins[3];
+		float vMaxs[3];
+		hParams.GetVector(1, vMins);
+		hParams.GetVector(2, vMaxs);
+
+		Call_StartForward(g_forward[Forward_OnIsBoundsTouchingInferno_Post].handle);
+		Call_PushCell(pThis);
+		Call_PushArray(vMins, sizeof(vMins));
+		Call_PushArray(vMaxs, sizeof(vMaxs));
+
+		if (!hParams.IsNull(3))
+		{
+			float vContact[3];
+			hParams.GetVector(3, vContact);
+			Call_PushArray(vContact, sizeof(vContact));
+		}
+		else Call_PushNullVector();
+
+		Call_PushCell(hReturn.Value);
+		Call_PushCell(g_bHandled_InfernoIsTouching_Bounds);
+		Call_Finish();
+
+		g_bHandled_InfernoIsTouching_Bounds = false;
+		return MRES_Ignored;
+	}
+
+/** OnIsNavAreaTouchingInferno */
+	bool g_bHandled_InfernoIsTouching_NavArea;
+
+	MRESReturn Detour_InfernoIsTouching_NavArea_Pre(int pThis, DHookReturn hReturn, DHookParam hParams)
+	{
+		Address pNav = hParams.Get(1);
+		bool bHandledResult = false;
+
+		Call_StartForward(g_forward[Forward_OnIsNavAreaTouchingInferno].handle);
+		Call_PushCell(pThis);
+		Call_PushCell(pNav);
+		Call_PushCellRef(bHandledResult);
+		Action result = Plugin_Continue;
+		Call_Finish(result);
+
+		if (result == Plugin_Handled)
+		{
+			g_bHandled_InfernoIsTouching_NavArea = true;
+			hReturn.Value = bHandledResult;
+			return MRES_Supercede;
+		}
+
+		return MRES_Ignored;
+	}
+
+	MRESReturn Detour_InfernoIsTouching_NavArea_Post(int pThis, DHookReturn hReturn, DHookParam hParams)
+	{
+		Address pNav = hParams.Get(1);
+
+		Call_StartForward(g_forward[Forward_OnIsNavAreaTouchingInferno_Post].handle);
+		Call_PushCell(pThis);
+		Call_PushCell(pNav);
+		Call_PushCell(hReturn.Value);
+		Call_PushCell(g_bHandled_InfernoIsTouching_NavArea);
+		Call_Finish();
+
+		g_bHandled_InfernoIsTouching_NavArea = false;
+		return MRES_Ignored;
+	}

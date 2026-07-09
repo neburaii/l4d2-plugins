@@ -36,6 +36,9 @@ enum
 	Forward_OnIncapacitatedAsTank,				Forward_OnIncapacitatedAsTank_Post,
 	Forward_OnCycleZoom,						Forward_OnCycleZoom_Post,
 	Forward_OnSetReserveAmmo,					Forward_OnSetReserveAmmo_Post,
+	Forward_OnIsEntityTouchingInferno,			Forward_OnIsEntityTouchingInferno_Post,
+	Forward_OnIsBoundsTouchingInferno,			Forward_OnIsBoundsTouchingInferno_Post,
+	Forward_OnIsNavAreaTouchingInferno,			Forward_OnIsNavAreaTouchingInferno_Post,
 
 	Forward_MAX
 };
@@ -207,7 +210,7 @@ GlobalForward InitGlobalForward(int forwardIndex, char name[MAX_FWD_LEN])
 
 		case Forward_OnCreateFlame:
 		{	name = "OnCreateFlame"; return CreateGlobalForward(name,
-				ET_Event, Param_Cell, Param_Array, Param_Array, Param_Cell, Param_CellByRef);
+				ET_Event, Param_Cell, Param_Array, Param_Array, Param_CellByRef, Param_CellByRef);
 		}
 		case Forward_OnCreateFlame_Post:
 		{	name = "OnCreateFlame_Post"; return CreateGlobalForward(name,
@@ -342,6 +345,33 @@ GlobalForward InitGlobalForward(int forwardIndex, char name[MAX_FWD_LEN])
 		}
 		case Forward_OnSetReserveAmmo_Post:
 		{	name = "OnSetReserveAmmo_Post"; return CreateGlobalForward(name,
+				ET_Ignore, Param_Cell, Param_Cell, Param_Cell, Param_Cell);
+		}
+
+		case Forward_OnIsEntityTouchingInferno:
+		{	name = "OnIsEntityTouchingInferno"; return CreateGlobalForward(name,
+				ET_Event, Param_Cell, Param_Cell, Param_FloatByRef, Param_CellByRef, Param_CellByRef);
+		}
+		case Forward_OnIsEntityTouchingInferno_Post:
+		{	name = "OnIsEntityTouchingInferno_Post"; return CreateGlobalForward(name,
+				ET_Ignore, Param_Cell, Param_Cell, Param_Float, Param_Cell, Param_Cell, Param_Cell);
+		}
+
+		case Forward_OnIsBoundsTouchingInferno:
+		{	name = "OnIsBoundsTouchingInferno"; return CreateGlobalForward(name,
+				ET_Event, Param_Cell, Param_Array, Param_Array, Param_Array, Param_CellByRef);
+		}
+		case Forward_OnIsBoundsTouchingInferno_Post:
+		{	name = "OnIsBoundsTouchingInferno_Post"; return CreateGlobalForward(name,
+				ET_Ignore, Param_Cell, Param_Array, Param_Array, Param_Array, Param_Cell, Param_Cell);
+		}
+
+		case Forward_OnIsNavAreaTouchingInferno:
+		{	name = "OnIsNavAreaTouchingInferno"; return CreateGlobalForward(name,
+				ET_Event, Param_Cell, Param_Cell, Param_CellByRef);
+		}
+		case Forward_OnIsNavAreaTouchingInferno_Post:
+		{	name = "OnIsNavAreaTouchingInferno_Post"; return CreateGlobalForward(name,
 				ET_Ignore, Param_Cell, Param_Cell, Param_Cell, Param_Cell);
 		}
 	}
