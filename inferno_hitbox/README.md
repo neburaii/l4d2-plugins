@@ -3,8 +3,9 @@ CInferno is an internal class that refers to fire, spit, and firework particles 
 
 this plugin will:
 - fix issues related to their hitbox.
-- adds new configuration of things like the radius (defaults behave like vanilla)
-- layered hitbox, with full damage inner and reduced damage outer layer (disabled by default)
+- adds new configuration of things like the radius
+- layered hitbox, with full damage inner and reduced damage outer layer
+- option for damage ramping to be relative to individual flame lifetimes
 
 ### Hibox fixes
 the hitbox is a sphere with its center elevated from the inferno surface. there is one for each "fire" within the inferno. the radius of the sphere is inconsistent in vanilla. for actual hit detection, it's always 60. but for things like computing the full extent, it's 30. the extent computation being lower is quite problematic. when checking entities to deal damage to, it first filters for entities within the bounding box of the entire inferno.
@@ -13,7 +14,6 @@ in practice, this means the safe approach distance is very inconsistent. the bou
 
 so the first fix is to make the radius consistent everywhere it's used. now approaching from any side will have you receive damage at the same distance.
 
----
 
 the 2nd issue fixed is unique to spit. for some odd reason, the client will always fail to render the 2nd created "fire" (but let's just call them patches in the context of spit) of the spit puddle.
 
@@ -30,25 +30,39 @@ every sphere now has a smaller sphere within it. contact with the smaller one wi
 
 it's configured as a multiplier of the base radius, ranging 0 to 1.
 
-### Configuration
-all convars exist for all 3 types. in the names, replace `<type>` with one of:
-- `fire`
-- `spit`
-- `firework`
+### Damage Ramp
+this is a vanilla mechanic. for the first 2 seconds of an inferno's lifetime, the base damage/tick is multiplied by a ratio of how much of the first 2 seconds has elapsed. so 1 second in means multiply by 0.5, 0.1 seconds for 0.05, and so on.
 
+vanilla offers no way to customize this. it's a hardcoded 2 seconds always. the other problem is that it's relative to the entire inferno's lifetime. so let's say halfway into a molotov, it randomly spreads towards your feet. the damage ramp mechanic does nothing to reduce damage here.
+
+this plugin has a toggle to make the damage ramp mechanic based on the lifetime of each individual flame. if touching multiple flames, the flame that will deal the most damage is used. it also has convars for adjusting the hardcoded 2 second ramp time for each inferno type.
+
+### Configuration
 a config is automatically generated in `cfg/sourcemod` for easier configuration.
 
----
+* `inferno_hitbox_damage_ramp_by_flame`
+toggle for all inferno types. makes it so that the damage ramp mechanic is relative to the lifetime of each individual flame, rather than the entire inferno.
+1 or 0. by default it's 1.
+
+
+
+the following convars exist for all 3 types. in the names, replace `<type>` with one of:
+`fire`
+`spit`
+`firework`
+
+* `inferno_hitbox_damage_ramp_time_<type>`
+the first X seconds into inferno/flame lifetime to reduce damage. reduction is done linearly, by multiplying the base damage by a ratio of how much of this time has elapsed
 
 * `inferno_hitbox_radius_<type>`
 the radius in absolute units. defaults to 45 for all types.
 earlier when i was describing one of the hitbox issues, i said the radius in vanilla is inconsistent for outer most fires. it can be as low as 30, or as high as 60.
 because hit detection uses 60, i view that as the more "intended" value. but players are used to the inconsistency allowing for nearer approaches on many occassions. 45 is in the middle of that 30-60 range, and so i figured it's a good compromise.
 
-* `inferno_hitbox_high_ground_mult_<type>`
+* `inferno_hitbox_high_ground_<type>`
 in vanilla, this mechanic was unique to spit. if you're on solid ground and are elevated above the surface of the inferno (surface, not hitbox center), then you'll take no damage.
-it's a multiplier of the radius, ranging 0 to 1. 1 will disable the mechanic for that type.
-fire and firework default to 1, and spit to 0.33333334. this perfectly matches vanilla behavior.
+if set to 0.0, then the mechanic is disabled for that type. otherwise it's the Z distance of the min elevation required to be safe.
+fire and firework default to 0.0, and spit to 20.0. this perfectly matches vanilla behavior.
 
 * `inferno_hitbox_full_damage_radius_mult_<type>`
 the radius of the inner "full damage" hitbox sphere will be `this * inferno_hitbox_radius_<type>`.
@@ -57,3 +71,15 @@ setting to 1 disables the mechanic for that type. defaults to 1 for all types.
 
 * `inferno_hitbox_damage_reduction_mult_<type>`
 if outside any "full dammage" inner hitbox sphere as defined by `inferno_hitbox_full_damage_radius_mult_<type>`, then you will receive `this * original damage` for damage.
+
+## Requirements
+- [hxlib](../hxlib/README.md)
+
+# Changelog
+### 1.1
+- `inferno_hitbox_high_ground_mult_<type>` replaced with `inferno_hitbox_high_ground_<type>`. same thing but in absolute units
+- use vanilla radius always when checking for overlap for creting new fires so that spread behaves like vanilla no matter the radius set
+- per-flame damage ramp, and convars to modify its time
+
+### 1.0
+- initial release

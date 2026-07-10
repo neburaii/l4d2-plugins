@@ -12,11 +12,13 @@ public Plugin myinfo =
 	name = "Revised Inferno Hitboxes",
 	author = "Neburai",
 	description = "Fixes inconsistent hitbox radius, and invisible spit. Implements new ways to configure the hitbox/damage of all inferno based entities",
-	version = "1.0",
+	version = "1.1",
 	url = "https://github.com/neburaii/l4d2-plugins/tree/main/inferno_hitbox"
 };
 
 #define INFERNO_MASK_DAMAGE	(CONTENTS_SOLID|CONTENTS_WINDOW|CONTENTS_MOVEABLE)
+#define VANILLA_RADIUS		60.0
+#define MAX_FIRES			64
 
 bool	g_bLateLoaded;
 bool	g_bPluginStarted;
@@ -24,8 +26,8 @@ bool	g_bPluginStarted;
 ConVar	g_hConVar_Radius[InfernoType_MAX];
 float	g_fRadius[InfernoType_MAX];
 
-ConVar	g_hConVar_HighGroundMult[InfernoType_MAX];
-float	g_fHighGroundMult[InfernoType_MAX];
+ConVar	g_hConVar_HighGround[InfernoType_MAX];
+float	g_fHighGround[InfernoType_MAX];
 
 ConVar	g_hConVar_FullDamageRadiusMult[InfernoType_MAX];
 float	g_fFullDamageRadiusMult[InfernoType_MAX];
@@ -33,7 +35,13 @@ float	g_fFullDamageRadiusMult[InfernoType_MAX];
 ConVar	g_hConVar_DamageReductionMult[InfernoType_MAX];
 float	g_fDamageReductionMult[InfernoType_MAX];
 
-DamageReductionManager g_damageReduction;
+ConVar	g_hConVar_DamageRampTime[InfernoType_MAX];
+float	g_fDamageRampTime[InfernoType_MAX];
+
+ConVar	g_hConVar_DamageRampByFlame;
+bool	g_bDamageRampByFlame;
+
+DamageModifier g_damage;
 
 public APLRes AskPluginLoad2(Handle hMyself, bool bLate, char[] sError, int iErrMax)
 {
@@ -63,45 +71,45 @@ public void OnPluginStart()
 
 	/****************************/
 
-	g_hConVar_HighGroundMult[Inferno_Fire] = CreateConVar(
-		"inferno_hitbox_high_ground_mult_fire", "1.0",
-		"if standing on solid ground, then being (radius * this) above fire will be safe. " ...
-		"1.0 disables this mechanic. vanilla is 1.0",
-		CVAR_FLAGS, true, 0.0, true, 1.0);
-	g_hConVar_HighGroundMult[Inferno_Fire].AddChangeHook(ConVarChanged_Update);
+	g_hConVar_HighGround[Inferno_Fire] = CreateConVar(
+		"inferno_hitbox_high_ground_fire", "0.0",
+		"if standing on solid ground, then being this distance above fire will be safe. " ...
+		"0.0 disables this mechanic. vanilla is 0.0",
+		CVAR_FLAGS, true, 0.0);
+	g_hConVar_HighGround[Inferno_Fire].AddChangeHook(ConVarChanged_Update);
 
-	g_hConVar_HighGroundMult[Inferno_Spit] = CreateConVar(
-		"inferno_hitbox_high_ground_mult_spit", "0.33333334",
-		"if standing on solid ground, then being (radius * this) above spit will be safe. " ...
-		"1.0 disables this mechanic. vanilla is 0.33333334",
-		CVAR_FLAGS, true, 0.0, true, 1.0);
-	g_hConVar_HighGroundMult[Inferno_Spit].AddChangeHook(ConVarChanged_Update);
+	g_hConVar_HighGround[Inferno_Spit] = CreateConVar(
+		"inferno_hitbox_high_ground_spit", "20.0",
+		"if standing on solid ground, then being this distance above spit will be safe. " ...
+		"0.0 disables this mechanic. vanilla is 20.0",
+		CVAR_FLAGS, true, 0.0);
+	g_hConVar_HighGround[Inferno_Spit].AddChangeHook(ConVarChanged_Update);
 
-	g_hConVar_HighGroundMult[Inferno_Firework] = CreateConVar(
-		"inferno_hitbox_high_ground_mult_firework", "1.0",
-		"if standing on solid ground, then being (radius * this) above firework particles will be safe. " ...
-		"1.0 disables this mechanic. vanilla is 1.0",
-		CVAR_FLAGS, true, 0.0, true, 1.0);
-	g_hConVar_HighGroundMult[Inferno_Firework].AddChangeHook(ConVarChanged_Update);
+	g_hConVar_HighGround[Inferno_Firework] = CreateConVar(
+		"inferno_hitbox_high_ground_firework", "0.0",
+		"if standing on solid ground, then being this distance above firework particles will be safe. " ...
+		"0.0 disables this mechanic. vanilla is 0.0",
+		CVAR_FLAGS, true, 0.0);
+	g_hConVar_HighGround[Inferno_Firework].AddChangeHook(ConVarChanged_Update);
 
 	/****************************/
 
 	g_hConVar_FullDamageRadiusMult[Inferno_Fire] = CreateConVar(
-		"inferno_hitbox_full_damage_radius_mult_fire", "1.0",
+		"inferno_hitbox_full_damage_radius_mult_fire", "0.75",
 		"fire will deal full damage when within an inner radius that's the full radius multiplied by this. " ...
 		"otherwise, receive (original damage * inferno_hitbox_damage_reduction_mult_fire).",
 		CVAR_FLAGS, true, 0.0, true, 1.0);
 	g_hConVar_FullDamageRadiusMult[Inferno_Fire].AddChangeHook(ConVarChanged_Update);
 
 	g_hConVar_FullDamageRadiusMult[Inferno_Spit] = CreateConVar(
-		"inferno_hitbox_full_damage_radius_mult_spit", "1.0",
+		"inferno_hitbox_full_damage_radius_mult_spit", "0.75",
 		"spit will deal full damage when within an inner radius that's the full radius multiplied by this. " ...
 		"otherwise, receive (original damage * inferno_hitbox_damage_reduction_mult_spit).",
 		CVAR_FLAGS, true, 0.0, true, 1.0);
 	g_hConVar_FullDamageRadiusMult[Inferno_Spit].AddChangeHook(ConVarChanged_Update);
 
 	g_hConVar_FullDamageRadiusMult[Inferno_Firework] = CreateConVar(
-		"inferno_hitbox_full_damage_radius_mult_firework", "1.0",
+		"inferno_hitbox_full_damage_radius_mult_firework", "0.75",
 		"firework particles will deal full damage when within an inner radius that's the full radius multiplied by this. " ...
 		"otherwise, receive (original damage * inferno_hitbox_damage_reduction_mult_firework).",
 		CVAR_FLAGS, true, 0.0, true, 1.0);
@@ -129,6 +137,38 @@ public void OnPluginStart()
 		"then reduce damage by this multiplier.",
 		CVAR_FLAGS, true, 0.0, true, 1.0);
 	g_hConVar_DamageReductionMult[Inferno_Firework].AddChangeHook(ConVarChanged_Update);
+
+	/****************************/
+
+	g_hConVar_DamageRampTime[Inferno_Fire] = CreateConVar(
+		"inferno_hitbox_damage_ramp_time_fire", "2.0",
+		"the amount of seconds at the start of a fire's lifetime to scale damage from 0 to the base amount. " ...
+		"vanilla is 2.0",
+		CVAR_FLAGS, true, 0.0);
+	g_hConVar_DamageRampTime[Inferno_Fire].AddChangeHook(ConVarChanged_Update);
+
+	g_hConVar_DamageRampTime[Inferno_Spit] = CreateConVar(
+		"inferno_hitbox_damage_ramp_time_spit", "2.0",
+		"the amount of seconds at the start of a spit's lifetime to scale damage from 0 to the base amount. " ...
+		"for spit, a hardcoded curve for base damage already exists. this applies on top of that. vanilla is 2.0",
+		CVAR_FLAGS, true, 0.0);
+	g_hConVar_DamageRampTime[Inferno_Spit].AddChangeHook(ConVarChanged_Update);
+
+	g_hConVar_DamageRampTime[Inferno_Firework] = CreateConVar(
+		"inferno_hitbox_damage_ramp_time_firework", "2.0",
+		"the amount of seconds at the start of a firework particle's lifetime to scale damage from 0 to the base amount. " ...
+		"vanilla is 2.0",
+		CVAR_FLAGS, true, 0.0);
+	g_hConVar_DamageRampTime[Inferno_Firework].AddChangeHook(ConVarChanged_Update);
+
+	/****************************/
+
+	g_hConVar_DamageRampByFlame = CreateConVar(
+		"inferno_hitbox_damage_ramp_by_flame", "1",
+		"should the damage ramp time be relative to the lifetime of individual flames (1)? " ...
+		"or relative to the lifetime of the inferno itself (0)? vanilla is 0",
+		CVAR_FLAGS, true, 0.0, true, 1.0);
+	g_hConVar_DamageRampByFlame.AddChangeHook(ConVarChanged_Update);
 
 	AutoExecConfig(_, "inferno_hitbox");
 	ReadConVars();
@@ -167,8 +207,7 @@ void StartPlugin()
 			|| !IsInferno(i))
 			continue;
 
-		Inferno inferno = GetInferno(i);
-		inferno.radius = g_fRadius[inferno.type];
+		PatchInferno(i);
 	}
 }
 
@@ -182,62 +221,142 @@ void ReadConVars()
 	for (any i = 0; i < InfernoType_MAX; i++)
 	{
 		g_fRadius[i] = g_hConVar_Radius[i].FloatValue;
-		g_fHighGroundMult[i] = g_hConVar_HighGroundMult[i].FloatValue;
+		g_fHighGround[i] = g_hConVar_HighGround[i].FloatValue;
 		g_fFullDamageRadiusMult[i] = g_hConVar_FullDamageRadiusMult[i].FloatValue;
 		g_fDamageReductionMult[i] = g_hConVar_DamageReductionMult[i].FloatValue;
+		g_fDamageRampTime[i] = g_hConVar_DamageRampTime[i].FloatValue;
 	}
-}
 
-/****************
- * Apply Radius
- ***************/
+	g_bDamageRampByFlame = g_hConVar_DamageRampByFlame.BoolValue;
+}
 
 public void OnEntityCreated(int iEntity, const char[] sClass)
 {
 	if (g_bPluginStarted && IsInferno(iEntity))
-		SDKHook(iEntity, SDKHook_SpawnPost, OnInfernoSpawn);
+		SDKHook(iEntity, SDKHook_SpawnPost, PatchInferno);
 }
 
-void OnInfernoSpawn(int iEntity)
+void PatchInferno(int iEntity)
 {
 	Inferno inferno = GetInferno(iEntity);
-	inferno.radius = g_fRadius[inferno.type];
+	InfernoType type = inferno.type;
+
+	inferno.radius = g_fRadius[type];
 }
 
 /***************
- * Damage Zones
+ * Modify Damage
  **************/
 
-enum struct DamageReductionManager
+enum struct DamageEvents
 {
-	int entref[MAXPLAYERS_L4D2 + 1];
+	int total;
+	float hardMod[MAX_FIRES];
+	float softMod[MAX_FIRES];
+
+	void Clear()
+	{
+		this.total = 0;
+	}
+
+	float CalcDamage(int iIndex, float fBase)
+	{
+		float fDamage = fBase;
+		fDamage *= this.hardMod[iIndex];
+
+		float fPostSoft = fDamage * this.softMod[iIndex];
+		if (fDamage >= 1.0 && fPostSoft < 1.0)
+			fDamage = 1.0;
+		else fDamage = fPostSoft;
+
+		return fDamage;
+	}
+
+	void Push(Flame flame, Inferno inferno, InfernoType type, bool bTouchingInner)
+	{
+		this.hardMod[this.total] = 1.0;
+		this.softMod[this.total] = 1.0;
+
+		if (g_fDamageRampTime[type] > 0.0)
+		{
+			float fStartTime;
+			if (g_bDamageRampByFlame)
+				fStartTime = flame.lifetime.timestamp - flame.lifetime.duration;
+			else fStartTime = inferno.startTime;
+
+			float fRampEnd = fStartTime + g_fDamageRampTime[type];
+
+			if (GetGameTime() < fRampEnd)
+				this.hardMod[this.total] *= GetElapsedRatio(fRampEnd, g_fDamageRampTime[type]);
+		}
+
+		if (!bTouchingInner)
+			this.softMod[this.total] *= g_fDamageReductionMult[type];
+
+		this.total++;
+	}
+}
+
+enum struct DamageModifier
+{
+	int playerRef[MAXPLAYERS_L4D2 + 1];
+	int infernoRef[MAXPLAYERS_L4D2 + 1];
 	int tickstamp[MAXPLAYERS_L4D2 + 1];
-	bool wants[MAXPLAYERS_L4D2 + 1];
 
-	void MarkWanted(int iClient)
+	DamageEvents events[MAXPLAYERS_L4D2 + 1];
+
+	void Reset(int iPlayer, Inferno inferno)
 	{
-		this.entref[iClient] = EntIndexToEntRef(iClient);
-		this.tickstamp[iClient] = GetGameTickCount();
-		this.wants[iClient] = true;
+		this.playerRef[iPlayer] = EntIndexToEntRef(iPlayer);
+		this.infernoRef[iPlayer] = EntIndexToEntRef(inferno.entity);
+		this.tickstamp[iPlayer] = GetGameTickCount();
+
+		this.events[iPlayer].Clear();
 	}
 
-	void Clear(int iClient)
+	void TouchFlame(int iPlayer, Flame flame, Inferno inferno, InfernoType type, bool bTouchingInner)
 	{
-		this.wants[iClient] = false;
+		this.events[iPlayer].Push(flame, inferno, type, bTouchingInner);
 	}
 
-	bool IsWanted(int iClient)
+	bool ShouldModifyDamage(int iPlayer, int iInfernoEnt)
 	{
-		if (!this.wants[iClient])
+		if (!this.events[iPlayer].total)
 			return false;
 
-		if (EntIndexToEntRef(iClient) != this.entref[iClient]
-			|| GetGameTickCount() > this.tickstamp[iClient])
+		if (EntIndexToEntRef(iPlayer) != this.playerRef[iPlayer]
+			|| EntIndexToEntRef(iInfernoEnt) != this.infernoRef[iPlayer]
+			|| GetGameTickCount() > this.tickstamp[iPlayer])
 		{
-			this.Clear(iClient);
+			this.events[iPlayer].Clear();
 			return false;
 		}
 
+		return true;
+	}
+
+	bool ModifyDamage(int iPlayer, int iInfernoEnt, float &fDamage)
+	{
+		if (!this.ShouldModifyDamage(iPlayer, iInfernoEnt))
+			return false;
+
+		float fHighestDmg;
+		float fEventDmg;
+
+		for (int i = 0; i < this.events[iPlayer].total; i++)
+		{
+			fEventDmg = this.events[iPlayer].CalcDamage(i, fDamage);
+
+			if (!i || fEventDmg > fHighestDmg)
+				fHighestDmg = fEventDmg;
+		}
+
+		this.events[iPlayer].Clear();
+
+		if (fHighestDmg >= fDamage)
+			return false;
+
+		fDamage = fHighestDmg;
 		return true;
 	}
 }
@@ -250,22 +369,10 @@ public void OnClientPutInServer(int iClient)
 
 Action OnTakeDamage(int iVictim, int &iAttacker, int &iInflictor, float &fDamage, int &iDamagetype, int &iWeapon, float vDamageForce[3], float vDamagePos[3])
 {
-	if (IsValidEdict(iInflictor) && IsInferno(iInflictor))
+	if (IsValidClient(iVictim) && IsValidEdict(iInflictor) && IsInferno(iInflictor))
 	{
-		if (g_damageReduction.IsWanted(iVictim))
-		{
-			g_damageReduction.Clear(iVictim);
-
-			Inferno inferno = GetInferno(iInflictor);
-			float fReducedDamage = fDamage * g_fDamageReductionMult[inferno.type];
-
-			/** because integer rounding, this is needed to prevent extending the initial godframes */
-			if (fDamage >= 1.0 && fReducedDamage < 1.0)
-				fDamage = 1.0;
-			else fDamage = fReducedDamage;
-
+		if (g_damage.ModifyDamage(iVictim, iInflictor, fDamage))
 			return Plugin_Changed;
-		}
 	}
 
 	return Plugin_Continue;
@@ -292,13 +399,16 @@ bool IsTouchingCustom_Entity(Inferno inferno, int iEntity, bool bCheckLOS)
 	InfernoType type = inferno.type;
 	int iTotalFlames = inferno.flameCount;
 	float fRadius = inferno.radius;
+	bool bIsPlayer = 1 <= iEntity <= MaxClients;
 
 	bool bRet = false;
-	bool bTouchingInner = false;
 
-	if (g_fFullDamageRadiusMult[type] >= 1.0
-		|| !(1 <= iEntity <= MaxClients))
+	bool bTouchingInner = false;
+	if (g_fFullDamageRadiusMult[type] >= 1.0)
 		bTouchingInner = true;
+
+	if (bIsPlayer)
+		g_damage.Reset(iEntity, inferno);
 
 	for (int i = 0; i < iTotalFlames; i++)
 	{
@@ -308,12 +418,12 @@ bool IsTouchingCustom_Entity(Inferno inferno, int iEntity, bool bCheckLOS)
 
 		flame = inferno.GetFlame(i);
 
-		if (g_fHighGroundMult[type] < 1.0 && IsOnGround(iEntity))
+		if (g_fHighGround[type] > 0.0 && IsOnGround(iEntity))
 		{
 			flame.GetOrigin(vFlamePos);
 			GetNearestPosOnEntity(iEntity, vFlamePos, vEntityPos);
 
-			if ((vEntityPos[2] - vFlamePos[2]) > (fRadius * g_fHighGroundMult[type]))
+			if ((vEntityPos[2] - vFlamePos[2]) > g_fHighGround[type])
 				continue;
 		}
 
@@ -338,8 +448,7 @@ bool IsTouchingCustom_Entity(Inferno inferno, int iEntity, bool bCheckLOS)
 				delete hTrace;
 			}
 
-			if (g_fFullDamageRadiusMult[type] < 1.0
-				&& !bTouchingInner)
+			if (bIsPlayer && !bTouchingInner)
 			{
 				fFullDamageRadius = fRadius * g_fFullDamageRadiusMult[type];
 
@@ -348,14 +457,10 @@ bool IsTouchingCustom_Entity(Inferno inferno, int iEntity, bool bCheckLOS)
 			}
 
 			bRet = true;
+			if (bIsPlayer) g_damage.TouchFlame(iEntity, flame, inferno, type, bTouchingInner);
+			else break;
 		}
-
-		if (bRet && bTouchingInner)
-			break;
 	}
-
-	if (bRet && !bTouchingInner)
-		g_damageReduction.MarkWanted(iEntity);
 
 	return bRet;
 }
@@ -374,7 +479,7 @@ bool IsTouchingCustom_Bounds(Inferno inferno, const float vMins[3], const float 
 	float fDistanceSqr;
 
 	int iTotalFlames = inferno.flameCount;
-	float fRadius = inferno.radius;
+	float fRadius = VANILLA_RADIUS;
 
 	for (int i = 0; i < iTotalFlames; i++)
 	{
@@ -417,7 +522,7 @@ bool IsTouchingCustom_NavArea(Inferno inferno, NavArea nav)
 
 	InfernoType type = inferno.type;
 	int iTotalFlames = inferno.flameCount;
-	float fRadius = inferno.radius;
+	float fRadius = VANILLA_RADIUS;
 
 	if (type == Inferno_Spit)
 		fRadius *= 2.0;
@@ -444,6 +549,23 @@ bool IsTouchingCustom_NavArea(Inferno inferno, NavArea nav)
 /***********
  * Helpers
  **********/
+
+float GetElapsedRatio(float fEndTime, float fDuration)
+{
+	float fElapsed = GetElapsedTime(fEndTime, fDuration) / fDuration;
+
+	if (fElapsed < 0.0)
+		return 0.0;
+	if (fElapsed > 1.0)
+		return 1.0;
+
+	return fElapsed;
+}
+
+float GetElapsedTime(float fEndTime, float fDuration)
+{
+	return GetGameTime() - fEndTime + fDuration;
+}
 
 bool IsInferno(int iEntity)
 {
