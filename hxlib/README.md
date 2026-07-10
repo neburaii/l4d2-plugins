@@ -36,6 +36,9 @@ None of the stocks in this file require anything from the main [hxlib.inc](./scr
 # Changelog
 this focuses on core hxlib. hxstocks updates go undocumented.
 
+### 1.17
+- added `Inferno.GetDamagePerSecond`
+
 ### 1.16
 - added forwards:
 	- `OnIsEntityTouchingInferno` and `OnIsEntityTouchingInferno_Post`

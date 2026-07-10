@@ -86,6 +86,7 @@ void RegisterNatives()
 	CreateNative("Inferno.GetFlameLifetime", Native_Inferno_GetFlameLifetime);
 	CreateNative("Inferno.radius.get", Native_Inferno_radius_get);
 	CreateNative("Inferno.radius.set", Native_Inferno_radius_set);
+	CreateNative("Inferno.GetDamagePerSecond", Native_Inferno_GetDamagePerSecond);
 
 	CreateNative("Flame.depth.get", Native_Flame_depth_get);
 	CreateNative("Flame.depth.set", Native_Flame_depth_set);
@@ -2576,6 +2577,12 @@ public any Native_GetServerOS(Handle hPlugin, int iNumParams)
 		float fValue = GetNativeCell(2);
 		StoreToAddress(inferno + view_as<Address>(
 			g_iOffset_Inferno_radius), fValue, NumberType_Int32);
+	}
+
+	public any Native_Inferno_GetDamagePerSecond(Handle hPlugin, int iNumParams)
+	{
+		Address inferno = GetNativeCell(1);
+		return SDKCall(g_hSDK_InfernoGetDamagePerSecond, inferno);
 	}
 
 /** Flame methodmap */

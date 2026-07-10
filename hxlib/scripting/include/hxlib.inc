@@ -3572,13 +3572,6 @@ methodmap Inferno
 	}
 
 	/**
-	 * get the lifetime flames will be created with
-	 *
-	 * @return				duration in seconds
-	 */
-	public native float GetFlameLifetime();
-
-	/**
 	 * origin of where the inferno started burning
 	 *
 	 * @param buffer		store origin into this buffer
@@ -3598,6 +3591,20 @@ methodmap Inferno
 	 * @param buffer		store origin into this buffer
 	 */
 	public native void GetMaxs(float buffer[3]);
+
+	/**
+	 * get the lifetime flames will be created with
+	 *
+	 * @return				duration in seconds
+	 */
+	public native float GetFlameLifetime();
+
+	/**
+	 * rate of damage to deal to entities touching it
+	 *
+	 * @return				damage per second
+	 */
+	public native float GetDamagePerSecond();
 
 	/*************
 	 * Flame List
@@ -4216,6 +4223,7 @@ public SharedPlugin __pl_hxlib =
 		MarkNativeAsOptional("Inferno.GetFlameLifetime");
 		MarkNativeAsOptional("Inferno.radius.get");
 		MarkNativeAsOptional("Inferno.radius.set");
+		MarkNativeAsOptional("Inferno.GetDamagePerSecond");
 
 		MarkNativeAsOptional("Flame.depth.get");
 		MarkNativeAsOptional("Flame.depth.set");

@@ -92,6 +92,7 @@ Handle g_hSDK_RemoveAmmo;
 Handle g_hSDK_GetFlameLifetime;
 Handle g_hSDK_CalcNearestPos;
 Handle g_hSDK_GetClosestPointOnArea;
+Handle g_hSDK_InfernoGetDamagePerSecond;
 
 void InitSDKCalls()
 {
@@ -561,6 +562,11 @@ void InitSDKCalls()
 	prep.Param(SDKType_Vector, SDKPass_Pointer);
 	prep.Param(SDKType_Vector, SDKPass_ByRef, _, VENCODE_FLAG_COPYBACK);
 	prep.End(g_hSDK_GetClosestPointOnArea);
+
+	/** Native_Inferno_GetDamagePerSecond */
+	prep.Start(SDKCall_Raw, SDKConf_Virtual, "CInferno::GetDamagePerSecond");
+	prep.Return(SDKType_Float, SDKPass_Plain);
+	prep.End(g_hSDK_InfernoGetDamagePerSecond);
 
 	/** Native_SpawnSpecial */
 	prep.Start(SDKCall_Raw, SDKConf_Signature, "ZombieManager::SpawnSpecial");

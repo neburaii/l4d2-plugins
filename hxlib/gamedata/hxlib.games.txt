@@ -1242,6 +1242,12 @@
 				"windows"	"205"
 			}
 
+			"CInferno::GetDamagePerSecond"
+			{
+				"linux"		"203"
+				"windows"	"202"
+			}
+
 			/*****************
 			 * various offsets
 			 *****************/
