@@ -12,7 +12,7 @@ public Plugin myinfo =
 	name = "Revised Inferno Hitboxes",
 	author = "Neburai",
 	description = "Fixes inconsistent hitbox radius, and invisible spit. Implements new ways to configure the hitbox/damage of all inferno based entities",
-	version = "1.1",
+	version = "1.1.1",
 	url = "https://github.com/neburaii/l4d2-plugins/tree/main/inferno_hitbox"
 };
 
@@ -403,9 +403,7 @@ bool IsTouchingCustom_Entity(Inferno inferno, int iEntity, bool bCheckLOS)
 
 	bool bRet = false;
 
-	bool bTouchingInner = false;
-	if (g_fFullDamageRadiusMult[type] >= 1.0)
-		bTouchingInner = true;
+	bool bTouchingInner;
 
 	if (bIsPlayer)
 		g_damage.Reset(iEntity, inferno);
@@ -448,16 +446,20 @@ bool IsTouchingCustom_Entity(Inferno inferno, int iEntity, bool bCheckLOS)
 				delete hTrace;
 			}
 
-			if (bIsPlayer && !bTouchingInner)
-			{
-				fFullDamageRadius = fRadius * g_fFullDamageRadiusMult[type];
-
-				if (fDistanceSqr <= (fFullDamageRadius * fFullDamageRadius))
-					bTouchingInner = true;
-			}
-
 			bRet = true;
-			if (bIsPlayer) g_damage.TouchFlame(iEntity, flame, inferno, type, bTouchingInner);
+
+			if (bIsPlayer)
+			{
+				if (g_fFullDamageRadiusMult[type] >= 1.0)
+					bTouchingInner = true;
+				else
+				{
+					fFullDamageRadius = fRadius * g_fFullDamageRadiusMult[type];
+					bTouchingInner = (fDistanceSqr < (fFullDamageRadius * fFullDamageRadius));
+				}
+
+				g_damage.TouchFlame(iEntity, flame, inferno, type, bTouchingInner);
+			}
 			else break;
 		}
 	}
