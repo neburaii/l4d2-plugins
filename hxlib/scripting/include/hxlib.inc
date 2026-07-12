@@ -644,6 +644,7 @@ enum EntityHook
 	EntityHook_SetObserverTarget,	// Player
 	EntityHook_FinishReload,		// CBaseCombatWeapon
 	EntityHook_RemoveAmmo,			// CBaseCombatCharacter
+	EntityHook_GetInfernoDPS,		// CInferno
 
 	EntityHook_MAX
 };
@@ -804,6 +805,23 @@ typeset EntityHookCB
 	 * @param handled		true if pre-hook returned Plugin_Handled
 	 */
 	function void (int client, int amount, AmmoType ammoType, bool handled);
+
+	/** EntityHook_GetInfernoDPS, EHook_Pre
+	 *
+	 * @param inferno		Inferno methodmap / CInferno address
+	 * @param handledResult	if Plugin_Handled is returned, override return value with this (DPS as float)
+	 *
+	 * @return				Plugin_Continue to take no action, Plugin_Handled to skip and return handledResult
+	 */
+	function Action (Inferno inferno, float &handledResult);
+
+	/** EntityHook_GetInfernoDPS, EHook_Post
+	 *
+	 * @param inferno		Inferno methodmap / CInferno address
+	 * @param result		returned damage per second, as float
+	 * @param handled		true if pre-hook returned Plugin_Handled
+	 */
+	function void (Inferno inferno, float result, bool handled);
 };
 
 /**

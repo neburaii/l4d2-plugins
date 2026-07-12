@@ -36,6 +36,9 @@ None of the stocks in this file require anything from the main [hxlib.inc](./scr
 # Changelog
 this focuses on core hxlib. hxstocks updates go undocumented.
 
+### 1.18
+- added `EntityHook_GetInfernoDPS`
+
 ### 1.17
 - added `Inferno.GetDamagePerSecond`
 

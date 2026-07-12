@@ -21,6 +21,9 @@ void InitEntityHooks()
 	CreateEntityHook(EntityHook_RemoveAmmo,
 		"HX::RemoveAmmo", DHook_RemoveAmmo_Pre, DHook_RemoveAmmo_Post);
 
+	CreateEntityHook(EntityHook_GetInfernoDPS,
+		"HX::CInferno::GetDamagePerSecond", DHook_GetInfernoDPS_Pre, DHook_GetInfernoDPS_Post);
+
 	if (g_OS == OS_Windows) {
 		CreateEntityHook(EntityHook_AcceptInput,
 			"HX::AcceptInput_win", DHook_AcceptInput_Pre, DHook_AcceptInput_Post);
@@ -409,3 +412,38 @@ void InitEntityHooks()
 		g_bHandled_RemoveAmmo = false;
 		return MRES_Ignored;
 	}
+
+/** EntityHook_GetInfernoDPS */
+static bool g_bHandled_GetInfernoDPS;
+
+MRESReturn DHook_GetInfernoDPS_Pre(int pThis, DHookReturn hReturn)
+{
+	float fRetOverride = 0.0;
+
+	Call_StartForward_EntityHook(pThis, EntityHook_GetInfernoDPS, Hook_Pre);
+	Call_PushCell(GetEntityAddress(pThis));
+	Call_PushFloatRef(fRetOverride);
+	Action result = Plugin_Continue;
+	Call_Finish(result);
+
+	if (result == Plugin_Handled)
+	{
+		g_bHandled_GetInfernoDPS = true;
+		hReturn.Value = fRetOverride;
+		return MRES_Supercede;
+	}
+
+	return MRES_Ignored;
+}
+
+MRESReturn DHook_GetInfernoDPS_Post(int pThis, DHookReturn hReturn)
+{
+	Call_StartForward_EntityHook(pThis, EntityHook_GetInfernoDPS, Hook_Post);
+	Call_PushCell(GetEntityAddress(pThis));
+	Call_PushFloat(hReturn.Value);
+	Call_PushCell(g_bHandled_GetInfernoDPS);
+	Call_Finish();
+
+	g_bHandled_GetInfernoDPS = false;
+	return MRES_Ignored;
+}

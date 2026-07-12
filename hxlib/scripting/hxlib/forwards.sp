@@ -442,6 +442,15 @@ PrivateForward InitPrivateForward(EntityHook type, HookMode mode)
 			case Hook_Post: return CreateForward(
 				ET_Ignore, Param_Cell, Param_Cell, Param_Cell, Param_Cell);
 		}
+
+		case EntityHook_GetInfernoDPS: switch (mode)
+		{
+			case Hook_Pre: return CreateForward(
+				ET_Event, Param_Cell, Param_FloatByRef);
+
+			case Hook_Post: return CreateForward(
+				ET_Ignore, Param_Cell, Param_Float, Param_Cell);
+		}
 	}
 
 	return null;

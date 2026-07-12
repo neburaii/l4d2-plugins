@@ -176,6 +176,15 @@
 				}
 			}
 
+			"HX::CInferno::GetDamagePerSecond"
+			{
+				"offset"	"CInferno::GetDamagePerSecond"
+				"callconv"	"thiscall"
+				"hooktype"	"entity"
+				"return"	"float"
+				"this"		"entity"
+			}
+
 			"HX::Intensity::Increase"
 			{
 				"signature"	"Intensity::Increase"
