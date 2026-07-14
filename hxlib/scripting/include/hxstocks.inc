@@ -11,6 +11,8 @@
 #define CONVAR_MAX_NAME_LENGTH	256
 #define SOUND_NORMAL_CLIP_DIST	1000.0
 
+#define MASK_SURVIVORSOLID		0x2014A0B // as returned by CTerrorGameMovement::PlayerSolidMask
+
 enum
 {
 	WeaponSlot_Primary,

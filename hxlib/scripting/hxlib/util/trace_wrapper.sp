@@ -28,6 +28,7 @@ methodmap TraceFilterSimple < TraceFilter
 		Address entAddress = Address_Null;
 		if (iEntity != INVALID_ENT_REFERENCE)
 			entAddress = GetEntityAddress(iEntity);
+
 		hFilter.StoreToOffset(g_iOffset_TraceFilterSimple_passEnt, entAddress, NumberType_Int32);
 
 		return view_as<TraceFilterSimple>(hFilter);
@@ -43,8 +44,8 @@ enum struct TraceWrapper
 
 bool TraceEntityFilter_wrapper(int iEntity, int iMask, any data)
 {
-	if (g_trace.filter.ShouldHitEntity(iEntity, iMask) == false)
-		return false;
+	if (g_trace.filter.ShouldHitEntity(iEntity, iMask) == true)
+		return true;
 
 	if (g_trace.callback != INVALID_FUNCTION)
 	{
@@ -58,7 +59,7 @@ bool TraceEntityFilter_wrapper(int iEntity, int iMask, any data)
 		return bResult;
 	}
 
-	return true;
+	return false;
 }
 
 bool TraceEntityFilter_internalOnly(int iEntity, int iMask)
