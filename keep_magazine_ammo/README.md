@@ -10,6 +10,9 @@ with my current understanding, i can't see how this issue can be avoided without
 - `keep_magazine_ammo`
 1 or 0, defaults to 1
 
+## Requirements
+- [sourcescramble](https://github.com/nosoop/SMExt-SourceScramble)
+
 # Changelog
 ### 1.0
 - initial release
