@@ -74,8 +74,12 @@ if outside any "full dammage" inner hitbox sphere as defined by `inferno_hitbox_
 
 ## Requirements
 - [hxlib](../hxlib/README.md)
+- [sourcescramble](https://github.com/nosoop/SMExt-SourceScramble)
 
 # Changelog
+### 1.1.2
+- fixed crash in windows. now plugin requires sourcescramble
+
 ### 1.1
 - `inferno_hitbox_high_ground_mult_<type>` replaced with `inferno_hitbox_high_ground_<type>`. same thing but in absolute units
 - use vanilla radius always when checking for overlap for creting new fires so that spread behaves like vanilla no matter the radius set

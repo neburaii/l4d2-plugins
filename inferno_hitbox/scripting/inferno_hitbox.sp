@@ -3,25 +3,30 @@
 
 #include <sourcemod>
 #include <sdkhooks>
+#include <dhooks>
+#include <sourcescramble>
 #include <hxlib>
 
 #define CVAR_FLAGS	FCVAR_NOTIFY
+#define GAMEDATA	"inferno_hitbox.games"
 
 public Plugin myinfo =
 {
 	name = "Revised Inferno Hitboxes",
 	author = "Neburai",
 	description = "Fixes inconsistent hitbox radius, and invisible spit. Implements new ways to configure the hitbox/damage of all inferno based entities",
-	version = "1.1.1",
+	version = "1.1.2",
 	url = "https://github.com/neburaii/l4d2-plugins/tree/main/inferno_hitbox"
 };
 
 #define INFERNO_MASK_DAMAGE	(CONTENTS_SOLID|CONTENTS_WINDOW|CONTENTS_MOVEABLE)
-#define VANILLA_RADIUS		60.0
 #define MAX_FIRES			64
 
 bool	g_bLateLoaded;
 bool	g_bPluginStarted;
+
+DynamicDetour g_hDetour_InfernoThink;
+DynamicDetour g_hDetour_EntitiesInBox;
 
 ConVar	g_hConVar_Radius[InfernoType_MAX];
 float	g_fRadius[InfernoType_MAX];
@@ -42,6 +47,7 @@ ConVar	g_hConVar_DamageRampByFlame;
 bool	g_bDamageRampByFlame;
 
 DamageModifier g_damage;
+ExtentFixer g_extentFixer;
 
 public APLRes AskPluginLoad2(Handle hMyself, bool bLate, char[] sError, int iErrMax)
 {
@@ -51,6 +57,25 @@ public APLRes AskPluginLoad2(Handle hMyself, bool bLate, char[] sError, int iErr
 
 public void OnPluginStart()
 {
+	char sPath[PLATFORM_MAX_PATH];
+	BuildPath(Path_SM, sPath, sizeof(sPath), "gamedata/%s.txt", GAMEDATA);
+	if (FileExists(sPath) == false) SetFailState("\n==========\nMissing required file: \"%s\".==========", sPath);
+
+	GameData hGameData = new GameData(GAMEDATA);
+	if (hGameData == null) SetFailState("Failed to load \"%s.txt\" gamedata.", GAMEDATA);
+
+	g_hDetour_InfernoThink = DynamicDetour.FromConf(hGameData, "FUNC::CInferno::InfernoThink");
+	g_hDetour_EntitiesInBox = DynamicDetour.FromConf(hGameData, "FUNC::UTIL_EntitiesInBox");
+	if (g_hDetour_InfernoThink == null || g_hDetour_EntitiesInBox == null)
+		SetFailState("failed to read gamedata");
+
+	g_hDetour_InfernoThink.Enable(Hook_Pre, OnInfernoThink_Pre);
+	g_hDetour_InfernoThink.Enable(Hook_Post, OnInfernoThink_Post);
+
+	g_hDetour_EntitiesInBox.Enable(Hook_Pre, OnGetEntitiesInBox_Pre);
+
+	delete hGameData;
+
 	g_hConVar_Radius[Inferno_Fire] = CreateConVar(
 		"inferno_hitbox_radius_fire", "45.0",
 		"radius of the sphere used for hit-detection with fire. vanilla is 60.0",
@@ -200,15 +225,6 @@ void StartPlugin()
 
 		SDKHook(i, SDKHook_OnTakeDamage, OnTakeDamage);
 	}
-
-	for (int i = MaxClients + 1; i < MAXEDICTS; i++)
-	{
-		if (!IsValidEdict(i)
-			|| !IsInferno(i))
-			continue;
-
-		PatchInferno(i);
-	}
 }
 
 void ConVarChanged_Update(ConVar hConVar, const char[] sOldValue, const char[] sNewValue)
@@ -228,20 +244,6 @@ void ReadConVars()
 	}
 
 	g_bDamageRampByFlame = g_hConVar_DamageRampByFlame.BoolValue;
-}
-
-public void OnEntityCreated(int iEntity, const char[] sClass)
-{
-	if (g_bPluginStarted && IsInferno(iEntity))
-		SDKHook(iEntity, SDKHook_SpawnPost, PatchInferno);
-}
-
-void PatchInferno(int iEntity)
-{
-	Inferno inferno = GetInferno(iEntity);
-	InfernoType type = inferno.type;
-
-	inferno.radius = g_fRadius[type];
 }
 
 /***************
@@ -382,6 +384,103 @@ Action OnTakeDamage(int iVictim, int &iAttacker, int &iInflictor, float &fDamage
  * Hit Detection
  *****************/
 
+/**
+ * allowing RecomputeExtent to set the mins/maxs of an inferno using an increased radius
+ * will indirectly cause crashing on windows. there's maybe some pre-allocated memory done
+ * elsewhere in code using the same constant for setting the radius, and is too small.
+ * if that guess is correct, the issue should exist on both platforms, but linux is just lucky.
+ *
+ * tracking down the exact root of the issue is difficult, and so we instead override the mins/maxs
+ * passed to a function that filters entities within the bounds to be checked by the IsTouching function.
+ * this is the only use of inferno bounds that directly relates to hit detection, so this is sufficient.
+ *
+ * we don't want to use dhoook's vectorptr param type otherwise we'll be directly writing to the
+ * mins/maxs properties of the inferno. this is why we need MemoryBlock from sourcescramble
+ */
+methodmap VectorPtr < MemoryBlock
+{
+	public VectorPtr(const float vValue[3])
+	{
+		MemoryBlock hMem = new MemoryBlock(12);
+		StoreVectorToAddress(hMem.Address, vValue);
+		return view_as<VectorPtr>(hMem);
+	}
+}
+
+enum struct ExtentFixer
+{
+	bool intercept;
+	Inferno inferno;
+
+	VectorPtr mins;
+	VectorPtr maxs;
+
+	void Set(Inferno inferno)
+	{
+		this.intercept = true;
+		this.inferno = inferno;
+	}
+
+	void Unset()
+	{
+		this.intercept = false;
+		if (this.mins) delete this.mins;
+		if (this.maxs) delete this.maxs;
+	}
+
+	bool ShouldIntercept()
+	{
+		return	this.intercept
+				&& this.inferno.flameCount > 0
+				&& this.inferno.radius != g_fRadius[this.inferno.type];
+	}
+
+	void Intercept(DHookParam hParams)
+	{
+		float vMins[3];
+		float vMaxs[3];
+		this.inferno.GetMins(vMins);
+		this.inferno.GetMaxs(vMaxs);
+
+		float fDiff = g_fRadius[this.inferno.type] - this.inferno.radius;
+
+		vMins[0] -= fDiff;
+		vMaxs[0] += fDiff;
+
+		vMins[1] -= fDiff;
+		vMaxs[1] += fDiff;
+
+		this.mins = new VectorPtr(vMins);
+		this.maxs = new VectorPtr(vMaxs);
+
+		hParams.Set(1, this.mins.Address);
+		hParams.Set(2, this.maxs.Address);
+	}
+}
+
+MRESReturn OnInfernoThink_Pre(int pThis)
+{
+	g_extentFixer.Set(view_as<Inferno>(pThis));
+	return MRES_Ignored;
+}
+
+MRESReturn OnInfernoThink_Post(int pThis)
+{
+	g_extentFixer.Unset();
+	return MRES_Ignored;
+}
+
+MRESReturn OnGetEntitiesInBox_Pre(DHookReturn hReturn, DHookParam hParams)
+{
+	if (g_extentFixer.ShouldIntercept())
+	{
+		g_extentFixer.Intercept(hParams);
+		return MRES_ChangedHandled;
+	}
+
+	return MRES_Ignored;
+}
+
 public Action OnIsEntityTouchingInferno(Inferno inferno, int iEntity, float &fRadius, bool &bCheckLOS, bool &bHandledResult)
 {
 	bHandledResult = IsTouchingCustom_Entity(inferno, iEntity, bCheckLOS);
@@ -398,7 +497,7 @@ bool IsTouchingCustom_Entity(Inferno inferno, int iEntity, bool bCheckLOS)
 
 	InfernoType type = inferno.type;
 	int iTotalFlames = inferno.flameCount;
-	float fRadius = inferno.radius;
+	float fRadius = g_fRadius[type];
 	bool bIsPlayer = 1 <= iEntity <= MaxClients;
 
 	bool bRet = false;
@@ -467,44 +566,6 @@ bool IsTouchingCustom_Entity(Inferno inferno, int iEntity, bool bCheckLOS)
 	return bRet;
 }
 
-public Action OnIsBoundsTouchingInferno(Inferno inferno, const float vMins[3], const float vMaxs[3], float vHandledContact[3], bool &bHandledResult)
-{
-	bHandledResult = IsTouchingCustom_Bounds(inferno, vMins, vMaxs, vHandledContact);
-	return Plugin_Handled;
-}
-
-bool IsTouchingCustom_Bounds(Inferno inferno, const float vMins[3], const float vMaxs[3], float vFound[3])
-{
-	float vFlamePos[3];
-	float vNearestPos[3];
-	Flame flame;
-	float fDistanceSqr;
-
-	int iTotalFlames = inferno.flameCount;
-	float fRadius = VANILLA_RADIUS;
-
-	for (int i = 0; i < iTotalFlames; i++)
-	{
-		/** don't skip 2nd spit here.
-		 * if other flames are created in the same spot, they'll be invisible too.
-		 * this function is primarily called to check overlap upon creating new flames */
-
-		flame = inferno.GetFlame(i);
-		flame.GetCenter(vFlamePos);
-		GetNearestPos(vMins, vMaxs, vFlamePos, vNearestPos);
-
-		fDistanceSqr = GetVectorDistance(vNearestPos, vFlamePos, true);
-
-		if (fDistanceSqr < (fRadius * fRadius))
-		{
-			vFound = vNearestPos;
-			return true;
-		}
-	}
-
-	return false;
-}
-
 public Action OnIsNavAreaTouchingInferno(Inferno inferno, NavArea nav, bool &bHandledResult)
 {
 	bHandledResult = IsTouchingCustom_NavArea(inferno, nav);
@@ -524,7 +585,7 @@ bool IsTouchingCustom_NavArea(Inferno inferno, NavArea nav)
 
 	InfernoType type = inferno.type;
 	int iTotalFlames = inferno.flameCount;
-	float fRadius = VANILLA_RADIUS;
+	float fRadius = inferno.radius * 2.0;
 
 	if (type == Inferno_Spit)
 		fRadius *= 2.0;
