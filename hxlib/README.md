@@ -36,6 +36,9 @@ None of the stocks in this file require anything from the main [hxlib.inc](./scr
 # Changelog
 this focuses on core hxlib. hxstocks updates go undocumented.
 
+### 1.18.2
+- removed the ability to set the radius property of Inferno methodmap (can indirectly cause serious problems like crashing)
+
 ### 1.18
 - added `EntityHook_GetInfernoDPS`
 

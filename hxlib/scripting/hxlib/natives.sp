@@ -85,7 +85,6 @@ void RegisterNatives()
 	CreateNative("Inferno.damageRampTimer.get", Native_Inferno_damageRampTimer_get);
 	CreateNative("Inferno.GetFlameLifetime", Native_Inferno_GetFlameLifetime);
 	CreateNative("Inferno.radius.get", Native_Inferno_radius_get);
-	CreateNative("Inferno.radius.set", Native_Inferno_radius_set);
 	CreateNative("Inferno.GetDamagePerSecond", Native_Inferno_GetDamagePerSecond);
 
 	CreateNative("Flame.depth.get", Native_Flame_depth_get);
@@ -2504,7 +2503,6 @@ public any Native_GetServerOS(Handle hPlugin, int iNumParams)
 	{
 		Address inferno = GetNativeCell(1);
 		float vBuffer[3];
-		GetNativeArray(2, vBuffer, 3);
 
 		LoadVectorFromAddress(inferno + view_as<Address>(
 			g_iOffset_Inferno_minBounds), vBuffer);
@@ -2515,7 +2513,6 @@ public any Native_GetServerOS(Handle hPlugin, int iNumParams)
 	{
 		Address inferno = GetNativeCell(1);
 		float vBuffer[3];
-		GetNativeArray(2, vBuffer, 3);
 
 		LoadVectorFromAddress(inferno + view_as<Address>(
 			g_iOffset_Inferno_maxBounds), vBuffer);
@@ -2569,14 +2566,6 @@ public any Native_GetServerOS(Handle hPlugin, int iNumParams)
 		Address inferno = GetNativeCell(1);
 		return LoadFromAddress(inferno + view_as<Address>(
 			g_iOffset_Inferno_radius), NumberType_Int32);
-	}
-
-	public void Native_Inferno_radius_set(Handle hPlugin, int iNumParams)
-	{
-		Address inferno = GetNativeCell(1);
-		float fValue = GetNativeCell(2);
-		StoreToAddress(inferno + view_as<Address>(
-			g_iOffset_Inferno_radius), fValue, NumberType_Int32);
 	}
 
 	public any Native_Inferno_GetDamagePerSecond(Handle hPlugin, int iNumParams)

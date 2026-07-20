@@ -3586,7 +3586,6 @@ methodmap Inferno
 	property float radius
 	{
 		public native get();
-		public native set(float value);
 	}
 
 	/**
@@ -4240,7 +4239,6 @@ public SharedPlugin __pl_hxlib =
 		MarkNativeAsOptional("Inferno.damageRampTimer.get");
 		MarkNativeAsOptional("Inferno.GetFlameLifetime");
 		MarkNativeAsOptional("Inferno.radius.get");
-		MarkNativeAsOptional("Inferno.radius.set");
 		MarkNativeAsOptional("Inferno.GetDamagePerSecond");
 
 		MarkNativeAsOptional("Flame.depth.get");
