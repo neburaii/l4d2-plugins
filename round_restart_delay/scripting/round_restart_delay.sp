@@ -80,8 +80,12 @@ void ConVarChanged_Update(ConVar hConVar, const char[] sOldValue, const char[] s
 
 void Event_RoundEnd(Event hEvent, const char[] sName, bool bDontBroadcast)
 {
-	if (hEvent.GetInt("reason") != Reason_Defeat || GetScenarioRestartTime() <= 0.0)
+	if (hEvent.GetInt("reason") != Reason_Defeat)
 		return;
 
-	SetScenarioRestartTime(g_fDelay);
+	HX_CountdownTimer hTimer = GetScenarioRestartTimer();
+	if (hTimer.GetRemainingTime() <= 0.0)
+		return;
+
+	hTimer.Start(g_fDelay);
 }
